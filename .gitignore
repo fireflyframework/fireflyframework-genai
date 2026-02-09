@@ -1,0 +1,125 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info/
+*.egg
+*.whl
+*.pyz
+*.pyzw
+SDIST/
+develop-eggs/
+.eggs/
+lib/
+lib64/
+parts/
+var/
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.env
+
+# IDE - JetBrains (IntelliJ, PyCharm, etc.)
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# IDE - VS Code
+.vscode/
+*.code-workspace
+
+# IDE - Eclipse
+.project
+.classpath
+.settings/
+
+# IDE - Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Editor swap/backup files
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+*.orig
+
+# OS - macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon\r
+._*
+.Spotlight-V100
+.Trashes
+
+# OS - Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# OS - Linux
+.directory
+
+# Testing
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Type checking
+.pyright/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff
+.ruff_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Environments / Secrets
+*.env.local
+*.env.*.local
+.env.production
+
+# Logs
+*.log
+logs/
+
+# AntiGravity / misc tools
+.antigravity/
+
+# UV
+.uv/
+uv.lock
+
+# Vibe coding
+.vibe/
+
+# Distribution / packaging
+*.tar.gz
+*.zip
