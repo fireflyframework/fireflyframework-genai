@@ -1,0 +1,11 @@
+name: Dependabot CI
+on:
+  pull_request_target:
+    branches: [develop, main]
+jobs:
+  lint-and-test:
+    if: github.actor == 'dependabot[bot]'
+    uses: fireflyframework/.github/.github/workflows/python-ci.yml@main
+    with:
+      python-version: '3.13'
+      checkout-ref: ${{ github.event.pull_request.head.sha }}
