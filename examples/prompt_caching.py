@@ -43,9 +43,9 @@ import os
 from fireflyframework_genai.agents.base import FireflyAgent
 from fireflyframework_genai.agents.prompt_cache import CacheStatistics, PromptCacheMiddleware
 
-
 # Sample long system prompt that would benefit from caching
-LEGAL_ASSISTANT_PROMPT = """You are an expert legal assistant specializing in contract analysis.
+LEGAL_ASSISTANT_PROMPT = (
+    """You are an expert legal assistant specializing in contract analysis.
 
 Your expertise includes:
 - Contract law and interpretation
@@ -77,7 +77,9 @@ Always provide clear, actionable analysis that non-legal stakeholders can unders
 For questions about specific contract sections, provide detailed analysis with
 references to relevant legal principles and potential implications.
 
-""" * 10  # Repeat to create a ~5000 token system prompt
+"""
+    * 10
+)  # Repeat to create a ~5000 token system prompt
 
 
 async def demo_without_caching():
@@ -215,18 +217,20 @@ async def demo_cache_statistics():
     input_cost_per_1k = 3.00 / 1000  # $3 per 1M input tokens for Sonnet
     cache_read_cost_per_1k = 0.30 / 1000  # $0.30 per 1M cached tokens
 
-    without_cache = (100000 * input_cost_per_1k)  # 10 requests × 10k tokens
+    without_cache = 100000 * input_cost_per_1k  # 10 requests × 10k tokens
     cache_creation = 10000 * input_cost_per_1k
     cache_reads = 90000 * cache_read_cost_per_1k
     with_cache = cache_creation + cache_reads
 
-    print(f"Without caching:")
-    print(f"  100,000 tokens @ ${input_cost_per_1k*1000:.2f}/1M = ${without_cache:.3f}")
-    print(f"\nWith caching:")
-    print(f"  Cache creation: 10,000 tokens @ ${input_cost_per_1k*1000:.2f}/1M = ${cache_creation:.3f}")
-    print(f"  Cache reads: 90,000 tokens @ ${cache_read_cost_per_1k*1000:.2f}/1M = ${cache_reads:.3f}")
+    print("Without caching:")
+    print(f"  100,000 tokens @ ${input_cost_per_1k * 1000:.2f}/1M = ${without_cache:.3f}")
+    print("\nWith caching:")
+    print(f"  Cache creation: 10,000 tokens @ ${input_cost_per_1k * 1000:.2f}/1M = ${cache_creation:.3f}")
+    print(f"  Cache reads: 90,000 tokens @ ${cache_read_cost_per_1k * 1000:.2f}/1M = ${cache_reads:.3f}")
     print(f"  Total: ${with_cache:.3f}")
-    print(f"\nSavings: ${without_cache - with_cache:.3f} ({((without_cache - with_cache) / without_cache * 100):.1f}% reduction)")
+    print(
+        f"\nSavings: ${without_cache - with_cache:.3f} ({((without_cache - with_cache) / without_cache * 100):.1f}% reduction)"
+    )
 
 
 async def demo_best_practices():

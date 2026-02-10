@@ -37,10 +37,6 @@ import os
 
 # Core framework
 from fireflyframework_genai.agents.base import FireflyAgent
-from fireflyframework_genai.config import get_config
-
-# Database persistence
-from fireflyframework_genai.memory.manager import MemoryManager
 
 # Middleware (all production features)
 from fireflyframework_genai.agents.builtin_middleware import (
@@ -49,15 +45,18 @@ from fireflyframework_genai.agents.builtin_middleware import (
     ObservabilityMiddleware,
 )
 from fireflyframework_genai.agents.prompt_cache import PromptCacheMiddleware
-from fireflyframework_genai.resilience.circuit_breaker import CircuitBreakerMiddleware
+from fireflyframework_genai.config import get_config
 
-# Pipeline with batch processing
-from fireflyframework_genai.pipeline.builder import PipelineBuilder
-from fireflyframework_genai.pipeline.steps import AgentStep, BatchLLMStep
+# Database persistence
+from fireflyframework_genai.memory.manager import MemoryManager
 
 # Observability
 from fireflyframework_genai.observability.usage import default_usage_tracker
-from fireflyframework_genai.observability.tracer import default_tracer
+
+# Pipeline with batch processing
+from fireflyframework_genai.pipeline.builder import PipelineBuilder
+from fireflyframework_genai.pipeline.steps import BatchLLMStep
+from fireflyframework_genai.resilience.circuit_breaker import CircuitBreakerMiddleware
 
 
 async def demo_full_stack_agent():
@@ -66,7 +65,7 @@ async def demo_full_stack_agent():
 
     # Configure framework (typically done via environment variables)
     config = get_config()
-    print(f"Configuration:")
+    print("Configuration:")
     print(f"  Model: {config.default_model}")
     print(f"  Observability: {config.observability_enabled}")
     print(f"  Cost tracking: {config.cost_tracking_enabled}")
@@ -87,27 +86,24 @@ async def demo_full_stack_agent():
         system_prompt="""You are a helpful AI assistant for a production application.
 
         You provide accurate, helpful responses while maintaining conversation context.
-        You are cost-effective, resilient, and secure.""" * 5,  # Long prompt for caching demo
+        You are cost-effective, resilient, and secure."""
+        * 5,  # Long prompt for caching demo
         memory=memory,
         middleware=[
             # Logging for audit trail
             LoggingMiddleware(),
-
             # Observability (tracing, metrics)
             ObservabilityMiddleware(),
-
             # Cost guard to prevent budget overruns
             CostGuardMiddleware(
                 budget_limit_usd=config.budget_limit_usd or 10.0,
                 alert_threshold_usd=config.budget_alert_threshold_usd or 5.0,
             ),
-
             # Prompt caching for cost savings
             PromptCacheMiddleware(
                 cache_system_prompt=True,
                 cache_min_tokens=1024,
             ),
-
             # Circuit breaker for resilience
             CircuitBreakerMiddleware(
                 failure_threshold=5,
@@ -154,7 +150,7 @@ async def demo_full_stack_agent():
 
     # Show usage statistics
     usage_summary = default_usage_tracker.get_summary()
-    print(f"\nUsage Statistics:")
+    print("\nUsage Statistics:")
     print(f"  Total requests: {usage_summary.total_requests}")
     print(f"  Total tokens: {usage_summary.total_tokens:,}")
     print(f"  Total cost: ${usage_summary.total_cost_usd:.4f}")
@@ -163,7 +159,7 @@ async def demo_full_stack_agent():
 
     # Show conversation history (persisted in memory)
     history = memory.get_message_history(conversation_id)
-    print(f"\nConversation History:")
+    print("\nConversation History:")
     print(f"  Messages persisted: {len(history)}")
 
 
@@ -239,7 +235,7 @@ async def demo_pipeline_with_batch():
 
     result = await pipeline.run(PipelineContext(inputs={}, correlation_id="pipeline-batch-1"))
 
-    print(f"Pipeline Result:")
+    print("Pipeline Result:")
     print(f"  Documents processed: {len(result.get_node_result('load'))}")
     print(f"  Classifications: {result.get_node_result('classify')}")
     print(f"  Sentiment distribution: {result.output}")
@@ -283,19 +279,19 @@ async def demo_observability_integration():
 
     config = get_config()
 
-    print(f"1. Distributed Tracing:")
+    print("1. Distributed Tracing:")
     print(f"   Enabled: {config.observability_enabled}")
     print(f"   OTLP endpoint: {config.otlp_endpoint or 'Not configured'}")
     print(f"   Service name: {config.service_name}")
-    print(f"   W3C Trace Context propagation: Enabled")
+    print("   W3C Trace Context propagation: Enabled")
     print()
 
-    print(f"2. Usage Tracking:")
+    print("2. Usage Tracking:")
     print(f"   Cost tracking: {config.cost_tracking_enabled}")
     print(f"   Max records: {config.usage_tracker_max_records:,}")
     print()
 
-    print(f"3. Quota Management:")
+    print("3. Quota Management:")
     print(f"   Enabled: {config.quota_enabled}")
     print(f"   Daily budget: ${config.quota_budget_daily_usd or 'Not set'}")
     print(f"   Rate limits: {config.quota_rate_limits or 'Not set'}")

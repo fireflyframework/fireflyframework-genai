@@ -57,7 +57,9 @@ class ShellTool(BaseTool):
             tags=["shell", "system"],
             guards=guards,
             parameters=[
-                ParameterSpec(name="command", type_annotation="str", description="Shell command to execute", required=True),
+                ParameterSpec(
+                    name="command", type_annotation="str", description="Shell command to execute", required=True
+                ),
             ],
         )
         self._allowed = set(allowed_commands)
@@ -72,9 +74,7 @@ class ShellTool(BaseTool):
 
         executable = parts[0]
         if executable not in self._allowed:
-            raise PermissionError(
-                f"Command '{executable}' is not in the allowed list: {sorted(self._allowed)}"
-            )
+            raise PermissionError(f"Command '{executable}' is not in the allowed list: {sorted(self._allowed)}")
 
         proc = await asyncio.create_subprocess_shell(
             command,

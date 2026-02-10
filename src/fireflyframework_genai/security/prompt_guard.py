@@ -136,7 +136,8 @@ class PromptGuard:
 
         if matched:
             logger.warning(
-                "Prompt injection detected: %d pattern(s) matched", len(matched),
+                "Prompt injection detected: %d pattern(s) matched",
+                len(matched),
             )
             return PromptGuardResult(
                 safe=False,

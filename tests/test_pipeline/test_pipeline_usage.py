@@ -51,12 +51,14 @@ class TestPipelineResultUsage:
         # Pre-populate the tracker with a record matching the correlation_id
         default_usage_tracker.reset()
 
-        default_usage_tracker.record(UsageRecord(
-            correlation_id="test-corr-1",
-            agent="pipeline-agent",
-            total_tokens=500,
-            cost_usd=0.01,
-        ))
+        default_usage_tracker.record(
+            UsageRecord(
+                correlation_id="test-corr-1",
+                agent="pipeline-agent",
+                total_tokens=500,
+                cost_usd=0.01,
+            )
+        )
 
         result = await engine.run(context=ctx)
         assert result.success is True
@@ -91,16 +93,20 @@ class TestPipelineEngineAggregateUsage:
 
     def test_aggregate_usage_returns_summary(self):
         default_usage_tracker.reset()
-        default_usage_tracker.record(UsageRecord(
-            correlation_id="agg-test",
-            total_tokens=100,
-            cost_usd=0.005,
-        ))
-        default_usage_tracker.record(UsageRecord(
-            correlation_id="agg-test",
-            total_tokens=200,
-            cost_usd=0.01,
-        ))
+        default_usage_tracker.record(
+            UsageRecord(
+                correlation_id="agg-test",
+                total_tokens=100,
+                cost_usd=0.005,
+            )
+        )
+        default_usage_tracker.record(
+            UsageRecord(
+                correlation_id="agg-test",
+                total_tokens=200,
+                cost_usd=0.01,
+            )
+        )
         result = PipelineEngine._aggregate_usage("agg-test")
         assert result is not None
         assert result.record_count == 2

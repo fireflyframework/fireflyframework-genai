@@ -363,10 +363,7 @@ class TestQuotaManager:
 
     def test_combined_quota_check(self):
         """Test that check_quota_before_request validates all constraints."""
-        quota = QuotaManager(
-            daily_budget_usd=10.0,
-            rate_limits={"openai:gpt-4o": 1}
-        )
+        quota = QuotaManager(daily_budget_usd=10.0, rate_limits={"openai:gpt-4o": 1})
 
         # First request should succeed (both budget and rate limit OK)
         quota.check_quota_before_request("openai:gpt-4o", estimated_cost=2.0)

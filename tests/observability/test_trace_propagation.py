@@ -85,9 +85,7 @@ class TestTraceContextExtraction:
 
     def test_extract_valid_traceparent(self):
         """Test extraction of valid W3C traceparent header."""
-        headers = {
-            "traceparent": "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"
-        }
+        headers = {"traceparent": "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"}
 
         context = extract_trace_context(headers)
 
@@ -99,9 +97,7 @@ class TestTraceContextExtraction:
 
     def test_extract_case_insensitive(self):
         """Test that header names are case-insensitive."""
-        headers = {
-            "TraceParent": "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"
-        }
+        headers = {"TraceParent": "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"}
 
         context = extract_trace_context(headers)
 
@@ -133,7 +129,7 @@ class TestTraceContextExtraction:
         """Test extraction of traceparent with tracestate."""
         headers = {
             "traceparent": "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01",
-            "tracestate": "vendor1=value1,vendor2=value2"
+            "tracestate": "vendor1=value1,vendor2=value2",
         }
 
         context = extract_trace_context(headers)
@@ -257,20 +253,19 @@ class TestRoundTripPropagation:
             assert context_b is not None
 
             # Service B continues the trace
-            with trace_context_scope(context_b):
-                with tracer.start_as_current_span("service-b") as span_b:
-                    # Service B sends request to Service C
-                    headers_to_c = {}
-                    inject_trace_context(headers_to_c)
+            with trace_context_scope(context_b), tracer.start_as_current_span("service-b") as span_b:
+                # Service B sends request to Service C
+                headers_to_c = {}
+                inject_trace_context(headers_to_c)
 
-                    # Service C receives request
-                    context_c = extract_trace_context(headers_to_c)
-                    assert context_c is not None
+                # Service C receives request
+                context_c = extract_trace_context(headers_to_c)
+                assert context_c is not None
 
-                    # All services share the same trace ID
-                    assert context_a.trace_id == context_b.trace_id == context_c.trace_id
-                    # context_b has context_a's span as parent, context_c has context_b's span as parent
-                    # (extracted contexts contain the parent span ID)
-                    assert context_b.span_id == context_a.span_id  # B's parent is A
-                    # The actual span created in B will have a different ID
-                    assert span_b.get_span_context().span_id != context_a.span_id
+                # All services share the same trace ID
+                assert context_a.trace_id == context_b.trace_id == context_c.trace_id
+                # context_b has context_a's span as parent, context_c has context_b's span as parent
+                # (extracted contexts contain the parent span ID)
+                assert context_b.span_id == context_a.span_id  # B's parent is A
+                # The actual span created in B will have a different ID
+                assert span_b.get_span_context().span_id != context_a.span_id

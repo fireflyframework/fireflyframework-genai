@@ -29,10 +29,10 @@ Example:
         from fireflyframework_genai.security.encryption import AESEncryptionProvider
 
         provider = AESEncryptionProvider(key="my-secret-key-32-bytes-long!!")
-        
+
         # Encrypt
         encrypted = provider.encrypt("sensitive data")
-        
+
         # Decrypt
         decrypted = provider.decrypt(encrypted)
 
@@ -44,7 +44,7 @@ Example:
         # Wrap any memory store with encryption
         base_store = InMemoryStore()
         encrypted_store = EncryptedMemoryStore(base_store, encryption_key="secret")
-        
+
         # Use like a normal store - encryption is transparent
         encrypted_store.save("namespace", entry)
         loaded = encrypted_store.load("namespace")
@@ -124,20 +124,16 @@ class AESEncryptionProvider:
 
     def __init__(self, key: str | bytes) -> None:
         try:
-            from cryptography.hazmat.primitives.ciphers.aead import AESGCM
             from cryptography.hazmat.primitives import hashes
+            from cryptography.hazmat.primitives.ciphers.aead import AESGCM
             from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
         except ImportError as exc:
             raise ImportError(
-                "Encryption support requires 'cryptography'. "
-                "Install with: pip install fireflyframework-genai[security]"
+                "Encryption support requires 'cryptography'. Install with: pip install fireflyframework-genai[security]"
             ) from exc
 
         # Derive 32-byte key if needed
-        if isinstance(key, str):
-            key_bytes = key.encode("utf-8")
-        else:
-            key_bytes = key
+        key_bytes = key.encode("utf-8") if isinstance(key, str) else key
 
         if len(key_bytes) != 32:
             # Use PBKDF2 to derive a 32-byte key from the password

@@ -227,8 +227,7 @@ class CircuitBreaker:
         if self._state == CircuitState.HALF_OPEN:
             # Any failure in HALF_OPEN immediately opens circuit
             logger.warning(
-                "Circuit breaker: Failure in HALF_OPEN state, transitioning to OPEN. "
-                "Error: %s",
+                "Circuit breaker: Failure in HALF_OPEN state, transitioning to OPEN. Error: %s",
                 exception,
             )
             self._state = CircuitState.OPEN
@@ -246,8 +245,7 @@ class CircuitBreaker:
 
             if self._failure_count >= self._failure_threshold:
                 logger.error(
-                    "Circuit breaker transitioning: CLOSED -> OPEN "
-                    "(threshold %d failures reached)",
+                    "Circuit breaker transitioning: CLOSED -> OPEN (threshold %d failures reached)",
                     self._failure_threshold,
                 )
                 self._state = CircuitState.OPEN
@@ -290,9 +288,7 @@ class CircuitBreaker:
             "success_threshold": self._success_threshold,
             "recovery_timeout": self._recovery_timeout,
             "time_since_last_failure": (
-                time.monotonic() - self._last_failure_time
-                if self._last_failure_time
-                else None
+                time.monotonic() - self._last_failure_time if self._last_failure_time else None
             ),
         }
 

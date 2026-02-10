@@ -107,10 +107,7 @@ class TreeOfThoughtsPattern(AbstractReasoningPattern):
         logger.info("ToT: selected branch %d (score=%.2f)", best_eval.branch_id + 1, best_eval.score)
 
         selection_step = ThoughtStep(
-            content=(
-                f"Selected branch {best_eval.branch_id + 1} "
-                f"(score={best_eval.score:.2f}): {best[:200]}"
-            ),
+            content=(f"Selected branch {best_eval.branch_id + 1} (score={best_eval.score:.2f}): {best[:200]}"),
             confidence=best_eval.score,
         )
         trace.add_step(selection_step)
@@ -146,7 +143,7 @@ class TreeOfThoughtsPattern(AbstractReasoningPattern):
         )
         branch_list = await self._structured_run(agent, prompt, BranchList)
         branches = [b for b in branch_list.branches if b.strip()]
-        return branches[:self._branching_factor] or [str(input)]
+        return branches[: self._branching_factor] or [str(input)]
 
     async def _evaluate_branches(
         self, agent: AgentLike, input: str | Sequence[Any], branches: list[str]
@@ -164,7 +161,9 @@ class TreeOfThoughtsPattern(AbstractReasoningPattern):
             # Ensure branch_id is correct even if LLM returns wrong id
             if evaluation.branch_id != idx:
                 evaluation = BranchEvaluation(
-                    branch_id=idx, score=evaluation.score, reasoning=evaluation.reasoning,
+                    branch_id=idx,
+                    score=evaluation.score,
+                    reasoning=evaluation.reasoning,
                 )
             evaluations.append(evaluation)
         return evaluations

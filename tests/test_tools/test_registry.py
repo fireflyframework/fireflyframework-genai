@@ -26,6 +26,7 @@ class TestToolRegistry:
     def _make_tool(self, name: str):
         async def handler(**kw):
             return "ok"
+
         return ToolBuilder(name).description("d").handler(handler).build()
 
     def test_register_and_get(self):
@@ -36,6 +37,7 @@ class TestToolRegistry:
 
     def test_get_nonexistent_raises(self):
         from fireflyframework_genai.exceptions import ToolNotFoundError
+
         registry = ToolRegistry()
         with pytest.raises(ToolNotFoundError):
             registry.get("nonexistent")

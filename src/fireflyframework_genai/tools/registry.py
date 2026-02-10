@@ -66,11 +66,7 @@ class ToolRegistry:
     def get_by_tag(self, tag: str) -> list[ToolProtocol]:
         """Return all tools that carry *tag*."""
         with self._lock:
-            return [
-                t
-                for t in self._tools.values()
-                if hasattr(t, "tags") and tag in getattr(t, "tags", [])
-            ]
+            return [t for t in self._tools.values() if hasattr(t, "tags") and tag in getattr(t, "tags", [])]
 
     def has(self, name: str) -> bool:
         """Return *True* if a tool with *name* is registered."""
@@ -98,9 +94,7 @@ class ToolRegistry:
             if hasattr(t, "info"):
                 results.append(t.info())  # type: ignore[union-attr]
             else:
-                results.append(
-                    ToolInfo(name=t.name, description=t.description)
-                )
+                results.append(ToolInfo(name=t.name, description=t.description))
         return results
 
     def clear(self) -> None:

@@ -63,9 +63,7 @@ class ReasoningPattern(Protocol):
     any framework base class.
     """
 
-    async def execute(
-        self, agent: AgentLike, input: str | Sequence[UserContent], **kwargs: Any
-    ) -> ReasoningResult:
+    async def execute(self, agent: AgentLike, input: str | Sequence[UserContent], **kwargs: Any) -> ReasoningResult:
         """Run the reasoning pattern using *agent* on *input*."""
         ...
 
@@ -153,8 +151,12 @@ class AbstractReasoningPattern(ABC):
         return model
 
     async def _structured_run(
-        self, agent: AgentLike, prompt: str, output_type: type[T],
-        *, correlation_id: str = "",
+        self,
+        agent: AgentLike,
+        prompt: str,
+        output_type: type[T],
+        *,
+        correlation_id: str = "",
     ) -> T:
         """Make an LLM call that returns a validated Pydantic model.
 
@@ -192,9 +194,7 @@ class AbstractReasoningPattern(ABC):
                 out = await _call()
         except TimeoutError:
             elapsed = time.monotonic() - t0
-            raise ReasoningError(
-                f"LLM call for {output_type.__name__} timed out after {elapsed:.1f}s"
-            ) from None
+            raise ReasoningError(f"LLM call for {output_type.__name__} timed out after {elapsed:.1f}s") from None
 
         elapsed_ms = (time.monotonic() - t0) * 1000
         logger.debug("_structured_run: got %s in %.1fms", output_type.__name__, elapsed_ms)
@@ -202,7 +202,8 @@ class AbstractReasoningPattern(ABC):
         # Record usage from the ephemeral agent result
         if _result_holder:
             self._record_structured_usage(
-                _result_holder[0], elapsed_ms,
+                _result_holder[0],
+                elapsed_ms,
                 model=str(resolved_model) if resolved_model else "",
                 correlation_id=correlation_id,
             )
@@ -274,9 +275,7 @@ class AbstractReasoningPattern(ABC):
         try:
             return output_type(content=raw_str)  # type: ignore[return-value]
         except Exception:  # noqa: BLE001
-            raise ReasoningError(
-                f"Cannot parse output into {output_type.__name__}: {raw_str[:200]}"
-            ) from None
+            raise ReasoningError(f"Cannot parse output into {output_type.__name__}: {raw_str[:200]}") from None
 
     # -- Memory integration --------------------------------------------------
 
@@ -320,9 +319,7 @@ class AbstractReasoningPattern(ABC):
 
     # -- Execute loop --------------------------------------------------------
 
-    async def execute(
-        self, agent: AgentLike, input: str | Sequence[UserContent], **kwargs: Any
-    ) -> ReasoningResult:
+    async def execute(self, agent: AgentLike, input: str | Sequence[UserContent], **kwargs: Any) -> ReasoningResult:
         """Run the reasoning loop.
 
         *input* may be a plain string or a sequence of multimodal
@@ -390,9 +387,7 @@ class AbstractReasoningPattern(ABC):
                     break
 
             if not completed and steps >= self._max_steps:
-                raise ReasoningStepLimitError(
-                    f"Pattern '{self._name}' exceeded {self._max_steps} steps"
-                )
+                raise ReasoningStepLimitError(f"Pattern '{self._name}' exceeded {self._max_steps} steps")
 
             output = await self._extract_output(state)
 
@@ -406,21 +401,19 @@ class AbstractReasoningPattern(ABC):
 
             logger.info(
                 "Pattern '%s' completed in %.1fs (%d steps)",
-                self._name, time.monotonic() - t_start, steps,
+                self._name,
+                time.monotonic() - t_start,
+                steps,
             )
             trace.complete()
-            return ReasoningResult(
-                output=output, trace=trace, steps_taken=steps, success=True
-            )
+            return ReasoningResult(output=output, trace=trace, steps_taken=steps, success=True)
 
         except ReasoningError:
             trace.complete()
             raise
         except Exception as exc:
             trace.complete()
-            raise ReasoningError(
-                f"Pattern '{self._name}' failed at step {steps}: {exc}"
-            ) from exc
+            raise ReasoningError(f"Pattern '{self._name}' failed at step {steps}: {exc}") from exc
 
     # -- Hooks (override in subclasses) --------------------------------------
 
@@ -434,9 +427,7 @@ class AbstractReasoningPattern(ABC):
         """Select and perform an action (e.g. tool call)."""
         ...
 
-    async def _observe(
-        self, state: dict[str, Any], action: ReasoningStep | None
-    ) -> ReasoningStep | None:
+    async def _observe(self, state: dict[str, Any], action: ReasoningStep | None) -> ReasoningStep | None:
         """Process the result of the action.  Default: no-op."""
         return None
 

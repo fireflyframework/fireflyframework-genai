@@ -98,12 +98,16 @@ class ChainOfThoughtPattern(AbstractReasoningPattern):
             state["output"] = thought.final_answer or thought.content
             logger.info(
                 "CoT step %d: FINAL (confidence=%.2f): %s",
-                step_num, thought.confidence or 0, (thought.final_answer or thought.content)[:120],
+                step_num,
+                thought.confidence or 0,
+                (thought.final_answer or thought.content)[:120],
             )
         else:
             logger.info(
                 "CoT step %d: (confidence=%.2f) %s",
-                step_num, thought.confidence or 0, thought.content[:120],
+                step_num,
+                thought.confidence or 0,
+                thought.content[:120],
             )
         return ThoughtStep(content=thought.content, confidence=thought.confidence)
 

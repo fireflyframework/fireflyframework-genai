@@ -43,10 +43,12 @@ async def main() -> None:
 
     agent = FireflyAgent(name="pipeline-agent", model=MODEL)
 
-    pipeline = ReasoningPipeline([
-        ChainOfThoughtPattern(max_steps=5, model=MODEL),
-        ReflexionPattern(max_steps=2, model=MODEL),
-    ])
+    pipeline = ReasoningPipeline(
+        [
+            ChainOfThoughtPattern(max_steps=5, model=MODEL),
+            ReflexionPattern(max_steps=2, model=MODEL),
+        ]
+    )
 
     task = "Explain the difference between concurrency and parallelism. Give a real-world analogy."
     print(f"Task: {task}\n")

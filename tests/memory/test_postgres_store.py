@@ -21,7 +21,6 @@ integration tests with real databases.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -57,9 +56,11 @@ class TestPostgreSQLStore:
 
         store = PostgreSQLStore(url="postgresql://test")
 
-        with patch.dict("sys.modules", {"asyncpg": None}):
-            with pytest.raises(DatabaseStoreError, match="PostgreSQL support requires"):
-                await store.initialize()
+        with (
+            patch.dict("sys.modules", {"asyncpg": None}),
+            pytest.raises(DatabaseStoreError, match="PostgreSQL support requires"),
+        ):
+            await store.initialize()
 
     async def test_connection_failure(self):
         """Test handling of connection failures."""

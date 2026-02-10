@@ -60,9 +60,7 @@ class EvalOrchestrator:
     def __init__(self, scorer: Scorer | None = None) -> None:
         self._scorer = scorer or exact_match_scorer
 
-    async def evaluate(
-        self, agent: AgentLike, dataset: EvalDataset, agent_name: str = ""
-    ) -> EvalReport:
+    async def evaluate(self, agent: AgentLike, dataset: EvalDataset, agent_name: str = "") -> EvalReport:
         """Evaluate *agent* against *dataset*."""
         name = agent_name or getattr(agent, "name", "unknown")
         results: list[EvalResult] = []
@@ -71,12 +69,14 @@ class EvalOrchestrator:
             result = await agent.run(case.input)
             actual = str(result.output if hasattr(result, "output") else result)
             score = self._scorer(case.expected_output, actual)
-            results.append(EvalResult(
-                input=case.input,
-                expected=case.expected_output,
-                actual=actual,
-                score=score,
-            ))
+            results.append(
+                EvalResult(
+                    input=case.input,
+                    expected=case.expected_output,
+                    actual=actual,
+                    score=score,
+                )
+            )
 
         avg = sum(r.score for r in results) / len(results) if results else 0
         return EvalReport(

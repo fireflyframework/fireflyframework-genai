@@ -228,9 +228,7 @@ class FireflyGenAIConfig(BaseSettings):
                 f"must be less than default_chunk_size ({self.default_chunk_size})"
             )
         if self.qos_consistency_runs < 2:
-            raise ValueError(
-                f"qos_consistency_runs ({self.qos_consistency_runs}) must be >= 2"
-            )
+            raise ValueError(f"qos_consistency_runs ({self.qos_consistency_runs}) must be >= 2")
         return self
 
 

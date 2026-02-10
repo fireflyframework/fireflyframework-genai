@@ -82,7 +82,7 @@ async def demo_basic_batch_processing():
     elapsed = time.perf_counter() - start
 
     print(f"Results (processed in {elapsed:.2f}s):")
-    for i, (review, sentiment) in enumerate(zip(reviews, results), 1):
+    for i, (review, sentiment) in enumerate(zip(reviews, results, strict=False), 1):
         print(f"{i}. '{review[:50]}...' → {sentiment}")
 
     print(f"\nProcessed {len(results)} reviews in {elapsed:.2f}s")
@@ -127,9 +127,9 @@ async def demo_large_scale_batch():
 
     print(f"\nProcessed {len(results)} documents in {elapsed:.2f}s")
     print(f"Average: {elapsed / len(results):.3f}s per document")
-    print(f"\nSample results:")
+    print("\nSample results:")
     for i in range(min(5, len(results))):
-        print(f"  {i+1}. {results[i]}")
+        print(f"  {i + 1}. {results[i]}")
     if len(results) > 5:
         print(f"  ... ({len(results) - 5} more)")
 
@@ -172,8 +172,8 @@ async def demo_batch_with_callback():
 
     results = await step.execute(context, inputs)
 
-    print(f"\nExtracted keywords:")
-    for text, keyword in zip(texts, results):
+    print("\nExtracted keywords:")
+    for text, keyword in zip(texts, results, strict=False):
         print(f"  '{text[:40]}...' → {keyword}")
 
     print(f"\nCallback was invoked {len(completed_batches)} time(s)")
@@ -239,7 +239,7 @@ async def demo_batch_in_pipeline():
     print("Running pipeline with batch processing...")
     result = await pipeline.run({})
 
-    print(f"\nPipeline result:")
+    print("\nPipeline result:")
     print(f"  Documents loaded: {len(result.get_node_result('load')['documents'])}")
     print(f"  Classifications: {result.get_node_result('classify')}")
     print(f"  Topic distribution: {result.output}")
@@ -285,7 +285,7 @@ async def demo_cost_comparison():
 
     batch_cost = default_usage_tracker.get_summary().total_cost_usd - initial_cost
 
-    print(f"\nCost comparison:")
+    print("\nCost comparison:")
     print(f"  Sequential: ${sequential_cost:.6f}")
     print(f"  Batch:      ${batch_cost:.6f}")
     print(f"  Difference: ${abs(sequential_cost - batch_cost):.6f}")

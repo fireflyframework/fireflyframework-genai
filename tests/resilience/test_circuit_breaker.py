@@ -182,6 +182,7 @@ class TestCircuitBreaker:
 
     async def test_circuit_breaker_excluded_exceptions(self):
         """Test that excluded exceptions don't count as failures."""
+
         class ValidationError(Exception):
             pass
 

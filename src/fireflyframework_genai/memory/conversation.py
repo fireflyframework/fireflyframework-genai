@@ -165,9 +165,7 @@ class ConversationMemory:
 
     def get_total_tokens(self, conversation_id: str) -> int:
         """Return the total estimated token count for a conversation."""
-        return sum(
-            t.token_estimate for t in self._conversations.get(conversation_id, [])
-        )
+        return sum(t.token_estimate for t in self._conversations.get(conversation_id, []))
 
     def clear(self, conversation_id: str) -> None:
         """Remove all turns for a conversation."""
@@ -244,18 +242,18 @@ class ConversationMemory:
 
             # Re-estimate tokens if the exported value is missing or zero
             if token_estimate <= 0 and (user_prompt or assistant_response):
-                token_estimate = self._estimator.estimate(
-                    f"{user_prompt}\n{assistant_response}"
-                )
+                token_estimate = self._estimator.estimate(f"{user_prompt}\n{assistant_response}")
 
-            turns.append(ConversationTurn(
-                turn_id=t.get("turn_id", len(turns)),
-                user_prompt=user_prompt,
-                assistant_response=assistant_response,
-                raw_messages=[],  # Raw messages are not portable
-                token_estimate=token_estimate,
-                metadata=t.get("metadata", {}),
-            ))
+            turns.append(
+                ConversationTurn(
+                    turn_id=t.get("turn_id", len(turns)),
+                    user_prompt=user_prompt,
+                    assistant_response=assistant_response,
+                    raw_messages=[],  # Raw messages are not portable
+                    token_estimate=token_estimate,
+                    metadata=t.get("metadata", {}),
+                )
+            )
 
         with self._lock:
             self._conversations[cid] = turns
@@ -267,7 +265,4 @@ class ConversationMemory:
         return cid
 
     def __repr__(self) -> str:
-        return (
-            f"ConversationMemory(conversations={len(self._conversations)}, "
-            f"max_tokens={self._max_tokens})"
-        )
+        return f"ConversationMemory(conversations={len(self._conversations)}, max_tokens={self._max_tokens})"

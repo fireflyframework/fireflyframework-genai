@@ -111,20 +111,25 @@ class TestCustomRule:
 
 class TestFieldValidator:
     def test_multiple_rules(self):
-        fv = FieldValidator("amount", [
-            RangeRule("amount", min_value=0, max_value=10000),
-            CustomRule("amount", lambda v: v != 0, description="Cannot be zero"),
-        ])
+        fv = FieldValidator(
+            "amount",
+            [
+                RangeRule("amount", min_value=0, max_value=10000),
+                CustomRule("amount", lambda v: v != 0, description="Cannot be zero"),
+            ],
+        )
         results = fv.validate(500)
         assert all(r.passed for r in results)
 
 
 class TestOutputValidator:
     def test_dict_validation(self):
-        validator = OutputValidator({
-            "email": [FormatRule("email", "email")],
-            "age": [RangeRule("age", min_value=0, max_value=120)],
-        })
+        validator = OutputValidator(
+            {
+                "email": [FormatRule("email", "email")],
+                "age": [RangeRule("age", min_value=0, max_value=120)],
+            }
+        )
         report = validator.validate({"email": "a@b.com", "age": 30})
         assert report.valid is True
         assert report.error_count == 0
@@ -134,17 +139,21 @@ class TestOutputValidator:
             total: float
             currency: str
 
-        validator = OutputValidator({
-            "total": [RangeRule("total", min_value=0)],
-            "currency": [EnumRule("currency", ["USD", "EUR", "GBP"])],
-        })
+        validator = OutputValidator(
+            {
+                "total": [RangeRule("total", min_value=0)],
+                "currency": [EnumRule("currency", ["USD", "EUR", "GBP"])],
+            }
+        )
         report = validator.validate(Invoice(total=100.0, currency="USD"))
         assert report.valid is True
 
     def test_validation_failure(self):
-        validator = OutputValidator({
-            "email": [FormatRule("email", "email")],
-        })
+        validator = OutputValidator(
+            {
+                "email": [FormatRule("email", "email")],
+            }
+        )
         report = validator.validate({"email": "not-email"})
         assert report.valid is False
         assert report.error_count == 1

@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 # Try to import httpx for connection pooling
 try:
     import httpx
+
     HTTPX_AVAILABLE = True
 except ImportError:
     HTTPX_AVAILABLE = False
@@ -72,9 +73,19 @@ class HttpTool(BaseTool):
             guards=guards,
             parameters=[
                 ParameterSpec(name="url", type_annotation="str", description="Request URL", required=True),
-                ParameterSpec(name="method", type_annotation="str", description="HTTP method", required=False, default="GET"),
-                ParameterSpec(name="body", type_annotation="str | None", description="Request body", required=False, default=None),
-                ParameterSpec(name="headers", type_annotation="dict[str, str]", description="Additional headers", required=False, default=None),
+                ParameterSpec(
+                    name="method", type_annotation="str", description="HTTP method", required=False, default="GET"
+                ),
+                ParameterSpec(
+                    name="body", type_annotation="str | None", description="Request body", required=False, default=None
+                ),
+                ParameterSpec(
+                    name="headers",
+                    type_annotation="dict[str, str]",
+                    description="Additional headers",
+                    required=False,
+                    default=None,
+                ),
             ],
         )
         self._timeout = timeout
@@ -100,10 +111,7 @@ class HttpTool(BaseTool):
         else:
             self._client = None
             if use_pool and not HTTPX_AVAILABLE:
-                logger.warning(
-                    "Connection pooling requested but httpx not available. "
-                    "Install with: pip install httpx"
-                )
+                logger.warning("Connection pooling requested but httpx not available. Install with: pip install httpx")
 
     async def close(self) -> None:
         """Close the HTTP client and release connections."""
@@ -143,9 +151,7 @@ class HttpTool(BaseTool):
             "body": response.text,
         }
 
-    def _do_request_urllib(
-        self, url: str, method: str, body: str | None, headers: dict[str, str]
-    ) -> dict[str, Any]:
+    def _do_request_urllib(self, url: str, method: str, body: str | None, headers: dict[str, str]) -> dict[str, Any]:
         """Perform the blocking HTTP request using urllib in a thread."""
         data = body.encode("utf-8") if body else None
         req = urllib.request.Request(url, data=data, headers=headers, method=method)

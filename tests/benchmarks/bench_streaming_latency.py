@@ -45,7 +45,7 @@ class TestStreamingLatencyBenchmarks:
 
             stream_ctx = await agent.run_stream("hello", streaming_mode="buffered")
             async with stream_ctx as stream:
-                async for chunk in stream.stream_text():
+                async for _chunk in stream.stream_text():
                     if first_token_time is None:
                         first_token_time = time.perf_counter() - start
                     # Only consume first few chunks for benchmarking
@@ -53,7 +53,7 @@ class TestStreamingLatencyBenchmarks:
 
             return first_token_time
 
-        result = benchmark(lambda: pytest.asyncio.fixture(stream_buffered))
+        benchmark(lambda: pytest.asyncio.fixture(stream_buffered))
 
     @pytest.mark.asyncio
     async def test_bench_incremental_streaming_latency(self, benchmark):
@@ -64,11 +64,9 @@ class TestStreamingLatencyBenchmarks:
             start = time.perf_counter()
             first_token_time = None
 
-            stream_ctx = await agent.run_stream(
-                "hello", streaming_mode="incremental"
-            )
+            stream_ctx = await agent.run_stream("hello", streaming_mode="incremental")
             async with stream_ctx as stream:
-                async for token in stream.stream_tokens():
+                async for _token in stream.stream_tokens():
                     if first_token_time is None:
                         first_token_time = time.perf_counter() - start
                     # Only consume first few tokens for benchmarking
@@ -76,7 +74,7 @@ class TestStreamingLatencyBenchmarks:
 
             return first_token_time
 
-        result = benchmark(lambda: pytest.asyncio.fixture(stream_incremental))
+        benchmark(lambda: pytest.asyncio.fixture(stream_incremental))
 
     @pytest.mark.asyncio
     async def test_bench_incremental_with_debounce(self, benchmark):
@@ -87,18 +85,16 @@ class TestStreamingLatencyBenchmarks:
             start = time.perf_counter()
             first_token_time = None
 
-            stream_ctx = await agent.run_stream(
-                "hello", streaming_mode="incremental"
-            )
+            stream_ctx = await agent.run_stream("hello", streaming_mode="incremental")
             async with stream_ctx as stream:
-                async for token in stream.stream_tokens(debounce_ms=10.0):
+                async for _token in stream.stream_tokens(debounce_ms=10.0):
                     if first_token_time is None:
                         first_token_time = time.perf_counter() - start
                     break
 
             return first_token_time
 
-        result = benchmark(lambda: pytest.asyncio.fixture(stream_with_debounce))
+        benchmark(lambda: pytest.asyncio.fixture(stream_with_debounce))
 
     @pytest.mark.asyncio
     async def test_bench_full_response_buffered(self, benchmark):
@@ -124,9 +120,7 @@ class TestStreamingLatencyBenchmarks:
 
         async def stream_full_incremental():
             tokens = []
-            stream_ctx = await agent.run_stream(
-                "Count to 10", streaming_mode="incremental"
-            )
+            stream_ctx = await agent.run_stream("Count to 10", streaming_mode="incremental")
             async with stream_ctx as stream:
                 async for token in stream.stream_tokens():
                     tokens.append(token)
@@ -142,10 +136,8 @@ class TestStreamingLatencyBenchmarks:
         agent = FireflyAgent("bench-ctx", model="test", auto_register=False)
 
         async def create_stream_context():
-            stream_ctx = await agent.run_stream(
-                "hello", streaming_mode="incremental"
-            )
-            async with stream_ctx as stream:
+            stream_ctx = await agent.run_stream("hello", streaming_mode="incremental")
+            async with stream_ctx:
                 # Just enter/exit without consuming
                 pass
 

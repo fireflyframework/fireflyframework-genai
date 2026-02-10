@@ -133,9 +133,7 @@ class ReActPattern(AbstractReasoningPattern):
             tool_args={"thought": thought_text[:100]},
         )
 
-    async def _observe(
-        self, state: dict[str, Any], action: ReasoningStep | None
-    ) -> ReasoningStep | None:
+    async def _observe(self, state: dict[str, Any], action: ReasoningStep | None) -> ReasoningStep | None:
         result = state.get("last_action_result", "")
         state["last_observation"] = result
         logger.debug("ReAct: observation: %s", result[:200])

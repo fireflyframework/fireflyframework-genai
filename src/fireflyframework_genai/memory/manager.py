@@ -177,9 +177,7 @@ class MemoryManager:
         **kwargs: Any,
     ) -> Any:
         """Shortcut to :meth:`ConversationMemory.add_turn`."""
-        return self._conversation.add_turn(
-            conversation_id, user_prompt, assistant_response, raw_messages, **kwargs
-        )
+        return self._conversation.add_turn(conversation_id, user_prompt, assistant_response, raw_messages, **kwargs)
 
     def new_conversation(self) -> str:
         """Create a new conversation and return its ID."""

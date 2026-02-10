@@ -112,7 +112,9 @@ def create_websocket_router() -> APIRouter:
                     if hasattr(agent, "run_stream"):
                         try:
                             async with agent.run_stream(
-                                prompt, deps=deps, conversation_id=conversation_id,
+                                prompt,
+                                deps=deps,
+                                conversation_id=conversation_id,
                             ) as stream:
                                 full_output: list[str] = []
                                 async for token in stream.stream_text(delta=True):
@@ -127,7 +129,9 @@ def create_websocket_router() -> APIRouter:
 
                     if final is None:
                         result = await agent.run(
-                            prompt, deps=deps, conversation_id=conversation_id,
+                            prompt,
+                            deps=deps,
+                            conversation_id=conversation_id,
                         )
                         final = result.output if hasattr(result, "output") else str(result)
 

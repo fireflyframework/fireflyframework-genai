@@ -64,9 +64,7 @@ class TestIncrementalStreaming:
         """Test that stream_tokens() can be iterated."""
         agent = FireflyAgent("test-iterate", model="test", auto_register=False)
 
-        stream_ctx = await agent.run_stream(
-            "Say hello", streaming_mode="incremental"
-        )
+        stream_ctx = await agent.run_stream("Say hello", streaming_mode="incremental")
         async with stream_ctx as stream:
             tokens = []
             async for token in stream.stream_tokens():
@@ -81,9 +79,7 @@ class TestIncrementalStreaming:
         """Test incremental streaming with debounce parameter."""
         agent = FireflyAgent("test-debounce", model="test", auto_register=False)
 
-        stream_ctx = await agent.run_stream(
-            "Count to 10", streaming_mode="incremental"
-        )
+        stream_ctx = await agent.run_stream("Count to 10", streaming_mode="incremental")
         async with stream_ctx as stream:
             tokens = []
             # Use debounce to batch rapid tokens
@@ -155,11 +151,9 @@ class TestIncrementalStreaming:
         agent = FireflyAgent("test-timeout", model="test", auto_register=False)
 
         # This should work without timeout error for normal execution
-        stream_ctx = await agent.run_stream(
-            "hello", streaming_mode="incremental", timeout=30.0
-        )
+        stream_ctx = await agent.run_stream("hello", streaming_mode="incremental", timeout=30.0)
         async with stream_ctx as stream:
-            async for token in stream.stream_tokens():
+            async for _token in stream.stream_tokens():
                 break  # Just get first token
 
     async def test_middleware_fires_with_incremental_mode(self):
@@ -192,9 +186,7 @@ class TestIncrementalStreamingEdgeCases:
         """Test incremental streaming with empty response."""
         agent = FireflyAgent("test-empty", model="test", auto_register=False)
 
-        stream_ctx = await agent.run_stream(
-            "Say nothing", streaming_mode="incremental"
-        )
+        stream_ctx = await agent.run_stream("Say nothing", streaming_mode="incremental")
         async with stream_ctx as stream:
             tokens = []
             async for token in stream.stream_tokens():
@@ -207,12 +199,10 @@ class TestIncrementalStreamingEdgeCases:
         """Test incremental streaming with very long response."""
         agent = FireflyAgent("test-long", model="test", auto_register=False)
 
-        stream_ctx = await agent.run_stream(
-            "Write a very long story", streaming_mode="incremental"
-        )
+        stream_ctx = await agent.run_stream("Write a very long story", streaming_mode="incremental")
         async with stream_ctx as stream:
             token_count = 0
-            async for token in stream.stream_tokens():
+            async for _token in stream.stream_tokens():
                 token_count += 1
                 if token_count >= 100:  # Limit for testing
                     break
@@ -229,9 +219,7 @@ class TestIncrementalStreamingEdgeCases:
 
         conv_id = "test-conv-123"
 
-        stream_ctx = await agent.run_stream(
-            "hello", conversation_id=conv_id, streaming_mode="incremental"
-        )
+        stream_ctx = await agent.run_stream("hello", conversation_id=conv_id, streaming_mode="incremental")
         async with stream_ctx as stream:
             async for _ in stream.stream_tokens():
                 break

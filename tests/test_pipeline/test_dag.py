@@ -26,8 +26,10 @@ from fireflyframework_genai.pipeline.steps import FanInStep
 
 # -- Helper step -----------------------------------------------------------
 
+
 class EchoStep:
     """Simple step that echoes input with a prefix."""
+
     def __init__(self, prefix: str = ""):
         self._prefix = prefix
 
@@ -138,11 +140,13 @@ class TestPipelineEngine:
     async def test_conditional_skip(self):
         dag = DAG("conditional")
         dag.add_node(DAGNode(node_id="always", step=EchoStep("OK:")))
-        dag.add_node(DAGNode(
-            node_id="never",
-            step=EchoStep("SKIP:"),
-            condition=lambda ctx: False,
-        ))
+        dag.add_node(
+            DAGNode(
+                node_id="never",
+                step=EchoStep("SKIP:"),
+                condition=lambda ctx: False,
+            )
+        )
         engine = PipelineEngine(dag)
         result = await engine.run(inputs="test")
         assert result.outputs["never"].skipped is True
@@ -239,12 +243,14 @@ class TestExponentialBackoff:
                 return "success"
 
         dag = DAG("retry-test")
-        dag.add_node(DAGNode(
-            node_id="retryable",
-            step=FailTwiceStep(),
-            retry_max=2,
-            backoff_factor=0.01,  # Very small for test speed
-        ))
+        dag.add_node(
+            DAGNode(
+                node_id="retryable",
+                step=FailTwiceStep(),
+                retry_max=2,
+                backoff_factor=0.01,  # Very small for test speed
+            )
+        )
         engine = PipelineEngine(dag)
         result = await engine.run(inputs="test")
         assert result.success is True

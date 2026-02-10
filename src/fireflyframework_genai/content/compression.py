@@ -56,6 +56,7 @@ class TokenEstimator:
         if encoding_name:
             try:
                 import tiktoken
+
                 self._encoder = tiktoken.get_encoding(encoding_name)
             except ImportError:
                 logger.debug("tiktoken not installed; falling back to heuristic estimation")
@@ -136,11 +137,7 @@ class SummarizationStrategy:
         self._instruction = system_instruction
 
     async def compress(self, text: str, max_tokens: int) -> str:
-        prompt = (
-            f"{self._instruction}\n\n"
-            f"Target maximum length: approximately {max_tokens} tokens.\n\n"
-            f"Text:\n{text}"
-        )
+        prompt = f"{self._instruction}\n\nTarget maximum length: approximately {max_tokens} tokens.\n\nText:\n{text}"
         result = await self._agent.run(prompt)
         return str(result.output if hasattr(result, "output") else result)
 
@@ -172,10 +169,7 @@ class MapReduceStrategy:
         # Map phase: summarize each chunk
         summaries: list[str] = []
         for chunk in chunks:
-            prompt = (
-                f"Summarize this text segment concisely, preserving key facts:\n\n"
-                f"{chunk.content}"
-            )
+            prompt = f"Summarize this text segment concisely, preserving key facts:\n\n{chunk.content}"
             result = await self._agent.run(prompt)
             summaries.append(str(result.output if hasattr(result, "output") else result))
 
@@ -187,8 +181,7 @@ class MapReduceStrategy:
 
         # If still too long, do a final reduction
         prompt = (
-            f"Combine these summaries into a single cohesive summary of "
-            f"approximately {max_tokens} tokens:\n\n{merged}"
+            f"Combine these summaries into a single cohesive summary of approximately {max_tokens} tokens:\n\n{merged}"
         )
         result = await self._agent.run(prompt)
         return str(result.output if hasattr(result, "output") else result)
@@ -272,8 +265,5 @@ class SlidingWindowManager:
 
     def _evict(self) -> None:
         """Remove oldest segments until the window fits."""
-        while (
-            len(self._segments) > 1
-            and self._estimator.estimate(self.get_context()) > self._max_tokens
-        ):
+        while len(self._segments) > 1 and self._estimator.estimate(self.get_context()) > self._max_tokens:
             self._segments.pop(0)

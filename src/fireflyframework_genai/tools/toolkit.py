@@ -94,11 +94,7 @@ class ToolKit:
         """
         pydantic_tools: list[PydanticTool[Any]] = []
         for tool in self._tools:
-            handler = (
-                tool.pydantic_handler()
-                if hasattr(tool, "pydantic_handler")
-                else tool.execute
-            )
+            handler = tool.pydantic_handler() if hasattr(tool, "pydantic_handler") else tool.execute
             pydantic_tools.append(
                 PydanticTool(
                     handler,

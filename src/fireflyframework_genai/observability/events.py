@@ -50,38 +50,54 @@ class FireflyEvents:
 
     def agent_started(self, agent_name: str, model: str = "", **extra: Any) -> None:
         """Emit an event when an agent run starts."""
-        self._emit(FireflyEvent(
-            event_type="agent.started", agent=agent_name,
-            detail={"model": model, **extra},
-        ))
+        self._emit(
+            FireflyEvent(
+                event_type="agent.started",
+                agent=agent_name,
+                detail={"model": model, **extra},
+            )
+        )
 
     def agent_completed(self, agent_name: str, *, tokens: int = 0, latency_ms: float = 0, **extra: Any) -> None:
         """Emit an event when an agent run completes."""
-        self._emit(FireflyEvent(
-            event_type="agent.completed", agent=agent_name,
-            detail={"tokens": tokens, "latency_ms": latency_ms, **extra},
-        ))
+        self._emit(
+            FireflyEvent(
+                event_type="agent.completed",
+                agent=agent_name,
+                detail={"tokens": tokens, "latency_ms": latency_ms, **extra},
+            )
+        )
 
     def agent_error(self, agent_name: str, error: str, **extra: Any) -> None:
         """Emit an event when an agent run fails."""
-        self._emit(FireflyEvent(
-            event_type="agent.error", agent=agent_name, level="ERROR",
-            detail={"error": error, **extra},
-        ))
+        self._emit(
+            FireflyEvent(
+                event_type="agent.error",
+                agent=agent_name,
+                level="ERROR",
+                detail={"error": error, **extra},
+            )
+        )
 
     def tool_executed(self, tool_name: str, *, success: bool = True, latency_ms: float = 0, **extra: Any) -> None:
         """Emit an event for a tool execution."""
-        self._emit(FireflyEvent(
-            event_type="tool.executed", tool=tool_name,
-            detail={"success": success, "latency_ms": latency_ms, **extra},
-        ))
+        self._emit(
+            FireflyEvent(
+                event_type="tool.executed",
+                tool=tool_name,
+                detail={"success": success, "latency_ms": latency_ms, **extra},
+            )
+        )
 
     def reasoning_step(self, pattern: str, step: int, step_type: str = "", **extra: Any) -> None:
         """Emit an event for a reasoning step."""
-        self._emit(FireflyEvent(
-            event_type="reasoning.step", pattern=pattern,
-            detail={"step": step, "step_type": step_type, **extra},
-        ))
+        self._emit(
+            FireflyEvent(
+                event_type="reasoning.step",
+                pattern=pattern,
+                detail={"step": step, "step_type": step_type, **extra},
+            )
+        )
 
     def _emit(self, event: FireflyEvent) -> None:
         """Log the event as a structured dict."""

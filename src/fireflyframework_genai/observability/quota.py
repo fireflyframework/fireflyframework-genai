@@ -52,9 +52,9 @@ import random
 import threading
 import time
 from collections import defaultdict
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
-from fireflyframework_genai.exceptions import BudgetExceededError, QuotaError, RateLimitError
+from fireflyframework_genai.exceptions import BudgetExceededError, RateLimitError
 
 logger = logging.getLogger(__name__)
 
@@ -223,7 +223,7 @@ class AdaptiveBackoff:
         # First failure (failures=1) gives base_delay
         # Second failure (failures=2) gives base_delay * multiplier
         exponent = max(0, failures - 1)
-        delay = min(self._base_delay * (self._multiplier ** exponent), self._max_delay)
+        delay = min(self._base_delay * (self._multiplier**exponent), self._max_delay)
 
         # Add jitter: random value between 0% and 50% of delay
         if self._jitter:
@@ -314,10 +314,14 @@ class QuotaManager:
 
         # Adaptive backoff
         self._enable_backoff = enable_adaptive_backoff
-        self._backoff = AdaptiveBackoff(
-            base_delay=backoff_base_delay,
-            max_delay=backoff_max_delay,
-        ) if enable_adaptive_backoff else None
+        self._backoff = (
+            AdaptiveBackoff(
+                base_delay=backoff_base_delay,
+                max_delay=backoff_max_delay,
+            )
+            if enable_adaptive_backoff
+            else None
+        )
 
     def check_budget_available(self, cost_usd: float) -> bool:
         """Check if the daily budget has room for the estimated cost.
@@ -415,8 +419,7 @@ class QuotaManager:
         if self._backoff:
             self._backoff.record_failure(model)
             logger.warning(
-                "Rate limit error (429) for model '%s'. "
-                "Failure count: %d, Recommended backoff: %.2fs",
+                "Rate limit error (429) for model '%s'. Failure count: %d, Recommended backoff: %.2fs",
                 model,
                 self._backoff.get_failure_count(model),
                 self._backoff.get_delay(model),

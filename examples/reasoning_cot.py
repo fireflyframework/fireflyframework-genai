@@ -40,10 +40,7 @@ async def main() -> None:
     agent = FireflyAgent(name="cot-thinker", model=MODEL)
     pattern = ChainOfThoughtPattern(max_steps=10, model=MODEL)
 
-    problem = (
-        "A farmer has 17 sheep. All but 9 run away. "
-        "How many sheep does the farmer have left?"
-    )
+    problem = "A farmer has 17 sheep. All but 9 run away. How many sheep does the farmer have left?"
     print(f"Problem: {problem}\n")
 
     result = await pattern.execute(agent, problem)

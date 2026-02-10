@@ -211,10 +211,13 @@ class TestConversationalAgent:
 
 class TestRouterAgent:
     def test_default_creation(self) -> None:
-        agent = create_router_agent({
-            "billing": "Handles billing questions",
-            "technical": "Handles technical support",
-        }, model="test")
+        agent = create_router_agent(
+            {
+                "billing": "Handles billing questions",
+                "technical": "Handles technical support",
+            },
+            model="test",
+        )
         assert isinstance(agent, FireflyAgent)
         assert agent.name == "router"
         assert "router" in agent.tags
@@ -232,16 +235,12 @@ class TestRouterAgent:
         assert agent.name == "my-router"
 
     def test_routing_decision_model(self) -> None:
-        decision = RoutingDecision(
-            target_agent="billing", confidence=0.9, reasoning="test"
-        )
+        decision = RoutingDecision(target_agent="billing", confidence=0.9, reasoning="test")
         assert decision.target_agent == "billing"
         assert decision.confidence == 0.9
 
     def test_no_auto_register(self) -> None:
-        create_router_agent(
-            {"a": "desc"}, name="no-reg-rtr", model="test", auto_register=False
-        )
+        create_router_agent({"a": "desc"}, name="no-reg-rtr", model="test", auto_register=False)
         assert not agent_registry.has("no-reg-rtr")
 
 
@@ -307,11 +306,10 @@ class TestTemplateDefaultTools:
 
     def test_explicit_tools_override_defaults(self) -> None:
         """When the user passes explicit tools, default tools are NOT added."""
+
         async def custom_tool(x: str) -> str:
             return x
 
-        agent = create_conversational_agent(
-            name="conv-custom", model="test", tools=[custom_tool]
-        )
+        agent = create_conversational_agent(name="conv-custom", model="test", tools=[custom_tool])
         # Only the user's 1 tool, not the 3 defaults
         assert len(agent.agent._function_toolset.tools) == 1

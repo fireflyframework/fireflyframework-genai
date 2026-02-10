@@ -169,8 +169,7 @@ def _pretty_json(obj: Any, indent: int = 2) -> str:
                     else:
                         lines.append(f"{inner}{kstr}{DIM}:{RESET} {DIM}[{RESET}")
                         for j, item in enumerate(v):
-                            _render(item, depth + 2,
-                                    trailing_comma=(j < len(v) - 1))
+                            _render(item, depth + 2, trailing_comma=(j < len(v) - 1))
                         lines.append(f"{inner}{DIM}]{RESET}{c}")
                 else:
                     lines.append(f"{inner}{kstr}{DIM}:{RESET} {_val(v)}{c}")
@@ -202,8 +201,7 @@ def _pretty_json(obj: Any, indent: int = 2) -> str:
                 else:
                     lines.append(f"{inner}{kstr}{DIM}:{RESET} {DIM}[{RESET}")
                     for j, item in enumerate(v):
-                        _render(item, depth + 1,
-                                trailing_comma=(j < len(v) - 1))
+                        _render(item, depth + 1, trailing_comma=(j < len(v) - 1))
                     lines.append(f"{inner}{DIM}]{RESET}{c}")
             else:
                 lines.append(f"{inner}{kstr}{DIM}:{RESET} {_val(v)}{c}")
@@ -401,10 +399,7 @@ async def ingest_step(context: PipelineContext, inputs: dict[str, Any]) -> Any:
 
     page_count = len(re.findall(r"\[PAGE \d+\]", raw_text))
     chunks = chunker.chunk(raw_text)
-    print(
-        f"   {GREEN}Extracted {len(raw_text):,} characters, "
-        f"{page_count} pages → {len(chunks)} chunks{RESET}"
-    )
+    print(f"   {GREEN}Extracted {len(raw_text):,} characters, {page_count} pages → {len(chunks)} chunks{RESET}")
 
     compressed = await compressor.compress(raw_text, max_tokens=60_000)
 
@@ -493,13 +488,15 @@ async def split_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> Any
         start = b.get("page_start", 1)
         end = b.get("page_end", page_count)
         text = _slice_pages(pages, start, end)
-        raw_sub_docs.append(SubDocument(
-            doc_id=f"sub_{i + 1}",
-            title=b.get("title", f"Sub-document {i + 1}"),
-            page_start=start,
-            page_end=end,
-            text=text,
-        ))
+        raw_sub_docs.append(
+            SubDocument(
+                doc_id=f"sub_{i + 1}",
+                title=b.get("title", f"Sub-document {i + 1}"),
+                page_start=start,
+                page_end=end,
+                text=text,
+            )
+        )
 
     # Merge fragments (< min_subdoc_chars) into the preceding sub-document
     # so that tiny counterpart/signature pages don't cause extraction failures.
@@ -515,10 +512,7 @@ async def split_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> Any
                 page_end=sd.page_end,
                 text=merged_text,
             )
-            print(
-                f"   {DIM}(merged fragment '{sd.title}' "
-                f"[{len(sd.text)} chars] into '{prev.title}'){RESET}"
-            )
+            print(f"   {DIM}(merged fragment '{sd.title}' [{len(sd.text)} chars] into '{prev.title}'){RESET}")
         else:
             sub_docs.append(sd)
 
@@ -528,11 +522,7 @@ async def split_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> Any
 
     print(f"   {GREEN}Found {len(sub_docs)} sub-document(s):{RESET}")
     for sd in sub_docs:
-        print(
-            f"   {BOLD}• {sd.title}{RESET} "
-            f"{DIM}(pages {sd.page_start}–{sd.page_end}, "
-            f"{len(sd.text):,} chars){RESET}"
-        )
+        print(f"   {BOLD}• {sd.title}{RESET} {DIM}(pages {sd.page_start}–{sd.page_end}, {len(sd.text):,} chars){RESET}")
 
     if context.memory is not None:
         context.memory.set_fact("sub_documents", [sd.model_dump() for sd in sub_docs])
@@ -547,9 +537,7 @@ async def split_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> Any
         output_summary=f"Found {len(sub_docs)} sub-document(s)",
         detail={
             "sub_documents": [
-                {"doc_id": sd.doc_id, "title": sd.title,
-                 "pages": f"{sd.page_start}-{sd.page_end}"}
-                for sd in sub_docs
+                {"doc_id": sd.doc_id, "title": sd.title, "pages": f"{sd.page_start}-{sd.page_end}"} for sd in sub_docs
             ],
         },
     )
@@ -577,10 +565,7 @@ async def classify_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> 
     if not isinstance(sub_docs_raw, list):
         sub_docs_raw = [sub_docs_raw]
 
-    print(
-        f"\n{CYAN}🏷️  Classifying {len(sub_docs_raw)} sub-document(s) "
-        f"with structured output...{RESET}"
-    )
+    print(f"\n{CYAN}🏷️  Classifying {len(sub_docs_raw)} sub-document(s) with structured output...{RESET}")
 
     classified: list[dict[str, Any]] = []
 
@@ -613,17 +598,16 @@ async def classify_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> 
             summary=cls_result.reasoning[:200],
         )
 
-        print(
-            f"     Result: {BOLD}{classification.doc_type}{RESET} "
-            f"(confidence: {classification.confidence:.0%})"
-        )
+        print(f"     Result: {BOLD}{classification.doc_type}{RESET} (confidence: {classification.confidence:.0%})")
 
-        classified.append({
-            "doc_id": doc_id,
-            "title": title,
-            "text": text,
-            "classification": classification.model_dump(),
-        })
+        classified.append(
+            {
+                "doc_id": doc_id,
+                "title": title,
+                "text": text,
+                "classification": classification.model_dump(),
+            }
+        )
 
         recorder.record(
             "llm_call",
@@ -640,8 +624,7 @@ async def classify_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> 
             actor="idp_classifier",
             action="classification",
             resource=doc_id,
-            detail={"doc_type": classification.doc_type,
-                    "confidence": classification.confidence},
+            detail={"doc_type": classification.doc_type, "confidence": classification.confidence},
         )
 
     if context.memory is not None:
@@ -680,9 +663,7 @@ async def _extract_single(
     direct agent call.  Returns a :class:`CorporateDocumentData` on
     success or raises on unrecoverable failure.
     """
-    rendered = extraction_prompt.render(
-        doc_type=doc_type, document_text=text[:30_000]
-    )
+    rendered = extraction_prompt.render(doc_type=doc_type, document_text=text[:30_000])
 
     extractor = _build_extractor()
     reviewer = OutputReviewer(
@@ -696,17 +677,11 @@ async def _extract_single(
         review_result = await reviewer.review(extractor, rendered)
         extracted = review_result.output
         if review_result.retry_history:
-            print(
-                f"     {YELLOW}OutputReviewer retried "
-                f"{len(review_result.retry_history)} time(s){RESET}"
-            )
+            print(f"     {YELLOW}OutputReviewer retried {len(review_result.retry_history)} time(s){RESET}")
         print(f"     {GREEN}Extraction succeeded on attempt {review_result.attempts}{RESET}")
         return extracted  # type: ignore[return-value]
     except Exception:
-        print(
-            f"     {YELLOW}OutputReviewer exhausted retries, "
-            f"trying direct agent call...{RESET}"
-        )
+        print(f"     {YELLOW}OutputReviewer exhausted retries, trying direct agent call...{RESET}")
         result = await extractor.run(rendered)
         raw_output = result.output if hasattr(result, "output") else result
         if isinstance(raw_output, CorporateDocumentData):
@@ -742,20 +717,19 @@ async def extract_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> A
 
         # ── Guard: skip extraction for fragments too small to extract ──
         if len(text) < min_extract_chars:
-            print(
-                f"     {DIM}Skipped (only {len(text)} chars — "
-                f"below {min_extract_chars}-char minimum){RESET}"
+            print(f"     {DIM}Skipped (only {len(text)} chars — below {min_extract_chars}-char minimum){RESET}")
+            extracted_results.append(
+                {
+                    "doc_id": doc_id,
+                    "title": title,
+                    "doc_type": doc_type,
+                    "extraction": CorporateDocumentData(
+                        company_name="(fragment)",
+                        doc_type=doc_type,
+                    ).model_dump(),
+                    "attempts": 0,
+                }
             )
-            extracted_results.append({
-                "doc_id": doc_id,
-                "title": title,
-                "doc_type": doc_type,
-                "extraction": CorporateDocumentData(
-                    company_name="(fragment)",
-                    doc_type=doc_type,
-                ).model_dump(),
-                "attempts": 0,
-            })
             continue
 
         # ── Per-subdoc error isolation ──────────────────────────────────
@@ -764,19 +738,22 @@ async def extract_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> A
         # trigger a pipeline-level retry of ALL sub-documents.
         try:
             extracted = await _extract_single(
-                text, doc_type, title, doc_id,
+                text,
+                doc_type,
+                title,
+                doc_id,
             )
         except Exception as exc:
-            print(
-                f"     {RED}Extraction failed for '{title}': {exc}{RESET}"
+            print(f"     {RED}Extraction failed for '{title}': {exc}{RESET}")
+            extracted_results.append(
+                {
+                    "doc_id": doc_id,
+                    "title": title,
+                    "doc_type": doc_type,
+                    "extraction": {},
+                    "attempts": 0,
+                }
             )
-            extracted_results.append({
-                "doc_id": doc_id,
-                "title": title,
-                "doc_type": doc_type,
-                "extraction": {},
-                "attempts": 0,
-            })
             audit.append(
                 actor="idp_extractor",
                 action="extraction_failed",
@@ -786,25 +763,22 @@ async def extract_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> A
             continue
 
         if isinstance(extracted, CorporateDocumentData):
-            company_officers = [
-                o for o in extracted.officers_mentioned if o.affiliation == "company"
-            ]
+            company_officers = [o for o in extracted.officers_mentioned if o.affiliation == "company"]
             print(f"     Company: {BOLD}{extracted.company_name}{RESET}")
             print(f"     Sections: {len(extracted.sections)}")
             print(f"     Officers: {len(company_officers)}")
             if extracted.authorized_shares:
-                print(
-                    f"     Authorized shares: "
-                    f"{extracted.authorized_shares.total_shares:,}"
-                )
+                print(f"     Authorized shares: {extracted.authorized_shares.total_shares:,}")
 
-            extracted_results.append({
-                "doc_id": doc_id,
-                "title": title,
-                "doc_type": doc_type,
-                "extraction": extracted.model_dump(),
-                "attempts": getattr(extracted, "_attempts", 1),
-            })
+            extracted_results.append(
+                {
+                    "doc_id": doc_id,
+                    "title": title,
+                    "doc_type": doc_type,
+                    "extraction": extracted.model_dump(),
+                    "attempts": getattr(extracted, "_attempts", 1),
+                }
+            )
 
             recorder.record(
                 "llm_call",
@@ -829,13 +803,15 @@ async def extract_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> A
                 detail={"company": extracted.company_name},
             )
         else:
-            extracted_results.append({
-                "doc_id": doc_id,
-                "title": title,
-                "doc_type": doc_type,
-                "extraction": {},
-                "attempts": 0,
-            })
+            extracted_results.append(
+                {
+                    "doc_id": doc_id,
+                    "title": title,
+                    "doc_type": doc_type,
+                    "extraction": {},
+                    "attempts": 0,
+                }
+            )
 
     if context.memory is not None:
         context.memory.set_fact("extracted_results", extracted_results)
@@ -882,17 +858,10 @@ async def validate_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> 
         grounding_score = 1.0
         ungrounded: list[str] = []
         if source_text and extracted:
-            string_fields = {
-                k: v for k, v in extracted.items() if isinstance(v, str) and v
-            }
-            grounding_score, grounding_map = grounding_checker.check(
-                source_text, string_fields
-            )
+            string_fields = {k: v for k, v in extracted.items() if isinstance(v, str) and v}
+            grounding_score, grounding_map = grounding_checker.check(source_text, string_fields)
             ungrounded = [k for k, v in grounding_map.items() if not v]
-            print(
-                f"     Grounding: {grounding_score:.0%} "
-                f"({len(ungrounded)} ungrounded)"
-            )
+            print(f"     Grounding: {grounding_score:.0%} ({len(ungrounded)} ungrounded)")
             if ungrounded:
                 print(f"     ⚠ Ungrounded: {', '.join(ungrounded)}")
 
@@ -902,9 +871,7 @@ async def validate_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> 
             try:
                 extractor = _build_extractor()
                 reflexion = ReflexionPattern(max_steps=4, model=MODEL)
-                error_details = "; ".join(
-                    f"{e.field_name}: {e.message}" for e in report.errors
-                )
+                error_details = "; ".join(f"{e.field_name}: {e.message}" for e in report.errors)
                 correction_prompt = (
                     f"The following extracted data has validation errors:\n"
                     f"Errors: {error_details}\n"
@@ -918,9 +885,7 @@ async def validate_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> 
                     if isinstance(correction.output, dict):
                         extracted = correction.output
                     else:
-                        extracted = CorporateDocumentData.model_validate_json(
-                            str(correction.output)
-                        ).model_dump()
+                        extracted = CorporateDocumentData.model_validate_json(str(correction.output)).model_dump()
                 except Exception:
                     pass
 
@@ -930,25 +895,24 @@ async def validate_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> 
             except Exception as exc:
                 print(f"     Reflexion could not self-correct: {exc}")
 
-        validated.append({
-            "doc_id": doc_id,
-            "title": title,
-            "doc_type": doc_type,
-            "extraction": extracted,
-            "valid": report.valid,
-            "error_count": report.error_count,
-            "grounding_score": grounding_score,
-            "ungrounded_fields": ungrounded,
-        })
+        validated.append(
+            {
+                "doc_id": doc_id,
+                "title": title,
+                "doc_type": doc_type,
+                "extraction": extracted,
+                "valid": report.valid,
+                "error_count": report.error_count,
+                "grounding_score": grounding_score,
+                "ungrounded_fields": ungrounded,
+            }
+        )
 
         recorder.record(
             "reasoning_step",
             agent="validator",
             input_summary=f"Validate '{title}' ({len(extracted)} fields)",
-            output_summary=(
-                f"valid={report.valid}, errors={report.error_count}, "
-                f"grounding={grounding_score:.0%}"
-            ),
+            output_summary=(f"valid={report.valid}, errors={report.error_count}, grounding={grounding_score:.0%}"),
             detail={
                 "doc_id": doc_id,
                 "valid": report.valid,
@@ -996,16 +960,18 @@ async def assemble_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> 
         sections = extraction.get("sections", [])
         total_sections += len(sections) if isinstance(sections, list) else 0
 
-        documents.append({
-            "doc_id": item.get("doc_id", ""),
-            "title": item.get("title", ""),
-            "doc_type": item.get("doc_type", ""),
-            "extracted_fields": extraction,
-            "validation_passed": valid,
-            "validation_errors": item.get("error_count", 0),
-            "grounding_score": item.get("grounding_score", 0.0),
-            "ungrounded_fields": item.get("ungrounded_fields", []),
-        })
+        documents.append(
+            {
+                "doc_id": item.get("doc_id", ""),
+                "title": item.get("title", ""),
+                "doc_type": item.get("doc_type", ""),
+                "extracted_fields": extraction,
+                "validation_passed": valid,
+                "validation_errors": item.get("error_count", 0),
+                "grounding_score": item.get("grounding_score", 0.0),
+                "ungrounded_fields": item.get("ungrounded_fields", []),
+            }
+        )
 
     return {
         "text_hash": context.metadata.get("text_hash", ""),
@@ -1039,7 +1005,8 @@ async def explain_step_fn(context: PipelineContext, inputs: dict[str, Any]) -> A
 
     trace_json = json.dumps(
         [r.model_dump(mode="json") for r in recorder.records],
-        indent=2, default=str,
+        indent=2,
+        default=str,
     )
     audit_json = audit.export_json()
     assembled_json = json.dumps(assembled, indent=2, default=str)
@@ -1092,31 +1059,37 @@ class IDPEventHandler:
         print(f"  {DIM}⏳ [{pipeline_name}] Starting node '{node_id}'...{RESET}")
 
     async def on_node_complete(
-        self, node_id: str, pipeline_name: str, latency_ms: float,
+        self,
+        node_id: str,
+        pipeline_name: str,
+        latency_ms: float,
     ) -> None:
-        print(
-            f"  {GREEN}✔ [{pipeline_name}] Node '{node_id}' completed "
-            f"in {latency_ms:.0f}ms{RESET}"
-        )
+        print(f"  {GREEN}✔ [{pipeline_name}] Node '{node_id}' completed in {latency_ms:.0f}ms{RESET}")
 
     async def on_node_error(
-        self, node_id: str, pipeline_name: str, error: str,
+        self,
+        node_id: str,
+        pipeline_name: str,
+        error: str,
     ) -> None:
         print(f"  {RED}✘ [{pipeline_name}] Node '{node_id}' failed: {error}{RESET}")
 
     async def on_node_skip(
-        self, node_id: str, pipeline_name: str, reason: str,
+        self,
+        node_id: str,
+        pipeline_name: str,
+        reason: str,
     ) -> None:
         print(f"  {YELLOW}⏭ [{pipeline_name}] Node '{node_id}' skipped: {reason}{RESET}")
 
     async def on_pipeline_complete(
-        self, pipeline_name: str, success: bool, duration_ms: float,
+        self,
+        pipeline_name: str,
+        success: bool,
+        duration_ms: float,
     ) -> None:
         badge = f"{GREEN}SUCCESS{RESET}" if success else f"{RED}FAILED{RESET}"
-        print(
-            f"\n  {BOLD}Pipeline '{pipeline_name}' {badge} "
-            f"in {duration_ms:,.0f}ms{RESET}"
-        )
+        print(f"\n  {BOLD}Pipeline '{pipeline_name}' {badge} in {duration_ms:,.0f}ms{RESET}")
 
 
 def build_pipeline():
@@ -1127,15 +1100,22 @@ def build_pipeline():
         .add_node("split", CallableStep(split_step_fn), timeout_seconds=120)
         .add_node("classify", CallableStep(classify_step_fn), timeout_seconds=180)
         .add_node(
-            "extract", CallableStep(extract_step_fn),
-            retry_max=1, timeout_seconds=300,
+            "extract",
+            CallableStep(extract_step_fn),
+            retry_max=1,
+            timeout_seconds=300,
         )
         .add_node("validate", CallableStep(validate_step_fn), timeout_seconds=180)
         .add_node("assemble", CallableStep(assemble_step_fn))
         .add_node("explain", CallableStep(explain_step_fn), timeout_seconds=120)
         .chain(
-            "ingest", "split", "classify", "extract",
-            "validate", "assemble", "explain",
+            "ingest",
+            "split",
+            "classify",
+            "extract",
+            "validate",
+            "assemble",
+            "explain",
         )
         .build_dag()
     )
@@ -1168,23 +1148,24 @@ async def main() -> None:
     memory.set_fact("conversation_id", conv_id)
     memory.set_fact("pdf_url", PDF_URL)
 
-    print(
-        "🚀 Running pipeline: "
-        "ingest → split → classify → extract → validate → assemble → explain\n"
-    )
+    print("🚀 Running pipeline: ingest → split → classify → extract → validate → assemble → explain\n")
     result = await pipeline.run(context=ctx)
 
     # ═══════════════════════════════════════════════════════════════════
     # RESULTS
     # ═══════════════════════════════════════════════════════════════════
     print(_header("PIPELINE RESULTS"))
-    print(_pretty_json({
-        "pipeline": result.pipeline_name,
-        "success": result.success,
-        "total_duration_ms": round(result.total_duration_ms),
-        "nodes_executed": len(result.outputs),
-        "failed_nodes": result.failed_nodes or [],
-    }))
+    print(
+        _pretty_json(
+            {
+                "pipeline": result.pipeline_name,
+                "success": result.success,
+                "total_duration_ms": round(result.total_duration_ms),
+                "nodes_executed": len(result.outputs),
+                "failed_nodes": result.failed_nodes or [],
+            }
+        )
+    )
 
     # ── Per-node results ──
     print(_subheader("Node Results"))
@@ -1213,21 +1194,14 @@ async def main() -> None:
     if isinstance(assembled, dict) and assembled.get("documents"):
         print(_header("DOCUMENT SPLITTING"))
         docs = assembled["documents"]
-        print(
-            f"  {BOLD}Found {len(docs)} sub-document(s) "
-            f"in {assembled.get('page_count', '?')} pages{RESET}\n"
-        )
+        print(f"  {BOLD}Found {len(docs)} sub-document(s) in {assembled.get('page_count', '?')} pages{RESET}\n")
         for doc in docs:
             doc_type = doc.get("doc_type", "unknown")
             title = doc.get("title", "unknown")
             valid = doc.get("validation_passed", False)
             badge = f"{GREEN}✅{RESET}" if valid else f"{RED}❌{RESET}"
             grounding = doc.get("grounding_score", 0)
-            print(
-                f"  {badge} {BOLD}{title}{RESET}  "
-                f"→ {CYAN}{doc_type}{RESET}  "
-                f"grounding={grounding:.0%}"
-            )
+            print(f"  {badge} {BOLD}{title}{RESET}  → {CYAN}{doc_type}{RESET}  grounding={grounding:.0%}")
 
     # ── Per-document extracted data ──
     if isinstance(assembled, dict) and assembled.get("documents"):
@@ -1239,11 +1213,7 @@ async def main() -> None:
             badge = f"{GREEN}PASS{RESET}" if valid else f"{RED}FAIL{RESET}"
 
             print(f"\n  {BOLD}{CYAN}{'─' * 66}{RESET}")
-            print(
-                f"  {BOLD}{title}{RESET}  "
-                f"[{CYAN}{doc_type}{RESET}]  "
-                f"validation: {badge}"
-            )
+            print(f"  {BOLD}{title}{RESET}  [{CYAN}{doc_type}{RESET}]  validation: {badge}")
             print(f"  {BOLD}{CYAN}{'─' * 66}{RESET}")
             print(_pretty_json(doc.get("extracted_fields", {})))
 
@@ -1255,9 +1225,7 @@ async def main() -> None:
             "status": e.status,
             "started_at": e.started_at.isoformat(),
             "completed_at": e.completed_at.isoformat(),
-            "duration_ms": round(
-                (e.completed_at - e.started_at).total_seconds() * 1000
-            ),
+            "duration_ms": round((e.completed_at - e.started_at).total_seconds() * 1000),
         }
         for e in result.execution_trace
     ]
@@ -1266,15 +1234,15 @@ async def main() -> None:
     # ── Working memory ──
     print(_subheader("Working Memory"))
     facts_to_show = [
-        "doc_type", "doc_language", "raw_text_hash",
-        "page_count", "chunk_count", "sub_document_count",
+        "doc_type",
+        "doc_language",
+        "raw_text_hash",
+        "page_count",
+        "chunk_count",
+        "sub_document_count",
         "extraction_attempts",
     ]
-    working_mem = {
-        key: memory.get_fact(key)
-        for key in facts_to_show
-        if memory.get_fact(key) is not None
-    }
+    working_mem = {key: memory.get_fact(key) for key in facts_to_show if memory.get_fact(key) is not None}
     print(_pretty_json(working_mem))
 
     # ═══════════════════════════════════════════════════════════════════
@@ -1299,26 +1267,11 @@ async def main() -> None:
     # FOOTER
     # ═══════════════════════════════════════════════════════════════════
     print(f"\n{CYAN}{'═' * 70}{RESET}")
-    print(
-        f"{DIM}  Features demonstrated: agents, tools (CachedTool), prompts, "
-        f"reasoning (Reflexion),{RESET}"
-    )
-    print(
-        f"{DIM}  content processing (chunking, compression), memory "
-        f"(working + conversation),{RESET}"
-    )
-    print(
-        f"{DIM}  validation (rules, grounding), pipeline DAG "
-        f"(PipelineEventHandler), document splitting,{RESET}"
-    )
-    print(
-        f"{DIM}  security (PromptGuard, OutputGuard, CostGuard warn-only), "
-        f"logging,{RESET}"
-    )
-    print(
-        f"{DIM}  explainability (TraceRecorder, AuditTrail, "
-        f"ReportBuilder, LLM narrative){RESET}"
-    )
+    print(f"{DIM}  Features demonstrated: agents, tools (CachedTool), prompts, reasoning (Reflexion),{RESET}")
+    print(f"{DIM}  content processing (chunking, compression), memory (working + conversation),{RESET}")
+    print(f"{DIM}  validation (rules, grounding), pipeline DAG (PipelineEventHandler), document splitting,{RESET}")
+    print(f"{DIM}  security (PromptGuard, OutputGuard, CostGuard warn-only), logging,{RESET}")
+    print(f"{DIM}  explainability (TraceRecorder, AuditTrail, ReportBuilder, LLM narrative){RESET}")
     print(f"{CYAN}{'═' * 70}{RESET}")
 
 

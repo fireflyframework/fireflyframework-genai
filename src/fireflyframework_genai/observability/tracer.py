@@ -29,7 +29,7 @@ from contextvars import ContextVar
 from typing import Any
 
 from opentelemetry import trace
-from opentelemetry.trace import Span, SpanContext, StatusCode, Tracer, TraceFlags
+from opentelemetry.trace import Span, SpanContext, StatusCode, TraceFlags, Tracer
 
 _TRACER_NAME = "fireflyframework_genai"
 
@@ -48,9 +48,7 @@ class FireflyTracer:
         self._tracer: Tracer = trace.get_tracer(service_name)
 
     @contextmanager
-    def agent_span(
-        self, agent_name: str, *, model: str = "", **attributes: Any
-    ) -> Generator[Span]:
+    def agent_span(self, agent_name: str, *, model: str = "", **attributes: Any) -> Generator[Span]:
         """Create a span for an agent run."""
         with self._tracer.start_as_current_span(
             f"agent.{agent_name}",
@@ -63,9 +61,7 @@ class FireflyTracer:
             yield span
 
     @contextmanager
-    def tool_span(
-        self, tool_name: str, **attributes: Any
-    ) -> Generator[Span]:
+    def tool_span(self, tool_name: str, **attributes: Any) -> Generator[Span]:
         """Create a span for a tool execution."""
         with self._tracer.start_as_current_span(
             f"tool.{tool_name}",
@@ -77,9 +73,7 @@ class FireflyTracer:
             yield span
 
     @contextmanager
-    def reasoning_span(
-        self, pattern_name: str, step: int = 0, **attributes: Any
-    ) -> Generator[Span]:
+    def reasoning_span(self, pattern_name: str, step: int = 0, **attributes: Any) -> Generator[Span]:
         """Create a span for a reasoning step."""
         with self._tracer.start_as_current_span(
             f"reasoning.{pattern_name}.step_{step}",
@@ -92,9 +86,7 @@ class FireflyTracer:
             yield span
 
     @contextmanager
-    def custom_span(
-        self, name: str, **attributes: Any
-    ) -> Generator[Span]:
+    def custom_span(self, name: str, **attributes: Any) -> Generator[Span]:
         """Create a span with arbitrary attributes."""
         with self._tracer.start_as_current_span(
             name,
@@ -158,9 +150,7 @@ def inject_trace_context(headers: dict[str, str]) -> None:
     # W3C traceparent header format:
     # version-trace_id-parent_id-trace_flags
     # Example: 00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01
-    traceparent = (
-        f"00-{ctx.trace_id:032x}-{ctx.span_id:016x}-{ctx.trace_flags:02x}"
-    )
+    traceparent = f"00-{ctx.trace_id:032x}-{ctx.span_id:016x}-{ctx.trace_flags:02x}"
     headers["traceparent"] = traceparent
 
     # Include tracestate if present

@@ -49,8 +49,9 @@ from __future__ import annotations
 
 import functools
 import logging
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
-from typing import Any, Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -139,8 +140,7 @@ class RBACManager:
             import jwt
         except ImportError as exc:
             raise ImportError(
-                "JWT support requires 'pyjwt'. "
-                "Install with: pip install fireflyframework-genai[security]"
+                "JWT support requires 'pyjwt'. Install with: pip install fireflyframework-genai[security]"
             ) from exc
 
         now = datetime.now(UTC)
@@ -181,8 +181,7 @@ class RBACManager:
             import jwt
         except ImportError as exc:
             raise ImportError(
-                "JWT support requires 'pyjwt'. "
-                "Install with: pip install fireflyframework-genai[security]"
+                "JWT support requires 'pyjwt'. Install with: pip install fireflyframework-genai[security]"
             ) from exc
 
         try:
@@ -407,6 +406,7 @@ def require_permission(
 
         # Return appropriate wrapper based on function type
         import inspect
+
         if inspect.iscoroutinefunction(func):
             return async_wrapper
         return sync_wrapper

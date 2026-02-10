@@ -72,9 +72,11 @@ class _DecoratedTool(BaseTool):
         the correct parameter list, while execution still routes through
         :meth:`execute` for guard evaluation.
         """
+
         @functools.wraps(self._handler)
         async def _wrapper(**kwargs: Any) -> Any:
             return await self.execute(**kwargs)
+
         return _wrapper
 
 

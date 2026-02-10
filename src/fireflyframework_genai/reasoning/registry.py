@@ -48,9 +48,7 @@ class ReasoningPatternRegistry:
             try:
                 return self._patterns[name]
             except KeyError:
-                raise ReasoningPatternNotFoundError(
-                    f"No reasoning pattern registered with name '{name}'"
-                ) from None
+                raise ReasoningPatternNotFoundError(f"No reasoning pattern registered with name '{name}'") from None
 
     def has(self, name: str) -> bool:
         with self._lock:

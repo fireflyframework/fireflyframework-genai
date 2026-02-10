@@ -21,7 +21,6 @@ integration tests with real databases.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -71,9 +70,11 @@ class TestMongoDBStore:
 
         store = MongoDBStore(url="mongodb://test")
 
-        with patch.dict("sys.modules", {"motor.motor_asyncio": None}):
-            with pytest.raises(DatabaseStoreError, match="MongoDB support requires"):
-                await store.initialize()
+        with (
+            patch.dict("sys.modules", {"motor.motor_asyncio": None}),
+            pytest.raises(DatabaseStoreError, match="MongoDB support requires"),
+        ):
+            await store.initialize()
 
     async def test_connection_failure(self):
         """Test handling of connection failures."""

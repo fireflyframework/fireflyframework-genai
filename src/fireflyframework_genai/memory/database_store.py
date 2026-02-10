@@ -541,9 +541,7 @@ class MongoDBStore:
             await self.initialize()
 
         try:
-            await self._collection.delete_one(
-                {"namespace": namespace, "entry_id": entry_id}
-            )
+            await self._collection.delete_one({"namespace": namespace, "entry_id": entry_id})
         except Exception as exc:
             raise DatabaseStoreError(f"Failed to delete entry: {exc}") from exc
 
@@ -571,11 +569,7 @@ class MongoDBStore:
             await self.initialize()
 
         try:
-            result = await self._collection.delete_many(
-                {
-                    "expires_at": {"$exists": True, "$lte": datetime.now(UTC)}
-                }
-            )
+            result = await self._collection.delete_many({"expires_at": {"$exists": True, "$lte": datetime.now(UTC)}})
             count = result.deleted_count
             logger.debug("Cleaned up %d expired entries", count)
             return count

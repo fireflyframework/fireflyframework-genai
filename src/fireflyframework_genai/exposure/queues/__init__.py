@@ -43,6 +43,7 @@ def __getattr__(name: str):
             KafkaAgentConsumer,
             KafkaAgentProducer,
         )
+
         return {"KafkaAgentConsumer": KafkaAgentConsumer, "KafkaAgentProducer": KafkaAgentProducer}[name]
 
     if name in _rabbitmq_names:
@@ -50,6 +51,7 @@ def __getattr__(name: str):
             RabbitMQAgentConsumer,
             RabbitMQAgentProducer,
         )
+
         return {"RabbitMQAgentConsumer": RabbitMQAgentConsumer, "RabbitMQAgentProducer": RabbitMQAgentProducer}[name]
 
     if name in _redis_names:
@@ -57,6 +59,7 @@ def __getattr__(name: str):
             RedisAgentConsumer,
             RedisAgentProducer,
         )
+
         return {"RedisAgentConsumer": RedisAgentConsumer, "RedisAgentProducer": RedisAgentProducer}[name]
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

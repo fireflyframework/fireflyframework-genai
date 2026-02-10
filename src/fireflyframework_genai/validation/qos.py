@@ -107,9 +107,7 @@ class ConsistencyChecker:
         self._agent = agent
         self._num_runs = max(2, num_runs)
 
-    async def check(
-        self, prompt: str | Sequence[Any], **kwargs: Any
-    ) -> tuple[float, list[str]]:
+    async def check(self, prompt: str | Sequence[Any], **kwargs: Any) -> tuple[float, list[str]]:
         """Run *prompt* multiple times and return (consistency_score, outputs).
 
         The consistency score is the pairwise overlap ratio averaged across
@@ -290,11 +288,7 @@ class QoSGuard:
                 details["consistency_failed"] = True
 
         # Grounding check
-        if (
-            self._grounding_checker is not None
-            and source_text is not None
-            and extracted_fields is not None
-        ):
+        if self._grounding_checker is not None and source_text is not None and extracted_fields is not None:
             grounding, field_map = self._grounding_checker.check(source_text, extracted_fields)
             details["grounding"] = grounding
             details["ungrounded_fields"] = [k for k, v in field_map.items() if not v]

@@ -28,11 +28,13 @@ class FireflyGenAIError(Exception):
 
 # -- Configuration -----------------------------------------------------------
 
+
 class ConfigurationError(FireflyGenAIError):
     """Raised when the framework configuration is invalid or missing."""
 
 
 # -- Agents ------------------------------------------------------------------
+
 
 class AgentError(FireflyGenAIError):
     """Raised for errors during agent creation, registration, or execution."""
@@ -47,6 +49,7 @@ class DelegationError(AgentError):
 
 
 # -- Tools -------------------------------------------------------------------
+
 
 class ToolError(FireflyGenAIError):
     """Raised for errors during tool execution."""
@@ -66,6 +69,7 @@ class ToolTimeoutError(ToolError):
 
 # -- Prompts -----------------------------------------------------------------
 
+
 class PromptError(FireflyGenAIError):
     """Raised for errors in prompt template rendering, validation, or loading."""
 
@@ -79,6 +83,7 @@ class PromptValidationError(PromptError):
 
 
 # -- Reasoning ---------------------------------------------------------------
+
 
 class ReasoningError(FireflyGenAIError):
     """Raised for errors during reasoning pattern execution."""
@@ -94,11 +99,13 @@ class ReasoningPatternNotFoundError(ReasoningError):
 
 # -- Experiments -------------------------------------------------------------
 
+
 class ExperimentError(FireflyGenAIError):
     """Raised for errors during experiment definition, execution, or tracking."""
 
 
 # -- Observability -----------------------------------------------------------
+
 
 class ObservabilityError(FireflyGenAIError):
     """Raised for errors in tracing, metrics, or event emission."""
@@ -106,11 +113,13 @@ class ObservabilityError(FireflyGenAIError):
 
 # -- Explainability ----------------------------------------------------------
 
+
 class ExplainabilityError(FireflyGenAIError):
     """Raised for errors in trace recording, explanation generation, or audit."""
 
 
 # -- Exposure ----------------------------------------------------------------
+
 
 class ExposureError(FireflyGenAIError):
     """Raised for errors in REST API or queue-based agent exposure."""
@@ -122,6 +131,7 @@ class QueueConnectionError(ExposureError):
 
 # -- Content processing ------------------------------------------------------
 
+
 class ChunkingError(FireflyGenAIError):
     """Raised for errors during document chunking or splitting."""
 
@@ -131,6 +141,7 @@ class CompressionError(FireflyGenAIError):
 
 
 # -- Validation --------------------------------------------------------------
+
 
 class OutputValidationError(FireflyGenAIError):
     """Raised when structured output validation fails."""
@@ -146,11 +157,13 @@ class OutputReviewError(FireflyGenAIError):
 
 # -- Pipeline ----------------------------------------------------------------
 
+
 class PipelineError(FireflyGenAIError):
     """Raised for errors during pipeline construction or execution."""
 
 
 # -- Memory ------------------------------------------------------------------
+
 
 class MemoryError(FireflyGenAIError):
     """Raised for errors during memory storage, retrieval, or management."""
@@ -165,6 +178,7 @@ class DatabaseConnectionError(DatabaseStoreError):
 
 
 # -- Quota & Rate Limiting ---------------------------------------------------
+
 
 class QuotaError(FireflyGenAIError):
     """Base exception for quota and rate limit errors."""

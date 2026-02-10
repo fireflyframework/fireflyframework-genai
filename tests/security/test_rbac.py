@@ -61,7 +61,7 @@ class TestRBACManager:
             roles={
                 "agent_runner": ["agents.execute", "agents.list"],
                 "viewer": ["agents.list"],
-            }
+            },
         )
 
         token = rbac.create_token(user_id="user123", roles=["agent_runner"])
@@ -73,10 +73,7 @@ class TestRBACManager:
 
     def test_has_permission_wildcard(self):
         """Test that wildcard permission grants everything."""
-        rbac = RBACManager(
-            jwt_secret="test-secret",
-            roles={"admin": ["*"]}
-        )
+        rbac = RBACManager(jwt_secret="test-secret", roles={"admin": ["*"]})
 
         token = rbac.create_token(user_id="admin", roles=["admin"])
         claims = rbac.validate_token(token)
@@ -87,10 +84,7 @@ class TestRBACManager:
 
     def test_has_permission_prefix_match(self):
         """Test permission checking with prefix wildcard."""
-        rbac = RBACManager(
-            jwt_secret="test-secret",
-            roles={"agent_admin": ["agents.*"]}
-        )
+        rbac = RBACManager(jwt_secret="test-secret", roles={"agent_admin": ["agents.*"]})
 
         token = rbac.create_token(user_id="user123", roles=["agent_admin"])
         claims = rbac.validate_token(token)
@@ -102,10 +96,7 @@ class TestRBACManager:
 
     def test_has_permission_no_role(self):
         """Test that users without matching roles have no permissions."""
-        rbac = RBACManager(
-            jwt_secret="test-secret",
-            roles={"admin": ["*"]}
-        )
+        rbac = RBACManager(jwt_secret="test-secret", roles={"admin": ["*"]})
 
         token = rbac.create_token(user_id="user123", roles=["unknown_role"])
         claims = rbac.validate_token(token)
@@ -116,11 +107,7 @@ class TestRBACManager:
         """Test multi-tenant token creation and validation."""
         rbac = RBACManager(jwt_secret="test-secret", multi_tenant=True)
 
-        token = rbac.create_token(
-            user_id="user123",
-            roles=["agent_runner"],
-            tenant_id="acme_corp"
-        )
+        token = rbac.create_token(user_id="user123", roles=["agent_runner"], tenant_id="acme_corp")
         claims = rbac.validate_token(token)
 
         assert claims["tenant_id"] == "acme_corp"
@@ -136,11 +123,7 @@ class TestRBACManager:
         """Test tenant access checking."""
         rbac = RBACManager(jwt_secret="test-secret", multi_tenant=True)
 
-        token = rbac.create_token(
-            user_id="user123",
-            roles=["admin"],
-            tenant_id="tenant_a"
-        )
+        token = rbac.create_token(user_id="user123", roles=["admin"], tenant_id="tenant_a")
         claims = rbac.validate_token(token)
 
         assert rbac.check_tenant_access(claims, "tenant_a")
@@ -151,9 +134,7 @@ class TestRBACManager:
         rbac = RBACManager(jwt_secret="test-secret")
 
         token = rbac.create_token(
-            user_id="user123",
-            roles=["admin"],
-            custom_claims={"department": "engineering", "level": 5}
+            user_id="user123", roles=["admin"], custom_claims={"department": "engineering", "level": 5}
         )
         claims = rbac.validate_token(token)
 
@@ -185,7 +166,7 @@ class TestRBACManager:
             roles={
                 "agent_runner": ["agents.execute", "agents.list"],
                 "pipeline_runner": ["pipelines.execute"],
-            }
+            },
         )
 
         token = rbac.create_token(user_id="user123", roles=["agent_runner", "pipeline_runner"])
@@ -203,10 +184,7 @@ class TestRequirePermissionDecorator:
 
     async def test_decorator_allows_with_permission(self):
         """Test that decorator allows function when permission is granted."""
-        rbac = RBACManager(
-            jwt_secret="test-secret",
-            roles={"agent_runner": ["agents.execute"]}
-        )
+        rbac = RBACManager(jwt_secret="test-secret", roles={"agent_runner": ["agents.execute"]})
 
         @require_permission("agents.execute", rbac=rbac)
         async def protected_function(token: str, data: str) -> str:
@@ -219,10 +197,7 @@ class TestRequirePermissionDecorator:
 
     async def test_decorator_denies_without_permission(self):
         """Test that decorator blocks function when permission is missing."""
-        rbac = RBACManager(
-            jwt_secret="test-secret",
-            roles={"viewer": ["agents.list"]}
-        )
+        rbac = RBACManager(jwt_secret="test-secret", roles={"viewer": ["agents.list"]})
 
         @require_permission("agents.execute", rbac=rbac)
         async def protected_function(token: str, data: str) -> str:
@@ -257,10 +232,7 @@ class TestRequirePermissionDecorator:
 
     def test_decorator_with_sync_function(self):
         """Test that decorator works with synchronous functions."""
-        rbac = RBACManager(
-            jwt_secret="test-secret",
-            roles={"admin": ["*"]}
-        )
+        rbac = RBACManager(jwt_secret="test-secret", roles={"admin": ["*"]})
 
         @require_permission("agents.execute", rbac=rbac)
         def protected_sync_function(token: str, data: str) -> str:

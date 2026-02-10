@@ -65,9 +65,9 @@ _LEVEL_COLORS: dict[str, str] = {
 
 # Symbols emitted by LoggingMiddleware that we can enhance.
 _SYMBOL_COLORS: dict[str, str] = {
-    "\u25b8": _CYAN,    # ▸  entry
-    "\u2713": _GREEN,   # ✓  success
-    "\u2717": _RED,     # ✗  failure
+    "\u25b8": _CYAN,  # ▸  entry
+    "\u2713": _GREEN,  # ✓  success
+    "\u2717": _RED,  # ✗  failure
 }
 
 
@@ -106,7 +106,9 @@ class ColoredFormatter(logging.Formatter):
     """
 
     def __init__(
-        self, fmt: str | None = None, datefmt: str | None = None,
+        self,
+        fmt: str | None = None,
+        datefmt: str | None = None,
     ) -> None:
         super().__init__(fmt or _DEFAULT_FORMAT, datefmt or _DEFAULT_DATEFMT)
 
@@ -145,16 +147,13 @@ class ColoredFormatter(logging.Formatter):
         for sym, col in _SYMBOL_COLORS.items():
             if msg.startswith(sym):
                 # Symbol + agent name (first token after the symbol)
-                rest = msg[len(sym):].lstrip()
+                rest = msg[len(sym) :].lstrip()
                 # Agent name is everything up to the first dot or paren
                 match = re.match(r"([\w-]+)", rest)
                 if match:
                     agent = match.group(1)
-                    after = rest[match.end():]
-                    msg = (
-                        f"{col}{sym}{_RESET} "
-                        f"{_BOLD}{_CYAN}{agent}{_RESET}{after}"
-                    )
+                    after = rest[match.end() :]
+                    msg = f"{col}{sym}{_RESET} {_BOLD}{_CYAN}{agent}{_RESET}{after}"
                 else:
                     msg = f"{col}{sym}{_RESET} {rest}"
                 break

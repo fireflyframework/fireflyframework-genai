@@ -142,9 +142,7 @@ class DAG:
             self._edges.pop()
             self._adj[edge.source].pop()
             self._in_degree[edge.target] -= 1
-            raise PipelineError(
-                f"Adding edge {edge.source} -> {edge.target} would create a cycle"
-            )
+            raise PipelineError(f"Adding edge {edge.source} -> {edge.target} would create a cycle")
 
     # -- Query -------------------------------------------------------------
 

@@ -91,7 +91,9 @@ COT_STEP_PROMPT = PromptTemplate(
     description="Generates a single chain-of-thought reasoning step.",
     variables=[
         PromptVariable(name="problem", description="The original problem statement"),
-        PromptVariable(name="previous_steps", description="Formatted previous reasoning steps", required=False, default=""),
+        PromptVariable(
+            name="previous_steps", description="Formatted previous reasoning steps", required=False, default=""
+        ),
         PromptVariable(name="step_number", description="Current step number"),
     ],
 )
@@ -154,7 +156,9 @@ PLAN_REPLAN_PROMPT = PromptTemplate(
         PromptVariable(name="goal", description="The overall plan goal"),
         PromptVariable(name="failed_step", description="Description of the step that failed"),
         PromptVariable(name="error", description="The error that caused the failure"),
-        PromptVariable(name="completed_steps", description="Summary of completed steps", required=False, default="None"),
+        PromptVariable(
+            name="completed_steps", description="Summary of completed steps", required=False, default="None"
+        ),
     ],
 )
 

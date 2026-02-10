@@ -14,7 +14,6 @@
 
 """Tests for the memory subsystem."""
 
-
 from fireflyframework_genai.memory.conversation import ConversationMemory
 from fireflyframework_genai.memory.manager import MemoryManager
 from fireflyframework_genai.memory.store import FileStore, InMemoryStore, MemoryStore
@@ -384,11 +383,13 @@ class TestConversationExportImport:
     def test_import_reestimates_zero_tokens(self):
         mem = ConversationMemory()
         data = {
-            "turns": [{
-                "user_prompt": "hello world",
-                "assistant_response": "hi there",
-                "token_estimate": 0,
-            }],
+            "turns": [
+                {
+                    "user_prompt": "hello world",
+                    "assistant_response": "hi there",
+                    "token_estimate": 0,
+                }
+            ],
         }
         cid = mem.import_conversation(data, conversation_id="re-est")
         turns = mem.get_turns(cid)

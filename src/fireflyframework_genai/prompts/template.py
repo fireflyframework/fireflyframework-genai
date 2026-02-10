@@ -139,15 +139,9 @@ class PromptTemplate:
 
     def validate_variables(self, kwargs: dict[str, Any]) -> None:
         """Raise :class:`PromptValidationError` if required variables are missing."""
-        missing = [
-            v.name
-            for v in self._variables
-            if v.required and v.name not in kwargs
-        ]
+        missing = [v.name for v in self._variables if v.required and v.name not in kwargs]
         if missing:
-            raise PromptValidationError(
-                f"Template '{self._name}' is missing required variables: {', '.join(missing)}"
-            )
+            raise PromptValidationError(f"Template '{self._name}' is missing required variables: {', '.join(missing)}")
 
     def estimate_tokens(self, **kwargs: Any) -> int:
         """Rough token estimate based on whitespace-split word count / 0.75.

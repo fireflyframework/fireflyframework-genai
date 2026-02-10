@@ -42,7 +42,8 @@ async def _lifespan(app: Any) -> AsyncIterator[None]:
         result = PluginDiscovery.discover_all()
         logger.info(
             "Plugins: %d loaded, %d failed",
-            len(result.successful), len(result.failed),
+            len(result.successful),
+            len(result.failed),
         )
 
     from fireflyframework_genai.agents.lifecycle import agent_lifecycle

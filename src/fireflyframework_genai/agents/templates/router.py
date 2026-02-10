@@ -80,16 +80,11 @@ def create_router_agent(
     Returns:
         A configured :class:`FireflyAgent` that outputs :class:`RoutingDecision`.
     """
-    agent_descriptions = "\n".join(
-        f"- {agent_name}: {description}"
-        for agent_name, description in agent_map.items()
-    )
+    agent_descriptions = "\n".join(f"- {agent_name}: {description}" for agent_name, description in agent_map.items())
 
     fallback_clause = ""
     if fallback_agent:
-        fallback_clause = (
-            f"\nIf no agent is a confident match, route to '{fallback_agent}'."
-        )
+        fallback_clause = f"\nIf no agent is a confident match, route to '{fallback_agent}'."
 
     instructions = (
         "You are an intelligent request router.\n"

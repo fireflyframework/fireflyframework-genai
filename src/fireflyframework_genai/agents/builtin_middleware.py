@@ -99,11 +99,7 @@ class LoggingMiddleware:
     async def before_run(self, context: MiddlewareContext) -> None:
         """Log the start of an agent run."""
         context.metadata["_log_t0"] = time.monotonic()
-        preview = (
-            str(context.prompt)[: self._preview_length]
-            if context.prompt is not None
-            else "<none>"
-        )
+        preview = str(context.prompt)[: self._preview_length] if context.prompt is not None else "<none>"
         method = context.method or "run"
         logger.log(
             self._level,
@@ -206,17 +202,13 @@ class PromptGuardMiddleware:
 
         if self._sanitise and scan_result.sanitised_input is not None:
             logger.warning(
-                "PromptGuardMiddleware: sanitised prompt for agent '%s' "
-                "(%d pattern(s) matched)",
+                "PromptGuardMiddleware: sanitised prompt for agent '%s' (%d pattern(s) matched)",
                 context.agent_name,
                 len(scan_result.matched_patterns),
             )
             context.prompt = scan_result.sanitised_input
         else:
-            raise PromptGuardError(
-                f"Prompt blocked for agent '{context.agent_name}': "
-                f"{scan_result.reason}"
-            )
+            raise PromptGuardError(f"Prompt blocked for agent '{context.agent_name}': {scan_result.reason}")
 
     async def after_run(self, context: MiddlewareContext, result: Any) -> Any:
         """Pass-through (no post-processing needed)."""
@@ -272,10 +264,7 @@ class CostGuardMiddleware:
         # Snapshot cost before the call for per-call tracking
         context.metadata["_cost_before"] = current
         if current >= self._budget:
-            msg = (
-                f"Budget exceeded for agent '{context.agent_name}': "
-                f"${current:.4f} >= ${self._budget:.4f}"
-            )
+            msg = f"Budget exceeded for agent '{context.agent_name}': ${current:.4f} >= ${self._budget:.4f}"
             if self._warn_only:
                 logger.warning("CostGuardMiddleware (warn-only): %s", msg)
             else:
@@ -353,7 +342,9 @@ class ObservabilityMiddleware:
         from fireflyframework_genai.observability.metrics import default_metrics
 
         default_metrics.record_latency(
-            elapsed_ms, operation="agent.run", agent=context.agent_name,
+            elapsed_ms,
+            operation="agent.run",
+            agent=context.agent_name,
         )
         if tokens > 0:
             default_metrics.record_tokens(tokens, agent=context.agent_name)
@@ -511,8 +502,7 @@ class OutputGuardMiddleware:
 
         if self._sanitise and scan_result.sanitised_output is not None:
             logger.warning(
-                "OutputGuardMiddleware: sanitised output for agent '%s' "
-                "(%d pattern(s) matched in %s)",
+                "OutputGuardMiddleware: sanitised output for agent '%s' (%d pattern(s) matched in %s)",
                 context.agent_name,
                 len(scan_result.matched_patterns),
                 scan_result.matched_categories,
@@ -522,10 +512,7 @@ class OutputGuardMiddleware:
                 return result._replace(output=scan_result.sanitised_output)
             return scan_result.sanitised_output
 
-        raise OutputGuardError(
-            f"Output blocked for agent '{context.agent_name}': "
-            f"{scan_result.reason}"
-        )
+        raise OutputGuardError(f"Output blocked for agent '{context.agent_name}': {scan_result.reason}")
 
 
 class ValidationMiddleware:
@@ -554,9 +541,7 @@ class ValidationMiddleware:
         if parse_errors:
             from fireflyframework_genai.exceptions import OutputReviewError
 
-            raise OutputReviewError(
-                f"Output validation failed: {parse_errors}"
-            )
+            raise OutputReviewError(f"Output validation failed: {parse_errors}")
 
         validated = parsed if parsed is not None else raw
         report = self._reviewer._validate_output(validated)
@@ -564,8 +549,6 @@ class ValidationMiddleware:
             rule_errors = [r.message for r in report.errors if r.message]
             from fireflyframework_genai.exceptions import OutputReviewError
 
-            raise OutputReviewError(
-                f"Validation rules failed: {rule_errors}"
-            )
+            raise OutputReviewError(f"Validation rules failed: {rule_errors}")
 
         return result

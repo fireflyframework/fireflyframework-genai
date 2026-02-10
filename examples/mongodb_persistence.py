@@ -99,11 +99,14 @@ async def main() -> None:
     print(f"Agent: {result.data}")
 
     # Store structured data in working memory
-    memory.set_fact("tech_stack", {
-        "framework": "PyTorch",
-        "language": "Python",
-        "database": "MongoDB",
-    })
+    memory.set_fact(
+        "tech_stack",
+        {
+            "framework": "PyTorch",
+            "language": "Python",
+            "database": "MongoDB",
+        },
+    )
     memory.set_fact("team_size", 5)
     memory.set_fact("project_status", "in_progress")
     print("\n✓ Stored structured facts in working memory (MongoDB)")

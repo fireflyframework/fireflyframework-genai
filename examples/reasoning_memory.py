@@ -48,7 +48,9 @@ async def main() -> None:
     print(f"Question: {question}\n")
 
     result = await agent.run_with_reasoning(
-        pattern, question, conversation_id=cid,
+        pattern,
+        question,
+        conversation_id=cid,
     )
 
     print("--- Reasoning Trace ---")

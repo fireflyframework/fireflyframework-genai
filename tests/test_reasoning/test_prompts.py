@@ -40,9 +40,7 @@ class TestPromptTemplateRendering:
         assert "final" in rendered
 
     def test_cot_step(self):
-        rendered = COT_STEP_PROMPT.render(
-            problem="What is 2+2?", step_number="1"
-        )
+        rendered = COT_STEP_PROMPT.render(problem="What is 2+2?", step_number="1")
         assert "2+2" in rendered
         assert "step 1" in rendered.lower()
 
@@ -79,9 +77,7 @@ class TestPromptTemplateRendering:
         assert "revised" in rendered.lower() or "remaining" in rendered.lower()
 
     def test_reflexion_critique(self):
-        rendered = REFLEXION_CRITIQUE_PROMPT.render(
-            question="What is Python?", answer="A programming language"
-        )
+        rendered = REFLEXION_CRITIQUE_PROMPT.render(question="What is Python?", answer="A programming language")
         assert "Python" in rendered
         assert "satisfactory" in rendered
 
@@ -95,16 +91,12 @@ class TestPromptTemplateRendering:
         assert "add more detail" in rendered
 
     def test_tot_branch(self):
-        rendered = TOT_BRANCH_PROMPT.render(
-            branching_factor="3", problem="Design an API"
-        )
+        rendered = TOT_BRANCH_PROMPT.render(branching_factor="3", problem="Design an API")
         assert "3" in rendered
         assert "API" in rendered
 
     def test_tot_evaluate(self):
-        rendered = TOT_EVALUATE_PROMPT.render(
-            problem="Design an API", branch_id="0", approach="RESTful approach"
-        )
+        rendered = TOT_EVALUATE_PROMPT.render(problem="Design an API", branch_id="0", approach="RESTful approach")
         assert "RESTful" in rendered
         assert "score" in rendered.lower()
 
@@ -114,9 +106,7 @@ class TestPromptTemplateRendering:
         assert "phases" in rendered.lower()
 
     def test_goal_plan_phase(self):
-        rendered = GOAL_PLAN_PHASE_PROMPT.render(
-            phase="Data collection", goal="Build pipeline"
-        )
+        rendered = GOAL_PLAN_PHASE_PROMPT.render(phase="Data collection", goal="Build pipeline")
         assert "Data collection" in rendered
 
 

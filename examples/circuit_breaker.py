@@ -44,7 +44,6 @@ import random
 from fireflyframework_genai.resilience.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerOpenError,
-    CircuitState,
 )
 
 
@@ -53,9 +52,9 @@ async def demo_basic_circuit_breaker():
     print("\n=== Basic Circuit Breaker Demo ===\n")
 
     breaker = CircuitBreaker(
-        failure_threshold=3,      # Open after 3 failures
-        recovery_timeout=5.0,     # Try recovery after 5 seconds
-        success_threshold=2,      # Close after 2 successes
+        failure_threshold=3,  # Open after 3 failures
+        recovery_timeout=5.0,  # Try recovery after 5 seconds
+        success_threshold=2,  # Close after 2 successes
     )
 
     print(f"Initial state: {breaker.state.value}")
@@ -74,13 +73,13 @@ async def demo_basic_circuit_breaker():
             async with breaker:
                 # Fail first 3 requests
                 result = await unreliable_service(should_fail=(i < 3))
-                print(f"Request {i+1}: {result} (state: {breaker.state.value})")
+                print(f"Request {i + 1}: {result} (state: {breaker.state.value})")
 
         except CircuitBreakerOpenError as e:
-            print(f"Request {i+1}: REJECTED - {e.message}")
+            print(f"Request {i + 1}: REJECTED - {e.message}")
 
         except ValueError as e:
-            print(f"Request {i+1}: FAILED - {e} (failures: {breaker.failure_count})")
+            print(f"Request {i + 1}: FAILED - {e} (failures: {breaker.failure_count})")
 
         await asyncio.sleep(0.5)
 
@@ -121,7 +120,7 @@ async def demo_state_transitions():
             async with breaker:
                 await maybe_fail(True)
         except RuntimeError:
-            print(f"✗ Failure {i+1}/2 recorded")
+            print(f"✗ Failure {i + 1}/2 recorded")
 
     print(f"→ State transitioned to: {breaker.state.value}\n")
 
@@ -131,19 +130,19 @@ async def demo_state_transitions():
             async with breaker:
                 await maybe_fail(False)
         except CircuitBreakerOpenError:
-            print(f"✗ Request {i+1} rejected (circuit OPEN)")
+            print(f"✗ Request {i + 1} rejected (circuit OPEN)")
 
     print()
 
     print("Phase 4: Waiting for recovery timeout...")
     await asyncio.sleep(2.5)
-    print(f"Recovery timeout elapsed\n")
+    print("Recovery timeout elapsed\n")
 
     print("Phase 5: HALF_OPEN state (testing recovery)")
     try:
         async with breaker:
             await maybe_fail(False)
-        print(f"✓ Test request succeeded")
+        print("✓ Test request succeeded")
         print(f"→ State transitioned to: {breaker.state.value}\n")
     except Exception as e:
         print(f"✗ Test failed: {e}")
@@ -215,7 +214,7 @@ async def demo_monitoring_metrics():
         print(f"  State: {metrics['state']}")
         print(f"  Failures: {metrics['failure_count']}/{metrics['failure_threshold']}")
         print(f"  Successes: {metrics['success_count']}/{metrics['success_threshold']}")
-        if metrics['time_since_last_failure']:
+        if metrics["time_since_last_failure"]:
             print(f"  Time since last failure: {metrics['time_since_last_failure']:.1f}s")
         print()
 

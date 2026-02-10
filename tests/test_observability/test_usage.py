@@ -71,9 +71,14 @@ class TestAggregate:
     def test_single_record(self):
         records = [
             UsageRecord(
-                agent="a1", model="m1",
-                input_tokens=100, output_tokens=50, total_tokens=150,
-                request_count=1, cost_usd=0.01, latency_ms=100.0,
+                agent="a1",
+                model="m1",
+                input_tokens=100,
+                output_tokens=50,
+                total_tokens=150,
+                request_count=1,
+                cost_usd=0.01,
+                latency_ms=100.0,
             ),
         ]
         summary = _aggregate(records)
@@ -109,11 +114,16 @@ class TestUsageTracker:
 
     def test_record_and_get_summary(self):
         tracker = self._make_tracker()
-        tracker.record(UsageRecord(
-            agent="a1", model="m1",
-            input_tokens=100, output_tokens=50, total_tokens=150,
-            cost_usd=0.01,
-        ))
+        tracker.record(
+            UsageRecord(
+                agent="a1",
+                model="m1",
+                input_tokens=100,
+                output_tokens=50,
+                total_tokens=150,
+                cost_usd=0.01,
+            )
+        )
         summary = tracker.get_summary()
         assert summary.record_count == 1
         assert summary.total_tokens == 150

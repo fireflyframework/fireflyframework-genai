@@ -59,7 +59,13 @@ class DatabaseTool(BaseTool):
             guards=guards,
             parameters=[
                 ParameterSpec(name="query", type_annotation="str", description="SQL or query string", required=True),
-                ParameterSpec(name="params", type_annotation="dict[str, Any] | None", description="Query parameters", required=False, default=None),
+                ParameterSpec(
+                    name="params",
+                    type_annotation="dict[str, Any] | None",
+                    description="Query parameters",
+                    required=False,
+                    default=None,
+                ),
             ],
         )
         self._read_only = read_only
@@ -76,9 +82,7 @@ class DatabaseTool(BaseTool):
         if self._read_only:
             normalised = query.strip().upper()
             if not normalised.startswith("SELECT") and not normalised.startswith("WITH"):
-                raise PermissionError(
-                    "DatabaseTool is in read-only mode; only SELECT / WITH queries are allowed"
-                )
+                raise PermissionError("DatabaseTool is in read-only mode; only SELECT / WITH queries are allowed")
 
         return await self._execute_query(query, params)
 
@@ -102,7 +106,6 @@ class DatabaseTool(BaseTool):
             (r"'\s*\+\s*'", "String concatenation detected (use parameterized queries)"),
             (r"'\s*\|\|\s*'", "String concatenation with || detected (use parameterized queries)"),
             (r"concat\s*\(", "CONCAT function detected (use parameterized queries)"),
-
             # Multiple statements (SQL injection attempts)
             (r";\s*drop\s+", "Multiple statements with DROP detected (SQL injection attempt)"),
             (r";\s*delete\s+", "Multiple statements with DELETE detected (SQL injection attempt)"),
@@ -110,38 +113,30 @@ class DatabaseTool(BaseTool):
             (r";\s*insert\s+", "Multiple statements with INSERT detected (SQL injection attempt)"),
             (r";\s*exec\s*\(", "Multiple statements with EXEC detected (SQL injection attempt)"),
             (r";\s*execute\s+", "Multiple statements with EXECUTE detected (SQL injection attempt)"),
-
             # Comment-based injection
             (r"--\s*$", "SQL comment at end of query (potential injection)"),
             (r"/\*.*\*/", "SQL block comment detected (potential injection)"),
-
             # Always-true conditions (authentication bypass)
             (r"'\s*or\s+'?1'?\s*=\s*'?1", "Always-true condition detected (SQL injection attempt)"),
             (r"'\s*or\s+1\s*=\s*1", "Always-true condition detected (SQL injection attempt)"),
             (r"'\s*or\s+'.*'\s*=\s*'", "Suspicious OR condition detected (potential injection)"),
-
             # Union-based injection
             (r"union\s+select", "UNION SELECT detected (potential injection)"),
             (r"union\s+all\s+select", "UNION ALL SELECT detected (potential injection)"),
-
             # Information schema access (reconnaissance)
             (r"information_schema\.", "Information schema access detected (reconnaissance attempt)"),
             (r"sys\.", "System catalog access detected (reconnaissance attempt)"),
             (r"pg_catalog\.", "PostgreSQL catalog access detected (reconnaissance attempt)"),
-
             # Time-based blind injection
             (r"sleep\s*\(", "SLEEP function detected (time-based injection attempt)"),
             (r"waitfor\s+delay", "WAITFOR DELAY detected (time-based injection attempt)"),
             (r"benchmark\s*\(", "BENCHMARK function detected (time-based injection attempt)"),
-
             # File operations (data exfiltration)
             (r"into\s+outfile", "INTO OUTFILE detected (file write attempt)"),
             (r"into\s+dumpfile", "INTO DUMPFILE detected (file write attempt)"),
             (r"load_file\s*\(", "LOAD_FILE detected (file read attempt)"),
-
             # Hex encoding (obfuscation)
             (r"0x[0-9a-f]{10,}", "Long hex string detected (potential obfuscation)"),
-
             # Stacked queries
             (r";\s*select", "Stacked query with SELECT detected"),
         ]
@@ -170,9 +165,7 @@ class DatabaseTool(BaseTool):
             )
 
     @abstractmethod
-    async def _execute_query(
-        self, query: str, params: dict[str, Any] | None
-    ) -> Any:
+    async def _execute_query(self, query: str, params: dict[str, Any] | None) -> Any:
         """Execute the query and return results.
 
         Parameters:

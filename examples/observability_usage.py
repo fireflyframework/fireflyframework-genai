@@ -37,21 +37,42 @@ def main() -> None:
     print("=== Basic Usage Tracking ===\n")
 
     tracker = UsageTracker()
-    tracker.record(UsageRecord(
-        agent="summarizer", model="openai:gpt-4o-mini",
-        input_tokens=500, output_tokens=150, total_tokens=650,
-        cost_usd=0.001, latency_ms=320.0, correlation_id="run-1",
-    ))
-    tracker.record(UsageRecord(
-        agent="classifier", model="openai:gpt-4o-mini",
-        input_tokens=200, output_tokens=50, total_tokens=250,
-        cost_usd=0.0004, latency_ms=180.0, correlation_id="run-1",
-    ))
-    tracker.record(UsageRecord(
-        agent="summarizer", model="openai:gpt-4o",
-        input_tokens=1000, output_tokens=300, total_tokens=1300,
-        cost_usd=0.015, latency_ms=1200.0, correlation_id="run-2",
-    ))
+    tracker.record(
+        UsageRecord(
+            agent="summarizer",
+            model="openai:gpt-4o-mini",
+            input_tokens=500,
+            output_tokens=150,
+            total_tokens=650,
+            cost_usd=0.001,
+            latency_ms=320.0,
+            correlation_id="run-1",
+        )
+    )
+    tracker.record(
+        UsageRecord(
+            agent="classifier",
+            model="openai:gpt-4o-mini",
+            input_tokens=200,
+            output_tokens=50,
+            total_tokens=250,
+            cost_usd=0.0004,
+            latency_ms=180.0,
+            correlation_id="run-1",
+        )
+    )
+    tracker.record(
+        UsageRecord(
+            agent="summarizer",
+            model="openai:gpt-4o",
+            input_tokens=1000,
+            output_tokens=300,
+            total_tokens=1300,
+            cost_usd=0.015,
+            latency_ms=1200.0,
+            correlation_id="run-2",
+        )
+    )
 
     summary = tracker.get_summary()
     print(f"  Total records  : {summary.record_count}")

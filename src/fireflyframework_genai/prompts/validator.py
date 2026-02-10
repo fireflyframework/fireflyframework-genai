@@ -58,9 +58,7 @@ class PromptValidator:
         if self._max_tokens > 0:
             estimated = int(len(rendered.split()) / 0.75)
             if estimated > self._max_tokens:
-                errors.append(
-                    f"Estimated token count ({estimated}) exceeds limit ({self._max_tokens})"
-                )
+                errors.append(f"Estimated token count ({estimated}) exceeds limit ({self._max_tokens})")
 
         # Required sections check
         for section in self._required_sections:

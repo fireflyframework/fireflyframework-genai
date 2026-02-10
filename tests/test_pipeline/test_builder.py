@@ -49,11 +49,7 @@ class TestPipelineBuilder:
         assert result.success is True
 
     def test_build_dag_only(self) -> None:
-        dag = (
-            PipelineBuilder("dag")
-            .add_node("n1", _EchoStep())
-            .build_dag()
-        )
+        dag = PipelineBuilder("dag").add_node("n1", _EchoStep()).build_dag()
         assert "n1" in dag._nodes
 
     async def test_async_callable_auto_wrapped(self) -> None:

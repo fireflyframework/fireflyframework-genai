@@ -51,6 +51,7 @@ def _resolve_prompt(request: AgentRequest) -> Any:
             parts.append(DocumentUrl(url=part.content))
         elif part.type == "binary" and part.media_type:
             import base64
+
             data = base64.b64decode(part.content)
             parts.append(BinaryContent(data=data, media_type=part.media_type))
         else:
@@ -79,9 +80,7 @@ def create_agent_router() -> APIRouter:
             conv_id = request.conversation_id
             if conv_id is not None and agent.memory is None:
                 agent.memory = _rest_memory
-            result = await agent.run(
-                prompt, deps=request.deps, conversation_id=conv_id
-            )
+            result = await agent.run(prompt, deps=request.deps, conversation_id=conv_id)
             output = result.output if hasattr(result, "output") else str(result)
             return AgentResponse(agent_name=name, output=output)
         except Exception as exc:

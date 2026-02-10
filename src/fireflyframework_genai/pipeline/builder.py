@@ -69,14 +69,16 @@ class PipelineBuilder:
         Returns *self* for chaining.
         """
         executor = self._resolve_step(step)
-        self._pending_nodes.append(DAGNode(
-            node_id=node_id,
-            step=executor,
-            condition=condition,
-            retry_max=retry_max,
-            timeout_seconds=timeout_seconds,
-            failure_strategy=failure_strategy,
-        ))
+        self._pending_nodes.append(
+            DAGNode(
+                node_id=node_id,
+                step=executor,
+                condition=condition,
+                retry_max=retry_max,
+                timeout_seconds=timeout_seconds,
+                failure_strategy=failure_strategy,
+            )
+        )
         return self
 
     def add_edge(
@@ -91,10 +93,14 @@ class PipelineBuilder:
 
         Returns *self* for chaining.
         """
-        self._pending_edges.append(DAGEdge(
-            source=source, target=target,
-            output_key=output_key, input_key=input_key,
-        ))
+        self._pending_edges.append(
+            DAGEdge(
+                source=source,
+                target=target,
+                output_key=output_key,
+                input_key=input_key,
+            )
+        )
         return self
 
     def chain(self, *node_ids: str) -> PipelineBuilder:
@@ -138,6 +144,7 @@ class PipelineBuilder:
         # Async callable
         if callable(step):
             import asyncio
+
             if asyncio.iscoroutinefunction(step):
                 return CallableStep(step)
         return step

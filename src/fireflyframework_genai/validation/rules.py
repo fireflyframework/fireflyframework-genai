@@ -170,21 +170,33 @@ class RangeRule:
             num = float(value)
         except (TypeError, ValueError):
             return ValidationRuleResult(
-                rule_name=self.name, field_name=self._field_name,
-                passed=False, message="Value is not numeric", value=value,
+                rule_name=self.name,
+                field_name=self._field_name,
+                passed=False,
+                message="Value is not numeric",
+                value=value,
             )
         if self._min is not None and num < self._min:
             return ValidationRuleResult(
-                rule_name=self.name, field_name=self._field_name,
-                passed=False, message=f"Value {num} below minimum {self._min}", value=value,
+                rule_name=self.name,
+                field_name=self._field_name,
+                passed=False,
+                message=f"Value {num} below minimum {self._min}",
+                value=value,
             )
         if self._max is not None and num > self._max:
             return ValidationRuleResult(
-                rule_name=self.name, field_name=self._field_name,
-                passed=False, message=f"Value {num} above maximum {self._max}", value=value,
+                rule_name=self.name,
+                field_name=self._field_name,
+                passed=False,
+                message=f"Value {num} above maximum {self._max}",
+                value=value,
             )
         return ValidationRuleResult(
-            rule_name=self.name, field_name=self._field_name, passed=True, value=value,
+            rule_name=self.name,
+            field_name=self._field_name,
+            passed=True,
+            value=value,
         )
 
 
@@ -219,7 +231,8 @@ class EnumRule:
         else:
             passed = str_val.lower() in [a.lower() for a in self._allowed]
         return ValidationRuleResult(
-            rule_name=self.name, field_name=self._field_name,
+            rule_name=self.name,
+            field_name=self._field_name,
             passed=passed,
             message="" if passed else f"Value '{str_val}' not in allowed set: {self._allowed}",
             value=value,
@@ -253,7 +266,8 @@ class CustomRule:
     def validate(self, value: Any) -> ValidationRuleResult:
         passed = self._check_fn(value)
         return ValidationRuleResult(
-            rule_name=self.name, field_name=self._field_name,
+            rule_name=self.name,
+            field_name=self._field_name,
             passed=passed,
             message="" if passed else self._description,
             value=value,

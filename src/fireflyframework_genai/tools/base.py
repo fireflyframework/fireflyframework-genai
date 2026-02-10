@@ -188,21 +188,18 @@ class BaseTool(ABC):
         for guard in self._guards:
             result = await guard.check(self._name, kwargs)
             if not result.passed:
-                raise ToolError(
-                    f"Guard rejected execution of tool '{self._name}': {result.reason}"
-                )
+                raise ToolError(f"Guard rejected execution of tool '{self._name}': {result.reason}")
 
         logger.debug("Executing tool '%s' with kwargs=%s", self._name, list(kwargs.keys()))
         try:
             if self._timeout is not None:
                 return await asyncio.wait_for(
-                    self._execute(**kwargs), timeout=self._timeout,
+                    self._execute(**kwargs),
+                    timeout=self._timeout,
                 )
             return await self._execute(**kwargs)
         except TimeoutError:
-            raise ToolTimeoutError(
-                f"Tool '{self._name}' timed out after {self._timeout}s"
-            ) from None
+            raise ToolTimeoutError(f"Tool '{self._name}' timed out after {self._timeout}s") from None
         except ToolError:
             raise
         except Exception as exc:

@@ -36,9 +36,7 @@ class TestFireflyAgent:
         assert agent.description == ""  # instructions stored on inner agent
 
     def test_agent_tags(self):
-        agent = FireflyAgent(
-            name="test3", model="test", tags=["writer", "creative"], auto_register=False
-        )
+        agent = FireflyAgent(name="test3", model="test", tags=["writer", "creative"], auto_register=False)
         assert "writer" in agent.tags
 
     def test_agent_accepts_model_object(self):

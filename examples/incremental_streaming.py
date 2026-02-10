@@ -63,13 +63,13 @@ async def demo_buffered_streaming():
         async for chunk in stream.stream_text():
             if first_chunk_time is None:
                 first_chunk_time = time.perf_counter() - start
-                print(f"\n[First chunk received after {first_chunk_time*1000:.1f}ms]\n")
+                print(f"\n[First chunk received after {first_chunk_time * 1000:.1f}ms]\n")
 
             print(chunk, end="", flush=True)
 
     total_time = time.perf_counter() - start
-    print(f"\n\n[Total time: {total_time*1000:.1f}ms]")
-    print(f"[Time to first chunk: {first_chunk_time*1000:.1f}ms]")
+    print(f"\n\n[Total time: {total_time * 1000:.1f}ms]")
+    print(f"[Time to first chunk: {first_chunk_time * 1000:.1f}ms]")
 
 
 async def demo_incremental_streaming():
@@ -93,20 +93,18 @@ async def demo_incremental_streaming():
     first_token_time = None
     token_count = 0
 
-    async with await agent.run_stream(
-        prompt, streaming_mode="incremental"
-    ) as stream:
+    async with await agent.run_stream(prompt, streaming_mode="incremental") as stream:
         async for token in stream.stream_tokens():
             if first_token_time is None:
                 first_token_time = time.perf_counter() - start
-                print(f"\n[First token received after {first_token_time*1000:.1f}ms]\n")
+                print(f"\n[First token received after {first_token_time * 1000:.1f}ms]\n")
 
             print(token, end="", flush=True)
             token_count += 1
 
     total_time = time.perf_counter() - start
-    print(f"\n\n[Total time: {total_time*1000:.1f}ms]")
-    print(f"[Time to first token: {first_token_time*1000:.1f}ms]")
+    print(f"\n\n[Total time: {total_time * 1000:.1f}ms]")
+    print(f"[Time to first token: {first_token_time * 1000:.1f}ms]")
     print(f"[Total tokens: {token_count}]")
 
 
@@ -131,21 +129,19 @@ async def demo_incremental_with_debounce():
     first_token_time = None
     batch_count = 0
 
-    async with await agent.run_stream(
-        prompt, streaming_mode="incremental"
-    ) as stream:
+    async with await agent.run_stream(prompt, streaming_mode="incremental") as stream:
         # 50ms debounce - batches rapid tokens together
         async for token_batch in stream.stream_tokens(debounce_ms=50.0):
             if first_token_time is None:
                 first_token_time = time.perf_counter() - start
-                print(f"\n[First batch after {first_token_time*1000:.1f}ms]\n")
+                print(f"\n[First batch after {first_token_time * 1000:.1f}ms]\n")
 
             print(token_batch, end="", flush=True)
             batch_count += 1
 
     total_time = time.perf_counter() - start
-    print(f"\n\n[Total time: {total_time*1000:.1f}ms]")
-    print(f"[Time to first batch: {first_token_time*1000:.1f}ms]")
+    print(f"\n\n[Total time: {total_time * 1000:.1f}ms]")
+    print(f"[Time to first batch: {first_token_time * 1000:.1f}ms]")
     print(f"[Total batches: {batch_count}]")
 
 
@@ -167,7 +163,7 @@ async def demo_comparison():
     ttft_buf = None
 
     async with await agent.run_stream(prompt, streaming_mode="buffered") as stream:
-        async for chunk in stream.stream_text():
+        async for _chunk in stream.stream_text():
             if ttft_buf is None:
                 ttft_buf = time.perf_counter() - start_buf
             break  # Just measure first chunk
@@ -180,7 +176,7 @@ async def demo_comparison():
     ttft_inc = None
 
     async with await agent.run_stream(prompt, streaming_mode="incremental") as stream:
-        async for token in stream.stream_tokens():
+        async for _token in stream.stream_tokens():
             if ttft_inc is None:
                 ttft_inc = time.perf_counter() - start_inc
             break  # Just measure first token
@@ -188,13 +184,13 @@ async def demo_comparison():
     total_inc = time.perf_counter() - start_inc
 
     # Show comparison
-    print(f"\nResults:")
-    print(f"  Buffered mode:")
-    print(f"    - Time to first chunk: {ttft_buf*1000:.1f}ms")
-    print(f"    - Total time: {total_buf*1000:.1f}ms")
-    print(f"\n  Incremental mode:")
-    print(f"    - Time to first token: {ttft_inc*1000:.1f}ms")
-    print(f"    - Total time: {total_inc*1000:.1f}ms")
+    print("\nResults:")
+    print("  Buffered mode:")
+    print(f"    - Time to first chunk: {ttft_buf * 1000:.1f}ms")
+    print(f"    - Total time: {total_buf * 1000:.1f}ms")
+    print("\n  Incremental mode:")
+    print(f"    - Time to first token: {ttft_inc * 1000:.1f}ms")
+    print(f"    - Total time: {total_inc * 1000:.1f}ms")
 
     if ttft_inc and ttft_buf:
         improvement = ((ttft_buf - ttft_inc) / ttft_buf) * 100
@@ -223,9 +219,7 @@ async def demo_interactive_chat():
         print(f"\n[Question {i}]: {question}")
         print("[Assistant]: ", end="", flush=True)
 
-        async with await agent.run_stream(
-            question, streaming_mode="incremental"
-        ) as stream:
+        async with await agent.run_stream(question, streaming_mode="incremental") as stream:
             async for token in stream.stream_tokens():
                 print(token, end="", flush=True)
                 # Small delay to simulate typewriter effect

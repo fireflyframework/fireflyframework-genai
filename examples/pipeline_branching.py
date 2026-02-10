@@ -159,12 +159,15 @@ async def main() -> None:
     handler2 = ProgressHandler()
 
     dag = DAG("retry-demo")
-    dag.add_node(DAGNode(
-        node_id="flaky",
-        step=CallableStep(flaky_step),
-        retry_max=2,
-        backoff_factor=0.01,  # Fast for demo
-    ))
+    dag.add_node(
+        DAGNode(
+            node_id="flaky",
+            step=CallableStep(flaky_step),
+            retry_max=2,
+            backoff_factor=0.01,  # Fast for demo
+        )
+    )
+
     async def _done(ctx: PipelineContext, inp: dict) -> str:
         return f"Pipeline complete: {inp.get('input', '')}"
 

@@ -38,6 +38,7 @@ class TestAgentRegistry:
 
     def test_get_nonexistent_raises(self):
         from fireflyframework_genai.exceptions import AgentNotFoundError
+
         registry = AgentRegistry()
         with pytest.raises(AgentNotFoundError):
             registry.get("nonexistent")

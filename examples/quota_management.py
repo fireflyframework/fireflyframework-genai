@@ -73,16 +73,17 @@ async def demonstrate_budget_enforcement():
             quota.check_quota_before_request("openai:gpt-4o-mini", estimated_cost)
 
             # Make request
-            result = await agent.run(f"Say 'hello {i}' in one word")
+            await agent.run(f"Say 'hello {i}' in one word")
 
             # Get actual cost from usage tracker
-            summary = default_usage_tracker.get_summary()
-            actual_cost = summary.total_cost_usd
+            default_usage_tracker.get_summary()
 
             # Record actual cost
             quota.record_request("openai:gpt-4o-mini", cost_usd=estimated_cost, success=True)
 
-            print(f"  Request #{i}: OK (spend=${quota.get_daily_spend():.4f}, remaining=${quota.get_budget_remaining():.4f})")
+            print(
+                f"  Request #{i}: OK (spend=${quota.get_daily_spend():.4f}, remaining=${quota.get_budget_remaining():.4f})"
+            )
 
         except BudgetExceededError as e:
             print(f"\n✗ Request #{i} BLOCKED: {e}")
@@ -122,7 +123,7 @@ async def demonstrate_rate_limiting():
             quota.check_quota_before_request("openai:gpt-4o-mini")
 
             # Make request
-            result = await agent.run(f"Count to {i}")
+            await agent.run(f"Count to {i}")
 
             # Record request
             quota.record_request("openai:gpt-4o-mini", cost_usd=0.0, success=True)
@@ -166,7 +167,7 @@ async def demonstrate_adaptive_backoff():
         delay = quota.get_backoff_delay(model)
         failure_count = quota._backoff.get_failure_count(model) if quota._backoff else 0
 
-        print(f"  ✗ Received 429 (Rate Limit) error")
+        print("  ✗ Received 429 (Rate Limit) error")
         print(f"  Failure count: {failure_count}")
         print(f"  Recommended backoff: {delay:.2f}s")
         print(f"  Waiting {delay:.2f}s before retry...")
@@ -220,7 +221,7 @@ async def demonstrate_production_pattern():
     quota = QuotaManager(
         daily_budget_usd=100.0,
         rate_limits={
-            "openai:gpt-4o": 60,       # Premium model: 60 req/min
+            "openai:gpt-4o": 60,  # Premium model: 60 req/min
             "openai:gpt-4o-mini": 200,  # Budget model: 200 req/min
         },
         enable_adaptive_backoff=True,

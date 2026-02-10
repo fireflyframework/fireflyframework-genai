@@ -139,6 +139,7 @@ class TestBatchProcessor:
             async def run(self, prompt, **kwargs):
                 class R:
                     output = f"processed:{prompt[:10]}"
+
                 return R()
 
         chunks = [Chunk(content=f"chunk_{i}", index=i, total_chunks=3) for i in range(3)]
@@ -152,6 +153,7 @@ class TestBatchProcessor:
             async def run(self, prompt, **kwargs):
                 class R:
                     output = "x"
+
                 return R()
 
         chunks = [Chunk(content="a"), Chunk(content="b")]

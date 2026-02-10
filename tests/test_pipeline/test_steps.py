@@ -37,20 +37,26 @@ class TestBranchStep:
     async def test_branch_in_pipeline(self):
         """BranchStep integrated in a real DAG with conditional downstream nodes."""
         dag = DAG("branch-dag")
-        dag.add_node(DAGNode(
-            node_id="branch",
-            step=BranchStep(router=lambda inp: "left" if "left" in inp.get("input", "") else "right"),
-        ))
-        dag.add_node(DAGNode(
-            node_id="left_node",
-            step=_EchoStep("L:"),
-            condition=lambda ctx: ctx.get_node_result("branch").output == "left",
-        ))
-        dag.add_node(DAGNode(
-            node_id="right_node",
-            step=_EchoStep("R:"),
-            condition=lambda ctx: ctx.get_node_result("branch").output == "right",
-        ))
+        dag.add_node(
+            DAGNode(
+                node_id="branch",
+                step=BranchStep(router=lambda inp: "left" if "left" in inp.get("input", "") else "right"),
+            )
+        )
+        dag.add_node(
+            DAGNode(
+                node_id="left_node",
+                step=_EchoStep("L:"),
+                condition=lambda ctx: ctx.get_node_result("branch").output == "left",
+            )
+        )
+        dag.add_node(
+            DAGNode(
+                node_id="right_node",
+                step=_EchoStep("R:"),
+                condition=lambda ctx: ctx.get_node_result("branch").output == "right",
+            )
+        )
         dag.add_edge(DAGEdge(source="branch", target="left_node"))
         dag.add_edge(DAGEdge(source="branch", target="right_node"))
         engine = PipelineEngine(dag)

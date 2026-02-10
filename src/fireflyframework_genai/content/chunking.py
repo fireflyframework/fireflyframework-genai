@@ -137,13 +137,15 @@ class TextChunker:
             text = " ".join(chunk_words)
             char_start = content.index(chunk_words[0]) if chunk_words else 0
             char_end = char_start + len(text)
-            chunks.append(Chunk(
-                content=text,
-                index=len(chunks),
-                source_start=char_start,
-                source_end=char_end,
-                overlap_tokens=self._chunk_overlap if start_idx > 0 else 0,
-            ))
+            chunks.append(
+                Chunk(
+                    content=text,
+                    index=len(chunks),
+                    source_start=char_start,
+                    source_end=char_end,
+                    overlap_tokens=self._chunk_overlap if start_idx > 0 else 0,
+                )
+            )
             if end_idx >= len(words):
                 break
 
@@ -227,13 +229,15 @@ class DocumentSplitter:
             stripped = part.strip()
             if len(stripped) >= self._min_length:
                 start = content.index(stripped, offset) if stripped else offset
-                chunks.append(Chunk(
-                    content=stripped,
-                    index=len(chunks),
-                    source_start=start,
-                    source_end=start + len(stripped),
-                    metadata={"type": "document_segment"},
-                ))
+                chunks.append(
+                    Chunk(
+                        content=stripped,
+                        index=len(chunks),
+                        source_start=start,
+                        source_end=start + len(stripped),
+                        metadata={"type": "document_segment"},
+                    )
+                )
             offset += len(part)
 
         for c in chunks:
@@ -270,9 +274,7 @@ class ImageTiler:
         self._tile_height = tile_height
         self._overlap = overlap
 
-    def compute_tiles(
-        self, image_width: int, image_height: int
-    ) -> list[Chunk]:
+    def compute_tiles(self, image_width: int, image_height: int) -> list[Chunk]:
         """Compute tile coordinates for an image of the given dimensions.
 
         Returns :class:`Chunk` objects where ``metadata`` contains
@@ -291,13 +293,15 @@ class ImageTiler:
                 y = row * step_y
                 w = min(self._tile_width, image_width - x)
                 h = min(self._tile_height, image_height - y)
-                tiles.append(Chunk(
-                    content=f"tile_{row}_{col}",
-                    index=len(tiles),
-                    source_start=y * image_width + x,
-                    source_end=(y + h) * image_width + (x + w),
-                    metadata={"x": x, "y": y, "width": w, "height": h, "row": row, "col": col},
-                ))
+                tiles.append(
+                    Chunk(
+                        content=f"tile_{row}_{col}",
+                        index=len(tiles),
+                        source_start=y * image_width + x,
+                        source_end=(y + h) * image_width + (x + w),
+                        metadata={"x": x, "y": y, "width": w, "height": h, "row": row, "col": col},
+                    )
+                )
 
         for t in tiles:
             t.total_chunks = len(tiles)

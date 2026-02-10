@@ -87,15 +87,15 @@ class TestOutputGuardEdgeCases:
         assert result.pii_detected is False
 
     def test_multiline_xss_detected(self):
-        result = default_output_guard.scan(
-            '<script>\nalert("xss")\n</script>'
-        )
+        result = default_output_guard.scan('<script>\nalert("xss")\n</script>')
         assert result.safe is False
         assert result.harmful_detected is True
 
     def test_deny_patterns(self):
         guard = OutputGuard(
-            scan_pii=False, scan_secrets=False, scan_harmful=False,
+            scan_pii=False,
+            scan_secrets=False,
+            scan_harmful=False,
             deny_patterns=["CONFIDENTIAL"],
         )
         result = guard.scan("This is CONFIDENTIAL data")

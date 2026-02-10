@@ -75,7 +75,4 @@ class PipelineContext:
         return dict(self._results)
 
     def __repr__(self) -> str:
-        return (
-            f"PipelineContext(correlation_id={self.correlation_id!r}, "
-            f"completed_nodes={list(self._results.keys())})"
-        )
+        return f"PipelineContext(correlation_id={self.correlation_id!r}, completed_nodes={list(self._results.keys())})"

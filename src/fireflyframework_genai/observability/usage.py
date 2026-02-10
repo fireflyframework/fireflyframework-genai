@@ -223,25 +223,15 @@ class UsageTracker:
             from fireflyframework_genai.observability.metrics import default_metrics
 
             if usage.total_tokens > 0:
-                default_metrics.record_tokens(
-                    usage.total_tokens, agent=usage.agent, model=usage.model
-                )
+                default_metrics.record_tokens(usage.total_tokens, agent=usage.agent, model=usage.model)
             if usage.input_tokens > 0:
-                default_metrics.record_prompt_tokens(
-                    usage.input_tokens, agent=usage.agent, model=usage.model
-                )
+                default_metrics.record_prompt_tokens(usage.input_tokens, agent=usage.agent, model=usage.model)
             if usage.output_tokens > 0:
-                default_metrics.record_completion_tokens(
-                    usage.output_tokens, agent=usage.agent, model=usage.model
-                )
+                default_metrics.record_completion_tokens(usage.output_tokens, agent=usage.agent, model=usage.model)
             if usage.cost_usd > 0:
-                default_metrics.record_cost(
-                    usage.cost_usd, agent=usage.agent, model=usage.model
-                )
+                default_metrics.record_cost(usage.cost_usd, agent=usage.agent, model=usage.model)
             if usage.latency_ms > 0:
-                default_metrics.record_latency(
-                    usage.latency_ms, operation="agent.run", agent=usage.agent
-                )
+                default_metrics.record_latency(usage.latency_ms, operation="agent.run", agent=usage.agent)
         except Exception:  # noqa: BLE001
             logger.debug("Failed to emit usage metrics", exc_info=True)
 
@@ -276,16 +266,20 @@ class UsageTracker:
 
             if cfg.budget_alert_threshold_usd is not None and cumulative >= cfg.budget_alert_threshold_usd:
                 logger.warning(
-                    "Budget alert: cumulative cost $%.4f has reached the "
-                    "alert threshold of $%.4f (agent=%s, model=%s)",
-                    cumulative, cfg.budget_alert_threshold_usd, usage.agent, usage.model,
+                    "Budget alert: cumulative cost $%.4f has reached the alert threshold of $%.4f (agent=%s, model=%s)",
+                    cumulative,
+                    cfg.budget_alert_threshold_usd,
+                    usage.agent,
+                    usage.model,
                 )
 
             if cfg.budget_limit_usd is not None and cumulative >= cfg.budget_limit_usd:
                 logger.warning(
-                    "Budget EXCEEDED: cumulative cost $%.4f has exceeded "
-                    "the limit of $%.4f (agent=%s, model=%s)",
-                    cumulative, cfg.budget_limit_usd, usage.agent, usage.model,
+                    "Budget EXCEEDED: cumulative cost $%.4f has exceeded the limit of $%.4f (agent=%s, model=%s)",
+                    cumulative,
+                    cfg.budget_limit_usd,
+                    usage.agent,
+                    usage.model,
                 )
         except Exception:  # noqa: BLE001
             pass

@@ -299,14 +299,14 @@ async def date_normalizer(date_string: str) -> str:
 
     # Try common formats
     formats = [
-        "%B %d, %Y",       # January 15, 2026
-        "%b %d, %Y",       # Jan 15, 2026
-        "%m/%d/%Y",         # 01/15/2026
-        "%d/%m/%Y",         # 15/01/2026
-        "%Y-%m-%d",         # 2026-01-15
-        "%B %Y",            # January 2026
-        "%d %B %Y",         # 15 January 2026
-        "%Y",               # 2026
+        "%B %d, %Y",  # January 15, 2026
+        "%b %d, %Y",  # Jan 15, 2026
+        "%m/%d/%Y",  # 01/15/2026
+        "%d/%m/%Y",  # 15/01/2026
+        "%Y-%m-%d",  # 2026-01-15
+        "%B %Y",  # January 2026
+        "%d %B %Y",  # 15 January 2026
+        "%Y",  # 2026
     ]
     cleaned = date_string.strip()
     # Remove ordinal suffixes: 1st, 2nd, 3rd, 4th, etc.
@@ -376,8 +376,8 @@ split_prompt = PromptTemplate(
         "- title: descriptive title of the sub-document\n"
         "- page_start: first page number (integer)\n"
         "- page_end: last page number (integer, inclusive)\n\n"
-        "Example: [{\"title\": \"Certificate of Incorporation\", \"page_start\": 1, "
-        "\"page_end\": 6}, {\"title\": \"By-Laws\", \"page_start\": 7, \"page_end\": 33}]"
+        'Example: [{"title": "Certificate of Incorporation", "page_start": 1, '
+        '"page_end": 6}, {"title": "By-Laws", "page_start": 7, "page_end": 33}]'
     ),
     version="1.0.0",
     description="Identifies document boundaries within a multi-document PDF.",
@@ -502,11 +502,7 @@ def _sections_have_pages(data: dict[str, Any]) -> ValidationRuleResult:
             message="",
             value=sections,
         )
-    has_pages = all(
-        isinstance(s, dict) and s.get("page_number", 0) > 0
-        for s in sections
-        if isinstance(s, dict)
-    )
+    has_pages = all(isinstance(s, dict) and s.get("page_number", 0) > 0 for s in sections if isinstance(s, dict))
     return ValidationRuleResult(
         rule_name="cross:sections_have_pages",
         field_name="sections",
@@ -530,9 +526,7 @@ def _no_state_officials_in_officers(data: dict[str, Any]) -> ValidationRuleResul
         field_name="officers_mentioned",
         passed=passed,
         message=(
-            ""
-            if passed
-            else f"officers_mentioned should only contain company officers, but found: {', '.join(bad)}"
+            "" if passed else f"officers_mentioned should only contain company officers, but found: {', '.join(bad)}"
         ),
         value=officers,
     )
@@ -546,16 +540,57 @@ _ISO_DATE_OR_EMPTY = r"^$|^\d{4}-\d{2}-\d{2}$"
 
 # US state names / abbreviations (non-exhaustive but covers common cases)
 _US_STATES = [
-    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
-    "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
-    "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
-    "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
-    "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
-    "New Hampshire", "New Jersey", "New Mexico", "New York",
-    "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
-    "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
-    "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
-    "West Virginia", "Wisconsin", "Wyoming", "District of Columbia",
+    "Alabama",
+    "Alaska",
+    "Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Connecticut",
+    "Delaware",
+    "Florida",
+    "Georgia",
+    "Hawaii",
+    "Idaho",
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Maine",
+    "Maryland",
+    "Massachusetts",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Hampshire",
+    "New Jersey",
+    "New Mexico",
+    "New York",
+    "North Carolina",
+    "North Dakota",
+    "Ohio",
+    "Oklahoma",
+    "Oregon",
+    "Pennsylvania",
+    "Rhode Island",
+    "South Carolina",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Vermont",
+    "Virginia",
+    "Washington",
+    "West Virginia",
+    "Wisconsin",
+    "Wyoming",
+    "District of Columbia",
 ]
 
 
@@ -572,11 +607,7 @@ def _valid_signatories_affiliations(data: dict[str, Any]) -> ValidationRuleResul
         rule_name="cross:signatories_valid_affiliations",
         field_name="signatories",
         passed=passed,
-        message=(
-            ""
-            if passed
-            else f"Invalid affiliations in signatories: {', '.join(bad)}"
-        ),
+        message=("" if passed else f"Invalid affiliations in signatories: {', '.join(bad)}"),
         value=signatories,
     )
 
@@ -594,11 +625,7 @@ def _valid_officers_affiliations(data: dict[str, Any]) -> ValidationRuleResult:
         rule_name="cross:officers_affiliation_company",
         field_name="officers_mentioned",
         passed=passed,
-        message=(
-            ""
-            if passed
-            else f"officers_mentioned must all have affiliation='company': {', '.join(bad)}"
-        ),
+        message=("" if passed else f"officers_mentioned must all have affiliation='company': {', '.join(bad)}"),
         value=officers,
     )
 
@@ -622,11 +649,7 @@ def _authorized_shares_valid(data: dict[str, Any]) -> ValidationRuleResult:
         rule_name="cross:authorized_shares_valid",
         field_name="authorized_shares",
         passed=passed,
-        message=(
-            ""
-            if passed
-            else f"total_shares ({total}) < common ({common}) + preferred ({preferred})"
-        ),
+        message=("" if passed else f"total_shares ({total}) < common ({common}) + preferred ({preferred})"),
         value=shares,
     )
 
@@ -635,7 +658,8 @@ document_validator = OutputValidator(
     {
         "company_name": [
             RegexRule(
-                "company_name", r".{2,}",
+                "company_name",
+                r".{2,}",
                 description="Company name must be at least 2 characters",
             ),
         ],
@@ -644,46 +668,50 @@ document_validator = OutputValidator(
         ],
         "incorporation_state": [
             RegexRule(
-                "incorporation_state", r".{2,}",
+                "incorporation_state",
+                r".{2,}",
                 description="Incorporation state must be at least 2 characters",
             ),
             EnumRule(
-                "incorporation_state", _US_STATES, case_sensitive=False,
+                "incorporation_state",
+                _US_STATES,
+                case_sensitive=False,
             ),
         ],
         "incorporation_date": [
             RegexRule(
-                "incorporation_date", _ISO_DATE_OR_EMPTY,
+                "incorporation_date",
+                _ISO_DATE_OR_EMPTY,
                 description="incorporation_date must be ISO 8601 (YYYY-MM-DD) or empty",
             ),
         ],
         "effective_date": [
             RegexRule(
-                "effective_date", _ISO_DATE_OR_EMPTY,
+                "effective_date",
+                _ISO_DATE_OR_EMPTY,
                 description="effective_date must be ISO 8601 (YYYY-MM-DD) or empty",
             ),
         ],
         "filing_number": [
             RegexRule(
-                "filing_number", r"^$|^[A-Za-z0-9\-\s./]+$",
+                "filing_number",
+                r"^$|^[A-Za-z0-9\-\s./]+$",
                 description="filing_number must be alphanumeric (dashes, spaces, dots, slashes allowed) or empty",
             ),
         ],
         "registered_agent": [
             RegexRule(
-                "registered_agent", r"^$|.{2,}",
+                "registered_agent",
+                r"^$|.{2,}",
                 description="Registered agent name must be empty or at least 2 characters",
             ),
         ],
         "registered_agent_address": [
             CustomRule(
                 "registered_agent_address",
-                lambda v: isinstance(v, str) and (
-                    v == "" or ("," in v and len(v) >= 10)
-                ),
+                lambda v: isinstance(v, str) and (v == "" or ("," in v and len(v) >= 10)),
                 description=(
-                    "registered_agent_address must be empty or a full address "
-                    "(at least 10 chars with a comma)"
+                    "registered_agent_address must be empty or a full address (at least 10 chars with a comma)"
                 ),
             ),
         ],

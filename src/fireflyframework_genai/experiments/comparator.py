@@ -39,9 +39,7 @@ class VariantComparator:
         """Generate comparison metrics for each variant result."""
         metrics: list[ComparisonMetrics] = []
         for r in results:
-            avg_len = (
-                sum(len(o) for o in r.outputs) / len(r.outputs) if r.outputs else 0
-            )
+            avg_len = sum(len(o) for o in r.outputs) / len(r.outputs) if r.outputs else 0
             metrics.append(
                 ComparisonMetrics(
                     variant_name=r.variant_name,

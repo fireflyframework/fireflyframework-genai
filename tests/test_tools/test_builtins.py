@@ -188,9 +188,7 @@ class TestTextTool:
         assert result == "one two"
 
     async def test_replace(self, tool: TextTool) -> None:
-        result = await tool.execute(
-            action="replace", text="foo bar foo", pattern="foo", replacement="baz"
-        )
+        result = await tool.execute(action="replace", text="foo bar foo", pattern="foo", replacement="baz")
         assert result == "baz bar baz"
 
     async def test_split(self, tool: TextTool) -> None:
@@ -306,7 +304,7 @@ class TestHttpToolAsync:
         mock_resp = MagicMock()
         mock_resp.status = 201
         mock_resp.headers = {}
-        mock_resp.read.return_value = b'created'
+        mock_resp.read.return_value = b"created"
         mock_resp.__enter__ = lambda s: s
         mock_resp.__exit__ = MagicMock(return_value=False)
         with patch("urllib.request.urlopen", return_value=mock_resp):
@@ -319,7 +317,7 @@ class TestHttpToolAsync:
         mock_resp = MagicMock()
         mock_resp.status = 200
         mock_resp.headers = {}
-        mock_resp.read.return_value = b'ok'
+        mock_resp.read.return_value = b"ok"
         mock_resp.__enter__ = lambda s: s
         mock_resp.__exit__ = MagicMock(return_value=False)
         with patch("urllib.request.urlopen", return_value=mock_resp) as mock_open:
@@ -422,9 +420,7 @@ class _InMemoryDatabaseTool(DatabaseTool):
         super().__init__(**kwargs)
         self._data = data or []
 
-    async def _execute_query(
-        self, query: str, params: dict[str, Any] | None
-    ) -> list[dict[str, Any]]:
+    async def _execute_query(self, query: str, params: dict[str, Any] | None) -> list[dict[str, Any]]:
         return [{"query": query, "params": params, "rows": self._data}]
 
 

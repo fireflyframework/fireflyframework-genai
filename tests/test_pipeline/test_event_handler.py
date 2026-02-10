@@ -78,11 +78,13 @@ class TestPipelineEventHandler:
     async def test_events_on_skip(self):
         handler = _TestEventHandler()
         dag = DAG("skip-evt")
-        dag.add_node(DAGNode(
-            node_id="skipped",
-            step=_EchoStep(),
-            condition=lambda ctx: False,
-        ))
+        dag.add_node(
+            DAGNode(
+                node_id="skipped",
+                step=_EchoStep(),
+                condition=lambda ctx: False,
+            )
+        )
         engine = PipelineEngine(dag, event_handler=handler)
         await engine.run(inputs="test")
         assert "skipped" in handler.skips
@@ -103,8 +105,10 @@ class TestPipelineEventHandlerEdgeCases:
         class _BrokenHandler:
             async def on_node_start(self, node_id, pipeline_name):
                 raise RuntimeError("handler boom")
+
             async def on_node_complete(self, node_id, pipeline_name, latency_ms):
                 raise RuntimeError("handler boom")
+
             async def on_pipeline_complete(self, pipeline_name, success, duration_ms):
                 raise RuntimeError("handler boom")
 

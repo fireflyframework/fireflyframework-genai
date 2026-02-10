@@ -54,9 +54,7 @@ class ReasoningPipeline:
     def name(self) -> str:
         return self._name
 
-    async def execute(
-        self, agent: AgentLike, input: str | Sequence[UserContent], **kwargs: Any
-    ) -> ReasoningResult:
+    async def execute(self, agent: AgentLike, input: str | Sequence[UserContent], **kwargs: Any) -> ReasoningResult:
         """Run each pattern in order.
 
         The output of pattern *N* becomes the input for pattern *N+1*.
@@ -75,7 +73,9 @@ class ReasoningPipeline:
         """
         t_start = time.monotonic()
         pattern_names = [getattr(p, "name", type(p).__name__) for p in self._patterns]
-        logger.info("Pipeline '%s': starting %d patterns: %s", self._name, len(self._patterns), " → ".join(pattern_names))
+        logger.info(
+            "Pipeline '%s': starting %d patterns: %s", self._name, len(self._patterns), " → ".join(pattern_names)
+        )
         merged_trace = ReasoningTrace(pattern_name=self._name)
         total_steps = 0
         current_input: str | Sequence[UserContent] = input
@@ -87,14 +87,19 @@ class ReasoningPipeline:
             result: ReasoningResult = await pattern.execute(agent, current_input, **kwargs)
             logger.info(
                 "Pipeline '%s': pattern '%s' completed in %.1fs (%d steps)",
-                self._name, p_name, time.monotonic() - t0, result.steps_taken,
+                self._name,
+                p_name,
+                time.monotonic() - t0,
+                result.steps_taken,
             )
             merged_trace.steps.extend(result.trace.steps)
             total_steps += result.steps_taken
             # After the first pattern, output is always a string
             current_input = str(result.output) if result.output is not None else str(current_input)
 
-        logger.info("Pipeline '%s': completed in %.1fs (%d total steps)", self._name, time.monotonic() - t_start, total_steps)
+        logger.info(
+            "Pipeline '%s': completed in %.1fs (%d total steps)", self._name, time.monotonic() - t_start, total_steps
+        )
         merged_trace.complete()
         return ReasoningResult(
             output=current_input,

@@ -137,7 +137,10 @@ class PlanAndExecutePattern(AbstractReasoningPattern):
             elapsed = time.monotonic() - t0
             logger.info(
                 "Step '%s' completed in %.1fs (%d/%d)",
-                step_def.id, elapsed, idx + 1, len(plan.steps),
+                step_def.id,
+                elapsed,
+                idx + 1,
+                len(plan.steps),
             )
         except Exception as exc:
             step_def.status = StepStatus.FAILED
@@ -151,9 +154,7 @@ class PlanAndExecutePattern(AbstractReasoningPattern):
 
         return ActionStep(tool_name="execute_step", tool_args={"step": step_def.description[:100]})
 
-    async def _observe(
-        self, state: dict[str, Any], action: ReasoningStep | None
-    ) -> ReasoningStep | None:
+    async def _observe(self, state: dict[str, Any], action: ReasoningStep | None) -> ReasoningStep | None:
         results = state.get("results", [])
         if results:
             return ObservationStep(content=str(results[-1])[:200], source="plan_execution")
@@ -226,9 +227,7 @@ class PlanAndExecutePattern(AbstractReasoningPattern):
                 output = await _call()
         except TimeoutError:
             elapsed = time.monotonic() - t0
-            raise ReasoningError(
-                f"Step '{step_def.id}' timed out after {elapsed:.1f}s"
-            ) from None
+            raise ReasoningError(f"Step '{step_def.id}' timed out after {elapsed:.1f}s") from None
 
         logger.debug("Step '%s' LLM call completed in %.1fs", step_def.id, time.monotonic() - t0)
         # Persist step result to working memory

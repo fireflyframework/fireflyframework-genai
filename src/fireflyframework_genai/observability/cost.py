@@ -86,9 +86,7 @@ class StaticPriceCostCalculator:
             models.
     """
 
-    def __init__(
-        self, prices: dict[str, tuple[float, float]] | None = None
-    ) -> None:
+    def __init__(self, prices: dict[str, tuple[float, float]] | None = None) -> None:
         self._prices = dict(_DEFAULT_PRICES)
         if prices:
             self._prices.update(prices)
@@ -135,10 +133,7 @@ class GenAIPricesCostCalculator:
             self._find_model = find_model
             self._available = True
         except ImportError:
-            logger.debug(
-                "genai-prices is not installed; GenAIPricesCostCalculator "
-                "will return 0.0 for all estimates."
-            )
+            logger.debug("genai-prices is not installed; GenAIPricesCostCalculator will return 0.0 for all estimates.")
 
     @property
     def available(self) -> bool:
@@ -190,8 +185,5 @@ def get_cost_calculator(preference: str = "auto") -> CostCalculator:
         if calc.available:
             return calc
         if preference == "genai_prices":
-            logger.warning(
-                "genai-prices requested but not installed; "
-                "falling back to static price table."
-            )
+            logger.warning("genai-prices requested but not installed; falling back to static price table.")
     return StaticPriceCostCalculator()

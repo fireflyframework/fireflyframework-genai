@@ -127,7 +127,10 @@ class GoalDecompositionPattern(AbstractReasoningPattern):
                 tasks = await self._plan_phase(agent, phase.name, str(input))
             logger.info(
                 "GoalDecomposition: phase %d/%d '%s' — %d task(s)",
-                phase_idx + 1, len(decomposition.phases), phase.name, len(tasks),
+                phase_idx + 1,
+                len(decomposition.phases),
+                phase.name,
+                len(tasks),
             )
             phase_step = PlanStep(
                 description=f"Phase {phase_idx + 1}: {phase.name}",
@@ -187,7 +190,13 @@ class GoalDecompositionPattern(AbstractReasoningPattern):
         return [t.strip() for t in text.strip().split("\n") if t.strip()]
 
     async def _execute_task(
-        self, agent: AgentLike, task: str, *, goal: str = "", memory: Any = None, **kwargs: Any,
+        self,
+        agent: AgentLike,
+        task: str,
+        *,
+        goal: str = "",
+        memory: Any = None,
+        **kwargs: Any,
     ) -> str:
         """Execute a single task, optionally delegating to a sub-pattern."""
         if self._task_pattern is not None:

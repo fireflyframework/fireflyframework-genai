@@ -101,7 +101,8 @@ class PipelineEngine:
 
         # Observability: pipeline-level span
         _pipeline_span = self._start_otel_span(
-            f"pipeline.{self._dag.name}", pipeline=self._dag.name,
+            f"pipeline.{self._dag.name}",
+            pipeline=self._dag.name,
         )
 
         # Topological levels ensure that all upstream dependencies of a node
@@ -147,7 +148,8 @@ class PipelineEngine:
 
             # Wait for at least one task to complete.
             done, _ = await asyncio.wait(
-                running.values(), return_when=asyncio.FIRST_COMPLETED,
+                running.values(),
+                return_when=asyncio.FIRST_COMPLETED,
             )
 
             for task in done:
@@ -160,7 +162,9 @@ class PipelineEngine:
                     nr = task.result()
                 except Exception as exc:
                     nr = NodeResult(
-                        node_id=node_id, success=False, error=str(exc),
+                        node_id=node_id,
+                        success=False,
+                        error=str(exc),
                     )
 
                 all_results[node_id] = nr
@@ -191,15 +195,9 @@ class PipelineEngine:
         # final output is drawn from these nodes' results.
         terminal_ids = self._dag.terminal_nodes()
         final_outputs = {
-            nid: all_results[nid].output
-            for nid in terminal_ids
-            if nid in all_results and all_results[nid].success
+            nid: all_results[nid].output for nid in terminal_ids if nid in all_results and all_results[nid].success
         }
-        final_output = (
-            list(final_outputs.values())[0]
-            if len(final_outputs) == 1
-            else final_outputs or None
-        )
+        final_output = list(final_outputs.values())[0] if len(final_outputs) == 1 else final_outputs or None
 
         success = all(r.success or r.skipped for r in all_results.values())
 
@@ -207,7 +205,9 @@ class PipelineEngine:
         if self._event_handler is not None and hasattr(self._event_handler, "on_pipeline_complete"):
             with contextlib.suppress(Exception):
                 await self._event_handler.on_pipeline_complete(
-                    self._dag.name, success, pipeline_elapsed,
+                    self._dag.name,
+                    success,
+                    pipeline_elapsed,
                 )
 
         # Aggregate usage across all nodes for this pipeline run
@@ -256,7 +256,8 @@ class PipelineEngine:
         inputs = self._gather_inputs(node_id, context)
 
         _node_span = self._start_otel_span(
-            f"pipeline.node.{node_id}", node=node_id,
+            f"pipeline.node.{node_id}",
+            node=node_id,
         )
 
         # Emit node start event
@@ -283,15 +284,22 @@ class PipelineEngine:
 
                 elapsed = (time.perf_counter() - start_time) * 1000
                 completed_at = datetime.now(UTC)
-                trace_entries.append(ExecutionTraceEntry(
-                    node_id=node_id, started_at=started_at,
-                    completed_at=completed_at, status="success",
-                ))
+                trace_entries.append(
+                    ExecutionTraceEntry(
+                        node_id=node_id,
+                        started_at=started_at,
+                        completed_at=completed_at,
+                        status="success",
+                    )
+                )
                 if _node_span is not None:
                     _node_span.end()
                 return NodeResult(
-                    node_id=node_id, output=output, success=True,
-                    latency_ms=elapsed, retries=retries,
+                    node_id=node_id,
+                    output=output,
+                    success=True,
+                    latency_ms=elapsed,
+                    retries=retries,
                 )
             except Exception as exc:
                 last_error = str(exc)
@@ -303,19 +311,29 @@ class PipelineEngine:
                     backoff = delay + jitter
                     logger.warning(
                         "Node '%s' failed (attempt %d/%d): %s. Retrying in %.1fs",
-                        node_id, retries, max_retries + 1, exc, backoff,
+                        node_id,
+                        retries,
+                        max_retries + 1,
+                        exc,
+                        backoff,
                     )
                     await asyncio.sleep(backoff)
 
         completed_at = datetime.now(UTC)
-        trace_entries.append(ExecutionTraceEntry(
-            node_id=node_id, started_at=started_at,  # type: ignore[possibly-undefined]
-            completed_at=completed_at, status="failed",
-        ))
+        trace_entries.append(
+            ExecutionTraceEntry(
+                node_id=node_id,
+                started_at=started_at,  # type: ignore[possibly-undefined]
+                completed_at=completed_at,
+                status="failed",
+            )
+        )
         if _node_span is not None:
             _node_span.end()
         return NodeResult(
-            node_id=node_id, success=False, error=last_error,
+            node_id=node_id,
+            success=False,
+            error=last_error,
             retries=retries - 1,
         )
 
@@ -359,22 +377,26 @@ class PipelineEngine:
         try:
             if nr.skipped and hasattr(self._event_handler, "on_node_skip"):
                 await self._event_handler.on_node_skip(
-                    nr.node_id, self._dag.name, nr.error or "skipped",
+                    nr.node_id,
+                    self._dag.name,
+                    nr.error or "skipped",
                 )
             elif nr.success and hasattr(self._event_handler, "on_node_complete"):
                 await self._event_handler.on_node_complete(
-                    nr.node_id, self._dag.name, nr.latency_ms or 0.0,
+                    nr.node_id,
+                    self._dag.name,
+                    nr.latency_ms or 0.0,
                 )
             elif not nr.success and hasattr(self._event_handler, "on_node_error"):
                 await self._event_handler.on_node_error(
-                    nr.node_id, self._dag.name, nr.error or "unknown",
+                    nr.node_id,
+                    self._dag.name,
+                    nr.error or "unknown",
                 )
         except Exception:  # noqa: BLE001
             pass
 
-    def _gather_inputs(
-        self, node_id: str, context: PipelineContext
-    ) -> dict[str, Any]:
+    def _gather_inputs(self, node_id: str, context: PipelineContext) -> dict[str, Any]:
         """Collect inputs for a node from its upstream edges."""
         edges = self._dag.incoming_edges(node_id)
         if not edges:
@@ -384,10 +406,6 @@ class PipelineEngine:
         for edge in edges:
             upstream_result = context.get_node_result(edge.source)
             if upstream_result is not None:
-                value = (
-                    upstream_result.output
-                    if hasattr(upstream_result, "output")
-                    else upstream_result
-                )
+                value = upstream_result.output if hasattr(upstream_result, "output") else upstream_result
                 inputs[edge.input_key] = value
         return inputs

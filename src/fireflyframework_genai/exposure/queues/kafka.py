@@ -58,8 +58,7 @@ class KafkaAgentConsumer(BaseQueueConsumer):
             from aiokafka import AIOKafkaConsumer
         except ImportError as _err:
             raise ImportError(
-                "aiokafka is required for Kafka support. "
-                "Install it with: pip install fireflyframework-genai[kafka]"
+                "aiokafka is required for Kafka support. Install it with: pip install fireflyframework-genai[kafka]"
             ) from _err
 
         self._consumer = AIOKafkaConsumer(
@@ -122,8 +121,7 @@ class KafkaAgentProducer:
             from aiokafka import AIOKafkaProducer
         except ImportError as _err:
             raise ImportError(
-                "aiokafka is required for Kafka support. "
-                "Install it with: pip install fireflyframework-genai[kafka]"
+                "aiokafka is required for Kafka support. Install it with: pip install fireflyframework-genai[kafka]"
             ) from _err
 
         self._producer = AIOKafkaProducer(

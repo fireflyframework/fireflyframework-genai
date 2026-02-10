@@ -60,9 +60,7 @@ class PromptRegistry:
             raise PromptNotFoundError(f"No prompt template registered with name '{name}'")
         key = (name, resolved_version)
         if key not in self._templates:
-            raise PromptNotFoundError(
-                f"No prompt template '{name}' with version '{resolved_version}'"
-            )
+            raise PromptNotFoundError(f"No prompt template '{name}' with version '{resolved_version}'")
         return self._templates[key]
 
     def has(self, name: str) -> bool:

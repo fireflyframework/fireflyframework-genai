@@ -90,16 +90,11 @@ async def agent_service_a() -> str:
 
     # Create a span for Service A
     with default_tracer.agent_span("service_a", model="gpt-4o-mini"):
-        result = await agent.run(
-            "Generate a short creative story opening (max 2 sentences)."
-        )
+        result = await agent.run("Generate a short creative story opening (max 2 sentences).")
 
         # Service A calls Service B via HTTP
         print("\n→ Service A calling Service B via HTTP...")
-        response = await simulate_http_request(
-            "http://service-b/process",
-            result.data
-        )
+        await simulate_http_request("http://service-b/process", result.data)
 
         return result.data
 
@@ -121,20 +116,14 @@ async def agent_service_b(incoming_headers: dict[str, str], prompt: str) -> str:
     )
 
     # Continue the trace from Service A
-    with trace_context_scope(span_context):
-        with default_tracer.agent_span("service_b", model="gpt-4o-mini"):
-            result = await agent.run(
-                f"Continue this story with one more sentence: {prompt}"
-            )
+    with trace_context_scope(span_context), default_tracer.agent_span("service_b", model="gpt-4o-mini"):
+        result = await agent.run(f"Continue this story with one more sentence: {prompt}")
 
-            # Service B calls Service C
-            print("\n→ Service B calling Service C via HTTP...")
-            response = await simulate_http_request(
-                "http://service-c/finalize",
-                result.data
-            )
+        # Service B calls Service C
+        print("\n→ Service B calling Service C via HTTP...")
+        await simulate_http_request("http://service-c/finalize", result.data)
 
-            return result.data
+        return result.data
 
 
 async def agent_service_c(incoming_headers: dict[str, str], prompt: str) -> str:
@@ -154,13 +143,10 @@ async def agent_service_c(incoming_headers: dict[str, str], prompt: str) -> str:
     )
 
     # Continue the trace from Service B
-    with trace_context_scope(span_context):
-        with default_tracer.agent_span("service_c", model="gpt-4o-mini"):
-            result = await agent.run(
-                f"Add a surprising plot twist to this story: {prompt}"
-            )
+    with trace_context_scope(span_context), default_tracer.agent_span("service_c", model="gpt-4o-mini"):
+        result = await agent.run(f"Add a surprising plot twist to this story: {prompt}")
 
-            return result.data
+        return result.data
 
 
 async def main() -> None:
@@ -183,7 +169,7 @@ async def main() -> None:
     tracer = trace.get_tracer(__name__)
 
     with tracer.start_as_current_span("distributed_trace_example") as root_span:
-        print(f"\n✓ Started root trace")
+        print("\n✓ Started root trace")
         root_context = root_span.get_span_context()
         print(f"  Trace ID: {root_context.trace_id:032x}")
         print(f"  Root Span ID: {root_context.span_id:016x}")
@@ -259,12 +245,10 @@ async def demonstrate_queue_propagation():
     # Example of injecting trace context into Redis message
     print("\n3. Redis Pub/Sub Message (JSON-wrapped):")
     import json
+
     headers = {}
     inject_trace_context(headers)
-    redis_message = json.dumps({
-        "headers": headers,
-        "body": "message content"
-    })
+    redis_message = json.dumps({"headers": headers, "body": "message content"})
     print(f"   Wrapped message: {redis_message}")
 
     print("\n✓ Queue consumers automatically extract trace context")

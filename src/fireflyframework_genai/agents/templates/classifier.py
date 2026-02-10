@@ -74,10 +74,7 @@ def create_classifier_agent(
     Returns:
         A configured :class:`FireflyAgent` that outputs :class:`ClassificationResult`.
     """
-    cat_list = "\n".join(
-        f"- {cat}: {descriptions.get(cat, '')}" if descriptions else f"- {cat}"
-        for cat in categories
-    )
+    cat_list = "\n".join(f"- {cat}: {descriptions.get(cat, '')}" if descriptions else f"- {cat}" for cat in categories)
 
     multi_note = (
         "You may consider multiple categories but return the single best match."

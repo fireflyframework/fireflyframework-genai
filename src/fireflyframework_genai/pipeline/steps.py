@@ -287,10 +287,7 @@ class BatchLLMStep:
         )
 
         # Split prompts into batches
-        batches = [
-            prompts[i : i + self._batch_size]
-            for i in range(0, len(prompts), self._batch_size)
-        ]
+        batches = [prompts[i : i + self._batch_size] for i in range(0, len(prompts), self._batch_size)]
 
         all_results = []
 

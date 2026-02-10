@@ -168,14 +168,20 @@ class OutputReviewer:
             # Step 1: Schema parsing (if output_type set)
             parsed, parse_errors = self._parse_output(raw)
             if parse_errors:
-                retry_history.append(RetryAttempt(
-                    attempt=attempt, raw_output=raw_str[:500], errors=parse_errors,
-                ))
+                retry_history.append(
+                    RetryAttempt(
+                        attempt=attempt,
+                        raw_output=raw_str[:500],
+                        errors=parse_errors,
+                    )
+                )
                 if attempt < total_attempts:
                     current_prompt = self._build_retry_prompt(prompt, parse_errors)
                     logger.debug(
                         "Reviewer attempt %d/%d failed (parse): %s",
-                        attempt, total_attempts, parse_errors,
+                        attempt,
+                        total_attempts,
+                        parse_errors,
                     )
                 continue
 
@@ -183,14 +189,20 @@ class OutputReviewer:
             report = self._validate_output(parsed if parsed is not None else raw)
             if report is not None and not report.valid:
                 rule_errors = [r.message for r in report.errors if r.message]
-                retry_history.append(RetryAttempt(
-                    attempt=attempt, raw_output=raw_str[:500], errors=rule_errors,
-                ))
+                retry_history.append(
+                    RetryAttempt(
+                        attempt=attempt,
+                        raw_output=raw_str[:500],
+                        errors=rule_errors,
+                    )
+                )
                 if attempt < total_attempts:
                     current_prompt = self._build_retry_prompt(prompt, rule_errors)
                     logger.debug(
                         "Reviewer attempt %d/%d failed (validation): %s",
-                        attempt, total_attempts, rule_errors,
+                        attempt,
+                        total_attempts,
+                        rule_errors,
                     )
                 continue
 
@@ -251,12 +263,11 @@ class OutputReviewer:
             return None
         return self._validator.validate(output)
 
-    def _build_retry_prompt(
-        self, original_prompt: Any, errors: list[str]
-    ) -> str:
+    def _build_retry_prompt(self, original_prompt: Any, errors: list[str]) -> str:
         """Build a retry prompt that includes error feedback."""
         error_text = "\n".join(f"- {e}" for e in errors)
         prompt_str = str(original_prompt)
         return self._retry_prompt.format(
-            errors=error_text, original_prompt=prompt_str,
+            errors=error_text,
+            original_prompt=prompt_str,
         )

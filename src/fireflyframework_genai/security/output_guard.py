@@ -135,10 +135,7 @@ class OutputGuard:
         if custom_patterns:
             self._groups["custom"] = {k: re.compile(v) for k, v in custom_patterns.items()}
         if deny_patterns:
-            self._groups["deny"] = {
-                f"deny_{i}": re.compile(re.escape(p))
-                for i, p in enumerate(deny_patterns)
-            }
+            self._groups["deny"] = {f"deny_{i}": re.compile(re.escape(p)) for i, p in enumerate(deny_patterns)}
 
     def scan(self, text: str) -> OutputGuardResult:
         """Scan *text* for sensitive or harmful content.

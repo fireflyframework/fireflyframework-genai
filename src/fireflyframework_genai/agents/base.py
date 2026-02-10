@@ -137,16 +137,16 @@ class FireflyAgent(Generic[AgentDepsT, OutputT]):
 
         # Keep the original model identifier for cost tracking.
         self._model_identifier: str = (
-            resolved_model if isinstance(resolved_model, str) else getattr(resolved_model, "model_name", str(resolved_model))
+            resolved_model
+            if isinstance(resolved_model, str)
+            else getattr(resolved_model, "model_name", str(resolved_model))
         )
 
         self._memory = memory
 
         from fireflyframework_genai.agents.middleware import MiddlewareChain
 
-        self._middleware = MiddlewareChain(
-            self._build_middleware(middleware, default_middleware=default_middleware)
-        )
+        self._middleware = MiddlewareChain(self._build_middleware(middleware, default_middleware=default_middleware))
 
         self._agent: Agent[AgentDepsT, OutputT] = Agent(
             resolved_model,
@@ -242,8 +242,12 @@ class FireflyAgent(Generic[AgentDepsT, OutputT]):
             context = _AgentContext()
 
         mw_ctx = MiddlewareContext(
-            agent_name=self._name, prompt=prompt, method="run",
-            deps=deps, kwargs=kwargs, context=context,
+            agent_name=self._name,
+            prompt=prompt,
+            method="run",
+            deps=deps,
+            kwargs=kwargs,
+            context=context,
         )
         await self._middleware.run_before(mw_ctx)
 
@@ -287,8 +291,12 @@ class FireflyAgent(Generic[AgentDepsT, OutputT]):
             context = _AgentContext()
 
         mw_ctx = MiddlewareContext(
-            agent_name=self._name, prompt=prompt, method="run_sync",
-            deps=deps, kwargs=kwargs, context=context,
+            agent_name=self._name,
+            prompt=prompt,
+            method="run_sync",
+            deps=deps,
+            kwargs=kwargs,
+            context=context,
         )
         if len(self._middleware) > 0:
             _run_sync_coro(self._middleware.run_before(mw_ctx))
@@ -336,17 +344,18 @@ class FireflyAgent(Generic[AgentDepsT, OutputT]):
         from fireflyframework_genai.agents.middleware import MiddlewareContext
 
         if streaming_mode not in ("buffered", "incremental"):
-            raise ValueError(
-                f"Invalid streaming_mode: {streaming_mode!r}. "
-                f"Expected 'buffered' or 'incremental'."
-            )
+            raise ValueError(f"Invalid streaming_mode: {streaming_mode!r}. Expected 'buffered' or 'incremental'.")
 
         if context is None:
             context = _AgentContext()
 
         mw_ctx = MiddlewareContext(
-            agent_name=self._name, prompt=prompt, method="run_stream",
-            deps=deps, kwargs=kwargs, context=context,
+            agent_name=self._name,
+            prompt=prompt,
+            method="run_stream",
+            deps=deps,
+            kwargs=kwargs,
+            context=context,
         )
         await self._middleware.run_before(mw_ctx)
 
@@ -361,29 +370,31 @@ class FireflyAgent(Generic[AgentDepsT, OutputT]):
 
         if streaming_mode == "incremental":
             return _IncrementalStreamContext(
-                stream_ctx, self, time.monotonic(), mw_ctx,
+                stream_ctx,
+                self,
+                time.monotonic(),
+                mw_ctx,
                 correlation_id=context.correlation_id,
                 timeout=timeout,
             )
         else:
             return _UsageTrackingStreamContext(
-                stream_ctx, self, time.monotonic(), mw_ctx,
+                stream_ctx,
+                self,
+                time.monotonic(),
+                mw_ctx,
                 correlation_id=context.correlation_id,
                 timeout=timeout,
             )
 
     # -- Memory integration ------------------------------------------------
 
-    def _inject_memory(
-        self, conversation_id: str | None, kwargs: dict[str, Any]
-    ) -> None:
+    def _inject_memory(self, conversation_id: str | None, kwargs: dict[str, Any]) -> None:
         """If memory is attached, inject message_history into kwargs."""
         if self._memory is None or conversation_id is None:
             return
         if "message_history" not in kwargs:
-            kwargs["message_history"] = self._memory.get_message_history(
-                conversation_id
-            )
+            kwargs["message_history"] = self._memory.get_message_history(conversation_id)
             logger.debug("Agent '%s': injected memory for conversation '%s'", self._name, conversation_id)
 
     def _persist_memory(
@@ -400,9 +411,7 @@ class FireflyAgent(Generic[AgentDepsT, OutputT]):
         new_msgs = result.new_messages()
         prompt_text = prompt if isinstance(prompt, str) else str(prompt)
         output_text = str(result.output) if hasattr(result, "output") else ""
-        self._memory.add_turn(
-            conversation_id, prompt_text, output_text, new_msgs
-        )
+        self._memory.add_turn(conversation_id, prompt_text, output_text, new_msgs)
         logger.debug("Agent '%s': persisted turn to conversation '%s'", self._name, conversation_id)
 
     # -- Usage tracking ------------------------------------------------------
@@ -493,8 +502,12 @@ class FireflyAgent(Generic[AgentDepsT, OutputT]):
             context = _AgentContext()
 
         mw_ctx = MiddlewareContext(
-            agent_name=self._name, prompt=prompt, method="run_with_reasoning",
-            deps=None, kwargs=kwargs, context=context,
+            agent_name=self._name,
+            prompt=prompt,
+            method="run_with_reasoning",
+            deps=None,
+            kwargs=kwargs,
+            context=context,
         )
         await self._middleware.run_before(mw_ctx)
 
@@ -509,7 +522,10 @@ class FireflyAgent(Generic[AgentDepsT, OutputT]):
             prompt_text = prompt if isinstance(prompt, str) else str(prompt)
             output_text = str(result.output)[:1000] if result.output else ""
             self._memory.add_turn(
-                conversation_id, prompt_text, output_text, [],
+                conversation_id,
+                prompt_text,
+                output_text,
+                [],
             )
 
         result = await self._middleware.run_after(mw_ctx, result)
@@ -640,7 +656,9 @@ class _UsageTrackingStreamContext:
         # After the stream closes, usage() is available on the stream handle.
         if self._stream is not None:
             self._agent._record_usage(
-                self._stream, elapsed_ms, correlation_id=self._correlation_id,
+                self._stream,
+                elapsed_ms,
+                correlation_id=self._correlation_id,
             )
         # Run after-hooks on the stream handle so middleware can inspect usage.
         if self._mw_ctx is not None:
@@ -695,7 +713,9 @@ class _IncrementalStreamContext:
         # After the stream closes, usage() is available on the stream handle.
         if self._stream is not None:
             self._agent._record_usage(
-                self._stream, elapsed_ms, correlation_id=self._correlation_id,
+                self._stream,
+                elapsed_ms,
+                correlation_id=self._correlation_id,
             )
         # Run after-hooks on the stream handle so middleware can inspect usage.
         if self._mw_ctx is not None:

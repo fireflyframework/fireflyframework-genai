@@ -40,9 +40,7 @@ class TestReasoningThought:
         assert t.final_answer is None
 
     def test_final_thought(self):
-        t = ReasoningThought(
-            content="done", is_final=True, final_answer="42", confidence=0.95
-        )
+        t = ReasoningThought(content="done", is_final=True, final_answer="42", confidence=0.95)
         assert t.is_final is True
         assert t.final_answer == "42"
         assert t.confidence == 0.95
@@ -67,9 +65,7 @@ class TestReasoningAction:
         assert a.reasoning == ""
 
     def test_with_args(self):
-        a = ReasoningAction(
-            tool_name="calc", tool_args={"expr": "1+1"}, reasoning="need math"
-        )
+        a = ReasoningAction(tool_name="calc", tool_args={"expr": "1+1"}, reasoning="need math")
         assert a.tool_args["expr"] == "1+1"
 
 

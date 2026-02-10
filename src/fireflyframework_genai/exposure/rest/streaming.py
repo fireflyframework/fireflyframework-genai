@@ -60,9 +60,7 @@ async def sse_stream_incremental(
     Example SSE event:
         data: {"token": "Hello"}\\n\\n
     """
-    async with await agent.run_stream(
-        prompt, streaming_mode="incremental", **kwargs
-    ) as stream:
+    async with await agent.run_stream(prompt, streaming_mode="incremental", **kwargs) as stream:
         async for token in stream.stream_tokens(debounce_ms=debounce_ms):
             yield f"data: {json.dumps({'token': token})}\n\n"
     yield "data: [DONE]\n\n"

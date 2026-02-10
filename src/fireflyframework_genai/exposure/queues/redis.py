@@ -74,8 +74,9 @@ class RedisAgentConsumer(BaseQueueConsumer):
 
                     # Try to parse as JSON to extract trace context
                     # If not JSON, treat as plain text
-                    from fireflyframework_genai.observability.tracer import extract_trace_context, trace_context_scope
                     import json
+
+                    from fireflyframework_genai.observability.tracer import extract_trace_context, trace_context_scope
 
                     span_context = None
                     try:

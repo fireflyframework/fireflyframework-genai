@@ -57,27 +57,33 @@ class TestMemoryFork:
         """Pattern should fork memory into a scoped working memory."""
         memory = MemoryManager()
         memory.set_fact("global_fact", "visible")
-        agent = MockAgent([
-            ReasoningThought(content="done", is_final=True, final_answer="42"),
-        ])
+        agent = MockAgent(
+            [
+                ReasoningThought(content="done", is_final=True, final_answer="42"),
+            ]
+        )
         pattern = ChainOfThoughtPattern(max_steps=3)
         result = await pattern.execute(agent, "test", memory=memory)
         assert result.success is True
 
     async def test_memory_none_is_safe(self):
         """Passing no memory should work without errors."""
-        agent = MockAgent([
-            ReasoningThought(content="done", is_final=True, final_answer="42"),
-        ])
+        agent = MockAgent(
+            [
+                ReasoningThought(content="done", is_final=True, final_answer="42"),
+            ]
+        )
         pattern = ChainOfThoughtPattern(max_steps=3)
         result = await pattern.execute(agent, "test")
         assert result.success is True
 
     async def test_non_memory_manager_ignored(self):
         """Passing a non-MemoryManager object should be treated as None."""
-        agent = MockAgent([
-            ReasoningThought(content="done", is_final=True, final_answer="42"),
-        ])
+        agent = MockAgent(
+            [
+                ReasoningThought(content="done", is_final=True, final_answer="42"),
+            ]
+        )
         pattern = ChainOfThoughtPattern(max_steps=3)
         result = await pattern.execute(agent, "test", memory="not_a_manager")
         assert result.success is True
@@ -87,10 +93,12 @@ class TestMemoryPersistence:
     async def test_cot_persists_steps(self):
         """ChainOfThought should persist steps to working memory."""
         memory = MemoryManager()
-        agent = MockAgent([
-            ReasoningThought(content="step one analysis", is_final=False),
-            ReasoningThought(content="final", is_final=True, final_answer="result"),
-        ])
+        agent = MockAgent(
+            [
+                ReasoningThought(content="step one analysis", is_final=False),
+                ReasoningThought(content="final", is_final=True, final_answer="result"),
+            ]
+        )
         pattern = ChainOfThoughtPattern(max_steps=5)
         await pattern.execute(agent, "problem", memory=memory)
 
@@ -101,11 +109,13 @@ class TestMemoryPersistence:
     async def test_react_persists_observations(self):
         """ReAct should persist observations to working memory."""
         memory = MemoryManager()
-        agent = MockAgent([
-            ReasoningThought(content="think", is_final=False),
-            "action result data",
-            ReasoningThought(content="done", is_final=True, final_answer="ok"),
-        ])
+        agent = MockAgent(
+            [
+                ReasoningThought(content="think", is_final=False),
+                "action result data",
+                ReasoningThought(content="done", is_final=True, final_answer="ok"),
+            ]
+        )
         pattern = ReActPattern(max_steps=5)
         result = await pattern.execute(agent, "test", memory=memory)
         assert result.success is True
@@ -113,12 +123,14 @@ class TestMemoryPersistence:
     async def test_tot_persists_steps_with_memory(self):
         """TreeOfThoughts should persist branch steps to working memory."""
         memory = MemoryManager()
-        agent = MockAgent([
-            "A---B---C",
-            BranchEvaluation(branch_id=0, score=0.6),
-            BranchEvaluation(branch_id=1, score=0.9),
-            BranchEvaluation(branch_id=2, score=0.3),
-        ])
+        agent = MockAgent(
+            [
+                "A---B---C",
+                BranchEvaluation(branch_id=0, score=0.6),
+                BranchEvaluation(branch_id=1, score=0.9),
+                BranchEvaluation(branch_id=2, score=0.3),
+            ]
+        )
         pattern = TreeOfThoughtsPattern(branching_factor=3)
         result = await pattern.execute(agent, "test", memory=memory)
         assert result.success is True
@@ -180,8 +192,10 @@ class TestResolveModel:
     def test_resolve_from_duck_typed_agent(self):
         class FakeAgent:
             model = "openai:gpt-4o"
+
             async def run(self, prompt, **kwargs):
                 pass
+
         agent = FakeAgent()
         result = AbstractReasoningPattern._resolve_model(agent)
         assert result == "openai:gpt-4o"
@@ -189,10 +203,13 @@ class TestResolveModel:
     def test_resolve_from_agent_with_inner_agent(self):
         class InnerAgent:
             model = "anthropic:claude"
+
         class OuterAgent:
             agent = InnerAgent()
+
             async def run(self, prompt, **kwargs):
                 pass
+
         result = AbstractReasoningPattern._resolve_model(OuterAgent())
         assert result == "anthropic:claude"
 
@@ -200,16 +217,19 @@ class TestResolveModel:
 class TestProtocolConformance:
     def test_cot_is_reasoning_pattern(self):
         from fireflyframework_genai.reasoning.base import ReasoningPattern
+
         pattern = ChainOfThoughtPattern(max_steps=3)
         assert isinstance(pattern, ReasoningPattern)
 
     def test_react_is_reasoning_pattern(self):
         from fireflyframework_genai.reasoning.base import ReasoningPattern
+
         pattern = ReActPattern(max_steps=3)
         assert isinstance(pattern, ReasoningPattern)
 
     def test_reflexion_is_reasoning_pattern(self):
         from fireflyframework_genai.reasoning.base import ReasoningPattern
+
         pattern = ReflexionPattern(max_steps=3)
         assert isinstance(pattern, ReasoningPattern)
 
@@ -218,10 +238,9 @@ class TestStepLimitError:
     async def test_cot_exceeds_max_steps(self):
         """Pattern should raise ReasoningStepLimitError when max_steps exceeded."""
         from fireflyframework_genai.exceptions import ReasoningStepLimitError
+
         # Always non-final thoughts → will exhaust max_steps
-        agent = MockAgent([
-            ReasoningThought(content=f"step {i}") for i in range(10)
-        ])
+        agent = MockAgent([ReasoningThought(content=f"step {i}") for i in range(10)])
         pattern = ChainOfThoughtPattern(max_steps=3)
         with pytest.raises(ReasoningStepLimitError):
             await pattern.execute(agent, "infinite loop")

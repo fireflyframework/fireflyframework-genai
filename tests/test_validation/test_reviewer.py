@@ -79,10 +79,12 @@ class TestOutputReviewerBasic:
 class TestOutputReviewerRetry:
     async def test_retry_on_invalid_schema(self):
         """Should retry when first output fails schema parsing."""
-        agent = MockAgent([
-            "not valid json",
-            SampleOutput(name="fixed", score=0.9),
-        ])
+        agent = MockAgent(
+            [
+                "not valid json",
+                SampleOutput(name="fixed", score=0.9),
+            ]
+        )
         reviewer = OutputReviewer(output_type=SampleOutput, max_retries=2)
         result = await reviewer.review(agent, "test")
         assert isinstance(result.output, SampleOutput)
@@ -92,25 +94,31 @@ class TestOutputReviewerRetry:
 
     async def test_retry_exhausted_raises(self):
         """Should raise OutputReviewError when all retries fail."""
-        agent = MockAgent([
-            "bad 1",
-            "bad 2",
-            "bad 3",
-            "bad 4",
-        ])
+        agent = MockAgent(
+            [
+                "bad 1",
+                "bad 2",
+                "bad 3",
+                "bad 4",
+            ]
+        )
         reviewer = OutputReviewer(output_type=SampleOutput, max_retries=3)
         with pytest.raises(OutputReviewError, match="failed after 4 attempts"):
             await reviewer.review(agent, "test")
 
     async def test_validator_rules(self):
         """Should retry when output_type passes but validator rules fail."""
-        validator = OutputValidator({
-            "name": [EnumRule("name", ["alice", "bob"])],
-        })
-        agent = MockAgent([
-            SampleOutput(name="charlie", score=0.5),  # fails enum rule
-            SampleOutput(name="alice", score=0.8),     # passes
-        ])
+        validator = OutputValidator(
+            {
+                "name": [EnumRule("name", ["alice", "bob"])],
+            }
+        )
+        agent = MockAgent(
+            [
+                SampleOutput(name="charlie", score=0.5),  # fails enum rule
+                SampleOutput(name="alice", score=0.8),  # passes
+            ]
+        )
         reviewer = OutputReviewer(
             output_type=SampleOutput,
             validator=validator,
@@ -122,10 +130,12 @@ class TestOutputReviewerRetry:
 
     async def test_custom_retry_prompt(self):
         """Custom retry prompt should be used."""
-        agent = MockAgent([
-            "bad",
-            SampleOutput(name="ok", score=0.5),
-        ])
+        agent = MockAgent(
+            [
+                "bad",
+                SampleOutput(name="ok", score=0.5),
+            ]
+        )
         reviewer = OutputReviewer(
             output_type=SampleOutput,
             retry_prompt="FIX THIS: {errors}\nORIGINAL: {original_prompt}",

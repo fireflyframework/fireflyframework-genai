@@ -29,6 +29,7 @@ class TestReasoningPatternRegistry:
 
     def test_get_nonexistent_raises(self):
         from fireflyframework_genai.exceptions import ReasoningPatternNotFoundError
+
         registry = ReasoningPatternRegistry()
         with pytest.raises(ReasoningPatternNotFoundError):
             registry.get("nonexistent")

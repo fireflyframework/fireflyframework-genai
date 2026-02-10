@@ -28,6 +28,7 @@ class TestFireflyAgentDecorator:
 
     def test_auto_register(self) -> None:
         try:
+
             @firefly_agent("test-autoreg", model=TestModel(), auto_register=True)
             def instruct(ctx: object) -> str:
                 return "ok"

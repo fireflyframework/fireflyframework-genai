@@ -219,8 +219,7 @@ class PromptCacheMiddleware:
         context.metadata["_cache_min_tokens"] = self._cache_min_tokens
 
         logger.debug(
-            "PromptCacheMiddleware: Enabled Anthropic prompt caching "
-            "(min_tokens=%d, ttl=%ds)",
+            "PromptCacheMiddleware: Enabled Anthropic prompt caching (min_tokens=%d, ttl=%ds)",
             self._cache_min_tokens,
             self._cache_ttl_seconds,
         )
@@ -334,15 +333,11 @@ class CacheStatistics:
             Estimated savings in USD.
         """
         # Cost if no caching was used
-        full_cost = (
-            self._total_cache_creation_tokens + self._total_cache_read_tokens
-        ) * input_token_cost
+        full_cost = (self._total_cache_creation_tokens + self._total_cache_read_tokens) * input_token_cost
 
         # Actual cost with caching
         cache_creation_cost = self._total_cache_creation_tokens * input_token_cost
-        cache_read_cost = (
-            self._total_cache_read_tokens * input_token_cost * (1 - cache_read_discount)
-        )
+        cache_read_cost = self._total_cache_read_tokens * input_token_cost * (1 - cache_read_discount)
         actual_cost = cache_creation_cost + cache_read_cost
 
         return full_cost - actual_cost

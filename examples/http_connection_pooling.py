@@ -33,6 +33,7 @@ Performance Benefits:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import time
 
 from fireflyframework_genai.tools.builtins.http import HTTPX_AVAILABLE, HttpTool
@@ -56,7 +57,7 @@ async def demo_with_connection_pooling():
         timeout=30.0,
     )
 
-    print(f"Connection pool configuration:")
+    print("Connection pool configuration:")
     print(f"  - Pooling enabled: {tool._use_pool}")
     print(f"  - Pool size: {100 if tool._use_pool else 'N/A'}")
     print(f"  - Max keepalive: {20 if tool._use_pool else 'N/A'}")
@@ -83,7 +84,7 @@ async def demo_with_connection_pooling():
             print(f"   Request {i}: Error - {e}")
 
     elapsed = time.perf_counter() - start_time
-    print(f"   Total time: {elapsed:.2f}s ({elapsed/len(urls):.2f}s per request)\n")
+    print(f"   Total time: {elapsed:.2f}s ({elapsed / len(urls):.2f}s per request)\n")
 
     # Example 2: Concurrent requests
     print("2. Concurrent requests:")
@@ -136,7 +137,7 @@ async def demo_with_connection_pooling():
             },
         )
         print(f"   Status: HTTP {result['status']}")
-        print(f"   Response shows custom headers in echo\n")
+        print("   Response shows custom headers in echo\n")
     except Exception as e:
         print(f"   Error: {e}\n")
 
@@ -162,10 +163,8 @@ async def demo_comparison_pooled_vs_non_pooled():
 
     start_time = time.perf_counter()
     for url in urls:
-        try:
+        with contextlib.suppress(Exception):
             await tool_pooled._execute(url=url, method="GET")
-        except Exception:
-            pass
     elapsed_pooled = time.perf_counter() - start_time
 
     await tool_pooled.close()
@@ -177,10 +176,8 @@ async def demo_comparison_pooled_vs_non_pooled():
 
     start_time = time.perf_counter()
     for url in urls:
-        try:
+        with contextlib.suppress(Exception):
             await tool_no_pool._execute(url=url, method="GET")
-        except Exception:
-            pass
     elapsed_no_pool = time.perf_counter() - start_time
 
     print(f"  Time: {elapsed_no_pool:.2f}s\n")

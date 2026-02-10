@@ -45,17 +45,21 @@ class MockAgent:
 class TestReasoningPipeline:
     async def test_two_pattern_pipeline(self):
         """Output of pattern 1 should become input for pattern 2."""
-        agent = MockAgent([
-            # Pattern 1 (CoT): step 1 -> final
-            ReasoningThought(content="Draft answer", is_final=True, final_answer="draft 42"),
-            # Pattern 2 (Reflexion): generate answer, then critique
-            "improved 42",
-            ReflectionVerdict(is_satisfactory=True),
-        ])
-        pipeline = ReasoningPipeline([
-            ChainOfThoughtPattern(max_steps=3),
-            ReflexionPattern(max_steps=3),
-        ])
+        agent = MockAgent(
+            [
+                # Pattern 1 (CoT): step 1 -> final
+                ReasoningThought(content="Draft answer", is_final=True, final_answer="draft 42"),
+                # Pattern 2 (Reflexion): generate answer, then critique
+                "improved 42",
+                ReflectionVerdict(is_satisfactory=True),
+            ]
+        )
+        pipeline = ReasoningPipeline(
+            [
+                ChainOfThoughtPattern(max_steps=3),
+                ReflexionPattern(max_steps=3),
+            ]
+        )
         result = await pipeline.execute(agent, "What is 6*7?")
         assert result.success is True
         assert result.steps_taken >= 2
@@ -64,36 +68,47 @@ class TestReasoningPipeline:
 
     async def test_merged_trace(self):
         """Pipeline trace should contain steps from all patterns."""
-        agent = MockAgent([
-            ReasoningThought(content="step 1", is_final=True, final_answer="ans"),
-            "final answer",
-            ReflectionVerdict(is_satisfactory=True),
-        ])
-        pipeline = ReasoningPipeline([
-            ChainOfThoughtPattern(max_steps=3),
-            ReflexionPattern(max_steps=3),
-        ])
+        agent = MockAgent(
+            [
+                ReasoningThought(content="step 1", is_final=True, final_answer="ans"),
+                "final answer",
+                ReflectionVerdict(is_satisfactory=True),
+            ]
+        )
+        pipeline = ReasoningPipeline(
+            [
+                ChainOfThoughtPattern(max_steps=3),
+                ReflexionPattern(max_steps=3),
+            ]
+        )
         result = await pipeline.execute(agent, "test")
         assert len(result.trace.steps) >= 2
 
     async def test_pipeline_with_memory(self):
         """Memory should be passed through to each pattern."""
         memory = MemoryManager()
-        agent = MockAgent([
-            ReasoningThought(content="step", is_final=True, final_answer="done"),
-            "ok",
-            ReflectionVerdict(is_satisfactory=True),
-        ])
-        pipeline = ReasoningPipeline([
-            ChainOfThoughtPattern(max_steps=3),
-            ReflexionPattern(max_steps=3),
-        ])
+        agent = MockAgent(
+            [
+                ReasoningThought(content="step", is_final=True, final_answer="done"),
+                "ok",
+                ReflectionVerdict(is_satisfactory=True),
+            ]
+        )
+        pipeline = ReasoningPipeline(
+            [
+                ChainOfThoughtPattern(max_steps=3),
+                ReflexionPattern(max_steps=3),
+            ]
+        )
         result = await pipeline.execute(agent, "test", memory=memory)
         assert result.success is True
 
     async def test_pipeline_repr(self):
-        pipeline = ReasoningPipeline([
-            ChainOfThoughtPattern(max_steps=3),
-        ], name="my_pipe")
+        pipeline = ReasoningPipeline(
+            [
+                ChainOfThoughtPattern(max_steps=3),
+            ],
+            name="my_pipe",
+        )
         assert "my_pipe" in repr(pipeline)
         assert "1" in repr(pipeline)

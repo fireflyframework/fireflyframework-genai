@@ -135,7 +135,11 @@ class RabbitMQAgentProducer:
         if self._channel is None:
             await self.start()
 
-        exchange = await self._channel.get_exchange(self._exchange_name) if self._exchange_name else self._channel.default_exchange
+        exchange = (
+            await self._channel.get_exchange(self._exchange_name)
+            if self._exchange_name
+            else self._channel.default_exchange
+        )
         amqp_message = aio_pika.Message(
             body=message.body.encode("utf-8"),
             headers=message.headers or None,
