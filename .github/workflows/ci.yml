@@ -4,12 +4,8 @@ on:
     branches: [develop]
   pull_request:
     branches: [develop, main]
-  pull_request_target:
-    branches: [develop, main]
 jobs:
   lint-and-test:
-    if: github.event_name \!= 'pull_request_target' || github.actor == 'dependabot[bot]'
     uses: fireflyframework/.github/.github/workflows/python-ci.yml@main
     with:
       python-version: '3.13'
-      checkout-ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
