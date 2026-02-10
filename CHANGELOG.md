@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Copyright 2026 Firefly Software Solutions Inc. Licensed under the Apache License 2.0.
 
+## [26.01.01] - 2026-02-10
+
+### Changed
+
+- **CalVer Migration** -- Migrated versioning scheme from `M.YY.Patch` to
+  `YY.MM.Patch` for clearer calendar-based version identification. This
+  release consolidates all changes from the previous `2.26.x` releases.
+
 ## [2.26.1] - 2026-02-09
 
 ### Removed
@@ -235,6 +243,7 @@ Copyright 2026 Firefly Software Solutions Inc. Licensed under the Apache License
 - **Documentation Index** -- Professional `docs/README.md` landing page with
   documentation map organized by architecture layer.
 
+[26.01.01]: https://github.com/fireflyframework/fireflyframework-genai/releases/tag/v26.01.01
 [2.26.1]: https://github.com/fireflyframework/fireflyframework-genai/releases/tag/v2.26.1
 [2.26.0]: https://github.com/fireflyframework/fireflyframework-genai/releases/tag/v2.26.0
 [2.25.0]: https://github.com/fireflyframework/fireflyframework-genai/releases/tag/v2.25.0

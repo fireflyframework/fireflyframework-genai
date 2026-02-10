@@ -19,7 +19,7 @@ set -euo pipefail
 #  fireflyframework-genai — Interactive Uninstaller
 # ══════════════════════════════════════════════════════════════════════════════
 
-readonly VERSION="2.26.1"
+readonly VERSION="26.01.01"
 readonly PACKAGE="fireflyframework-genai"
 readonly PACKAGE_IMPORT="fireflyframework_genai"
 readonly TOTAL_STEPS=4

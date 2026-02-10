@@ -45,7 +45,7 @@ $ErrorActionPreference = "Stop"
 
 # ── Constants ────────────────────────────────────────────────────────────────
 
-$script:VERSION = "2.26.1"
+$script:VERSION = "26.01.01"
 $script:PACKAGE = "fireflyframework-genai"
 $script:REPO_URL = "https://github.com/fireflyframework/fireflyframework-genai.git"
 $script:MIN_PYTHON_MAJOR = 3

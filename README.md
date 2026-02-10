@@ -465,7 +465,7 @@ uv sync --all-extras    # or: pip install -e ".[all]"
 
 ```bash
 python -c "import fireflyframework_genai; print(fireflyframework_genai.__version__)"
-# 2.26.1
+# 26.01.01
 ```
 
 ### Uninstall
