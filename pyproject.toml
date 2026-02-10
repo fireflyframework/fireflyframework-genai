@@ -111,6 +111,7 @@ pythonVersion = "3.13"
 typeCheckingMode = "standard"
 venvPath = "."
 venv = ".venv"
+exclude = ["tests/**", "examples/**"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
