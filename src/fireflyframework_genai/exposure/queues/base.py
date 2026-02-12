@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from typing import Protocol, runtime_checkable
 
 from pydantic import BaseModel
@@ -26,7 +27,7 @@ class QueueMessage(BaseModel):
     """A message consumed from or produced to a queue."""
 
     body: str
-    headers: dict[str, str] = {}
+    headers: Mapping[str, str] = {}
     routing_key: str = ""
     reply_to: str = ""
 
