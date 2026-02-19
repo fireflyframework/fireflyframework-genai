@@ -27,6 +27,8 @@ __all__ = [
 def launch_studio() -> None:
     """Launch the Firefly Studio server.
 
-    .. note:: Not yet implemented.
+    Convenience wrapper that delegates to the CLI entry point.
     """
-    raise NotImplementedError("Firefly Studio is not yet implemented")
+    from fireflyframework_genai.studio.cli import main
+
+    main(["studio"])
