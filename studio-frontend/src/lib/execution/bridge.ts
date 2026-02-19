@@ -81,19 +81,27 @@ export function disconnectExecution(): void {
 /**
  * Send a "run" action to the backend, resetting node states first.
  */
-export function runPipeline(): void {
-	if (!ws) return;
+export function runPipeline(): boolean {
+	if (!ws) {
+		console.warn('[bridge] Cannot run pipeline: execution WebSocket not connected');
+		return false;
+	}
 	clearNodeStates();
 	isRunning.set(true);
 	ws.send({ action: 'run' });
+	return true;
 }
 
 /**
  * Send a "debug" action to the backend, resetting node states first.
  */
-export function debugPipeline(): void {
-	if (!ws) return;
+export function debugPipeline(): boolean {
+	if (!ws) {
+		console.warn('[bridge] Cannot debug pipeline: execution WebSocket not connected');
+		return false;
+	}
 	clearNodeStates();
 	isDebugging.set(true);
 	ws.send({ action: 'debug' });
+	return true;
 }

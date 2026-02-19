@@ -10,7 +10,7 @@
 		GitFork,
 		GitMerge
 	} from 'lucide-svelte';
-	import { nodes } from '$lib/stores/pipeline';
+	import { addNode } from '$lib/stores/pipeline';
 	import type { Component } from 'svelte';
 
 	interface PaletteItem {
@@ -31,22 +31,6 @@
 		{ type: 'fan_out', label: 'Fan Out', icon: GitFork, color: '#8888a0' },
 		{ type: 'fan_in', label: 'Fan In', icon: GitMerge, color: '#8888a0' }
 	];
-
-	let idCounter = $state(0);
-
-	function addNode(type: string, label: string) {
-		idCounter++;
-		const id = `${type}-${idCounter}`;
-		nodes.update((n) => [
-			...n,
-			{
-				id,
-				type,
-				position: { x: 250 + Math.random() * 200, y: 100 + Math.random() * 200 },
-				data: { label: `${label} ${idCounter}` }
-			}
-		]);
-	}
 
 	function iconBg(hex: string): string {
 		const r = parseInt(hex.slice(1, 3), 16);

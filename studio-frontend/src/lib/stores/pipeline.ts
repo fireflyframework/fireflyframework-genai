@@ -37,6 +37,22 @@ export function clearNodeStates() {
 	);
 }
 
+let _nodeIdCounter = 0;
+
+export function addNode(type: string, label: string): void {
+	_nodeIdCounter++;
+	const id = `${type}-${_nodeIdCounter}`;
+	nodes.update((n) => [
+		...n,
+		{
+			id,
+			type,
+			position: { x: 250 + Math.random() * 200, y: 100 + Math.random() * 200 },
+			data: { label: `${label} ${_nodeIdCounter}` }
+		}
+	]);
+}
+
 export function updateNodeData(nodeId: string, key: string, value: unknown) {
 	nodes.update((ns) =>
 		ns.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, [key]: value } } : n))
