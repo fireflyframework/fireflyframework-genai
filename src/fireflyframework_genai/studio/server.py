@@ -131,4 +131,44 @@ def create_studio_app(
     # Store config on app state for downstream routers
     app.state.studio_config = config
 
+    # -- Static file serving (bundled frontend) ----------------------------
+    _mount_static_files(app)
+
     return app
+
+
+def _get_default_static_dir() -> Any:
+    """Return the default path to the bundled static directory."""
+    from pathlib import Path
+
+    return Path(__file__).parent / "static"
+
+
+def _mount_static_files(app: Any, static_dir: Any | None = None) -> None:
+    """Mount the bundled Studio frontend as static files.
+
+    When the ``studio/static/`` directory contains a built SvelteKit SPA
+    (i.e. an ``index.html`` file), mount it via :class:`StaticFiles` so
+    the entire Studio is served from the Python package — no separate
+    frontend server needed in production.
+
+    The mount is placed at ``/`` with ``html=True`` so that the SPA's
+    ``index.html`` is served for all non-API routes (SPA fallback).
+    This must be registered **last** so API/WebSocket routes take priority.
+    """
+    if static_dir is None:
+        static_dir = _get_default_static_dir()
+
+    index_html = static_dir / "index.html"
+
+    if not index_html.exists():
+        logger.debug(
+            "No bundled frontend found at %s — static file serving disabled",
+            static_dir,
+        )
+        return
+
+    from starlette.staticfiles import StaticFiles  # type: ignore[import-not-found]
+
+    app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")
+    logger.info("Serving bundled Studio frontend from %s", static_dir)
