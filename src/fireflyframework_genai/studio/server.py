@@ -93,6 +93,13 @@ def create_studio_app(
 
     app.include_router(create_registry_router())
 
+    # -- Project endpoints -------------------------------------------------
+    from fireflyframework_genai.studio.api.projects import create_projects_router
+    from fireflyframework_genai.studio.projects import ProjectManager
+
+    project_manager = ProjectManager(config.projects_dir)
+    app.include_router(create_projects_router(project_manager))
+
     # Store config on app state for downstream routers
     app.state.studio_config = config
 
