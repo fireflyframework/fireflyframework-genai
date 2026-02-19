@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import os
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -73,3 +74,85 @@ class TestAssistantWebSocket:
             ws.send_json({"action": "clear_history"})
             response = ws.receive_json()
             assert response["type"] == "history_cleared"
+
+    def test_assistant_ws_chat_streams_tokens(self, app, monkeypatch):
+        """Test the chat action with a mock agent that simulates streaming."""
+
+        # Create a mock stream that yields tokens
+        mock_stream = MagicMock()
+        mock_stream.new_messages.return_value = []
+
+        async def fake_stream_tokens():
+            for token in ["Hello", " ", "world"]:
+                yield token
+
+        mock_stream.stream_tokens = fake_stream_tokens
+
+        # Async context manager that yields the mock stream
+        mock_ctx = MagicMock()
+        mock_ctx.__aenter__ = AsyncMock(return_value=mock_stream)
+        mock_ctx.__aexit__ = AsyncMock(return_value=False)
+
+        # Mock agent whose run_stream returns the mock context manager
+        mock_agent = MagicMock()
+        mock_agent.run_stream = AsyncMock(return_value=mock_ctx)
+
+        # Patch create_studio_assistant in the module where it's imported
+        monkeypatch.setattr(
+            "fireflyframework_genai.studio.assistant.agent.create_studio_assistant",
+            lambda canvas=None: mock_agent,
+        )
+
+        client = TestClient(app)
+        with client.websocket_connect("/ws/assistant") as ws:
+            ws.send_json({"action": "chat", "message": "Hello"})
+
+            tokens = []
+            while True:
+                resp = ws.receive_json()
+                if resp["type"] == "token":
+                    tokens.append(resp["content"])
+                elif resp["type"] == "response_complete":
+                    assert resp["full_text"] == "Hello world"
+                    break
+                elif resp["type"] == "error":
+                    pytest.fail(f"Unexpected error: {resp['message']}")
+
+            assert tokens == ["Hello", " ", "world"]
+
+    def test_assistant_ws_chat_fallback_on_stream_error(self, app, monkeypatch):
+        """Test that chat falls back to non-streaming when run_stream fails."""
+
+        # Mock agent whose run_stream raises, but run() succeeds
+        mock_result = MagicMock()
+        mock_result.output = "Fallback response"
+        mock_result.new_messages.return_value = [{"role": "assistant", "content": "Fallback response"}]
+
+        mock_agent = MagicMock()
+        mock_agent.run_stream = AsyncMock(side_effect=RuntimeError("No streaming"))
+        mock_agent.run = AsyncMock(return_value=mock_result)
+
+        monkeypatch.setattr(
+            "fireflyframework_genai.studio.assistant.agent.create_studio_assistant",
+            lambda canvas=None: mock_agent,
+        )
+
+        client = TestClient(app)
+        with client.websocket_connect("/ws/assistant") as ws:
+            ws.send_json({"action": "chat", "message": "Hello"})
+
+            responses = []
+            while True:
+                resp = ws.receive_json()
+                responses.append(resp)
+                if resp["type"] == "response_complete":
+                    break
+                elif resp["type"] == "error":
+                    pytest.fail(f"Unexpected error: {resp['message']}")
+
+            # Should have a token with the full response and a response_complete
+            token_msgs = [r for r in responses if r["type"] == "token"]
+            assert len(token_msgs) == 1
+            assert token_msgs[0]["content"] == "Fallback response"
+            assert responses[-1]["type"] == "response_complete"
+            assert responses[-1]["full_text"] == "Fallback response"

@@ -32,7 +32,6 @@ logger = logging.getLogger(__name__)
 async def _handle_chat(
     websocket: WebSocket,
     agent: Any,
-    canvas: Any,
     user_message: str,
     message_history: list[Any],
 ) -> None:
@@ -53,8 +52,6 @@ async def _handle_chat(
                     "content": token,
                 })
 
-            # Get final result for message history
-            result = stream.get_output()
             # Update message history with new messages
             message_history.extend(stream.new_messages())
 
@@ -74,6 +71,10 @@ async def _handle_chat(
             response_text = (
                 str(result.output) if hasattr(result, "output") else str(result)
             )
+
+            # Update message history from fallback result
+            if hasattr(result, "new_messages"):
+                message_history.extend(result.new_messages())
 
             await websocket.send_json({
                 "type": "token",
@@ -156,7 +157,7 @@ def create_assistant_router() -> APIRouter:
                         continue
 
                     await _handle_chat(
-                        websocket, agent, canvas, user_message, message_history
+                        websocket, agent, user_message, message_history
                     )
 
                 elif action == "clear_history":
