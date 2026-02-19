@@ -105,6 +105,11 @@ def create_studio_app(
 
     app.include_router(create_codegen_router())
 
+    # -- Monitoring endpoints ----------------------------------------------
+    from fireflyframework_genai.studio.api.monitoring import create_monitoring_router
+
+    app.include_router(create_monitoring_router())
+
     # -- Execution WebSocket -----------------------------------------------
     from fireflyframework_genai.studio.api.execution import create_execution_router
 

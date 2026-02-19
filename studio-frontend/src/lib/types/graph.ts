@@ -62,3 +62,23 @@ export interface Checkpoint {
 	branch_id?: string;
 	parent_index?: number;
 }
+
+export interface UsageBreakdown {
+	input_tokens: number;
+	output_tokens: number;
+	total_tokens: number;
+	cost_usd: number;
+	requests: number;
+}
+
+export interface UsageSummary {
+	total_input_tokens: number;
+	total_output_tokens: number;
+	total_tokens: number;
+	total_cost_usd: number;
+	total_requests: number;
+	total_latency_ms: number;
+	record_count: number;
+	by_agent: Record<string, UsageBreakdown>;
+	by_model: Record<string, UsageBreakdown>;
+}

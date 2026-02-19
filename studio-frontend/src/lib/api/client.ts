@@ -1,4 +1,4 @@
-import type { AgentInfo, ToolInfo, PatternInfo, ProjectInfo } from '$lib/types/graph';
+import type { AgentInfo, ToolInfo, PatternInfo, ProjectInfo, UsageSummary } from '$lib/types/graph';
 
 const BASE_URL = '/api';
 
@@ -47,5 +47,9 @@ export const api = {
 				method: 'POST',
 				body: JSON.stringify({ graph })
 			})
+	},
+
+	monitoring: {
+		usage: () => request<UsageSummary>('/monitoring/usage')
 	}
 };
