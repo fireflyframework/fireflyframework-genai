@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+from fireflyframework_genai.studio.codegen.generator import generate_python
 from fireflyframework_genai.studio.codegen.models import (
     GraphEdge,
     GraphModel,
@@ -28,4 +29,5 @@ __all__ = [
     "GraphModel",
     "GraphNode",
     "NodeType",
+    "generate_python",
 ]
