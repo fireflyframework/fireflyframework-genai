@@ -1,15 +1,114 @@
 <script lang="ts">
+	import { get } from 'svelte/store';
 	import TopBar from './TopBar.svelte';
 	import Sidebar from './Sidebar.svelte';
 	import CommandPalette from './CommandPalette.svelte';
-	import { commandPaletteOpen } from '$lib/stores/ui';
+	import ShortcutsModal from './ShortcutsModal.svelte';
+	import { commandPaletteOpen, bottomPanelOpen, bottomPanelTab, shortcutsModalOpen } from '$lib/stores/ui';
+	import { nodes, edges, selectedNodeId } from '$lib/stores/pipeline';
+	import { runPipeline, debugPipeline } from '$lib/execution/bridge';
 
 	let { children } = $props();
 
+	/**
+	 * Returns true when the active element is a text-input field
+	 * (input, textarea, or contenteditable) so that typing shortcuts
+	 * should not fire.
+	 */
+	function isEditingText(): boolean {
+		const el = document.activeElement;
+		if (!el) return false;
+		const tag = el.tagName.toLowerCase();
+		if (tag === 'input' || tag === 'textarea') return true;
+		if ((el as HTMLElement).isContentEditable) return true;
+		return false;
+	}
+
 	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+		const meta = e.metaKey || e.ctrlKey;
+
+		// Cmd/Ctrl + K  —  toggle command palette
+		if (e.key === 'k' && meta) {
 			e.preventDefault();
 			commandPaletteOpen.update((v) => !v);
+			return;
+		}
+
+		// Cmd/Ctrl + Enter  —  run pipeline
+		if (e.key === 'Enter' && meta) {
+			e.preventDefault();
+			runPipeline();
+			return;
+		}
+
+		// Cmd/Ctrl + Shift + D  —  toggle debug mode
+		if (e.key === 'D' && meta && e.shiftKey) {
+			e.preventDefault();
+			debugPipeline();
+			return;
+		}
+
+		// Cmd/Ctrl + /  —  toggle AI assistant (bottom panel chat tab)
+		if (e.key === '/' && meta) {
+			e.preventDefault();
+			const isOpen = get(bottomPanelOpen);
+			const currentTab = get(bottomPanelTab);
+			if (isOpen && currentTab === 'chat') {
+				// If already showing chat, close the panel
+				bottomPanelOpen.set(false);
+			} else {
+				// Open panel and switch to chat
+				bottomPanelOpen.set(true);
+				bottomPanelTab.set('chat');
+			}
+			return;
+		}
+
+		// Cmd/Ctrl + D  —  duplicate selected node (skip in text fields)
+		if (e.key === 'd' && meta && !e.shiftKey) {
+			if (isEditingText()) return;
+			e.preventDefault();
+			const selId = get(selectedNodeId);
+			if (!selId) return;
+			const currentNodes = get(nodes);
+			const sourceNode = currentNodes.find((n) => n.id === selId);
+			if (!sourceNode) return;
+			const newId = `${sourceNode.type}-dup-${Date.now()}`;
+			const offset = 40;
+			nodes.update((ns) => [
+				...ns,
+				{
+					...sourceNode,
+					id: newId,
+					position: {
+						x: sourceNode.position.x + offset,
+						y: sourceNode.position.y + offset
+					},
+					data: { ...sourceNode.data }
+				}
+			]);
+			selectedNodeId.set(newId);
+			return;
+		}
+
+		// Delete / Backspace  —  remove selected node (skip in text fields)
+		if ((e.key === 'Delete' || e.key === 'Backspace') && !meta && !e.shiftKey && !e.altKey) {
+			if (isEditingText()) return;
+			const selId = get(selectedNodeId);
+			if (!selId) return;
+			e.preventDefault();
+			nodes.update((ns) => ns.filter((n) => n.id !== selId));
+			edges.update((es) => es.filter((edge) => edge.source !== selId && edge.target !== selId));
+			selectedNodeId.set(null);
+			return;
+		}
+
+		// ?  —  toggle shortcuts help modal (skip in text fields)
+		if (e.key === '?' && !meta && !e.altKey) {
+			if (isEditingText()) return;
+			e.preventDefault();
+			shortcutsModalOpen.update((v) => !v);
+			return;
 		}
 	}
 </script>
@@ -27,6 +126,7 @@
 </div>
 
 <CommandPalette />
+<ShortcutsModal />
 
 <style>
 	.app-shell {
