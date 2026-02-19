@@ -88,6 +88,11 @@ def create_studio_app(
     async def health() -> dict[str, str]:
         return {"status": "ok", "version": pkg_version}
 
+    # -- Registry endpoints ------------------------------------------------
+    from fireflyframework_genai.studio.api.registry import create_registry_router
+
+    app.include_router(create_registry_router())
+
     # Store config on app state for downstream routers
     app.state.studio_config = config
 
