@@ -80,6 +80,13 @@ class TestCanvasTools:
         assert data["source"] == "node_1"
         assert data["target"] == "node_2"
 
+    async def test_connect_nodes_rejects_self_loop(self, canvas, tools):
+        await tools["add_node"].execute(node_type="agent", label="A")
+        with pytest.raises(Exception, match="Cannot connect a node to itself"):
+            await tools["connect_nodes"].execute(
+                source_id="node_1", target_id="node_1"
+            )
+
     async def test_connect_nodes_rejects_missing_node(self, canvas, tools):
         await tools["add_node"].execute(node_type="agent", label="A")
         with pytest.raises(Exception, match="does not exist"):
@@ -103,6 +110,12 @@ class TestCanvasTools:
             node_id="node_1", key="label", value="Renamed"
         )
         assert canvas.nodes[0].label == "Renamed"
+
+    async def test_configure_node_rejects_missing_node(self, canvas, tools):
+        with pytest.raises(Exception, match="does not exist"):
+            await tools["configure_node"].execute(
+                node_id="node_999", key="model", value="openai:gpt-4o"
+            )
 
     # -- remove_node ---------------------------------------------------------
 

@@ -24,13 +24,16 @@ that wires everything into a :class:`FireflyAgent`.
 from __future__ import annotations
 
 import json
+import logging
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
 
 from fireflyframework_genai.agents import FireflyAgent
 from fireflyframework_genai.tools.base import BaseTool
 from fireflyframework_genai.tools.decorators import firefly_tool
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Canvas data models
@@ -64,7 +67,7 @@ class CanvasState(BaseModel):
 
     nodes: list[CanvasNode] = Field(default_factory=list)
     edges: list[CanvasEdge] = Field(default_factory=list)
-    _counter: int = 0
+    _counter: int = PrivateAttr(default=0)
 
     def next_id(self, prefix: str = "node") -> str:
         self._counter += 1
@@ -133,6 +136,8 @@ def create_canvas_tools(canvas: CanvasState) -> list[BaseTool]:
         target_handle: str | None = None,
     ) -> str:
         """Connect two existing nodes with a directed edge."""
+        if source_id == target_id:
+            raise ValueError("Cannot connect a node to itself.")
         node_ids = {n.id for n in canvas.nodes}
         if source_id not in node_ids:
             raise ValueError(f"Source node '{source_id}' does not exist.")

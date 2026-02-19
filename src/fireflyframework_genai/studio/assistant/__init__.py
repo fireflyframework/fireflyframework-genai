@@ -11,3 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+"""Studio AI assistant subpackage."""
+
+from fireflyframework_genai.studio.assistant.agent import (
+    CanvasState,
+    create_canvas_tools,
+    create_studio_assistant,
+)
+
+__all__ = [
+    "CanvasState",
+    "create_canvas_tools",
+    "create_studio_assistant",
+]
