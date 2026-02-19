@@ -6,18 +6,16 @@
 
 	let execState = $derived((data._executionState as string) ?? 'idle');
 	let showComplete = $state(false);
-	let completeTimer: ReturnType<typeof setTimeout> | undefined;
 
 	$effect(() => {
 		if (execState === 'complete') {
 			showComplete = true;
-			clearTimeout(completeTimer);
-			completeTimer = setTimeout(() => {
+			const timer = setTimeout(() => {
 				showComplete = false;
 			}, 3000);
+			return () => clearTimeout(timer);
 		} else {
 			showComplete = false;
-			clearTimeout(completeTimer);
 		}
 	});
 </script>
