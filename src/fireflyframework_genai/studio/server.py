@@ -100,6 +100,11 @@ def create_studio_app(
     project_manager = ProjectManager(config.projects_dir)
     app.include_router(create_projects_router(project_manager))
 
+    # -- Code generation endpoints -----------------------------------------
+    from fireflyframework_genai.studio.api.codegen import create_codegen_router
+
+    app.include_router(create_codegen_router())
+
     # -- Execution WebSocket -----------------------------------------------
     from fireflyframework_genai.studio.api.execution import create_execution_router
 
