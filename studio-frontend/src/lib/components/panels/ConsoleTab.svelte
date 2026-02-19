@@ -95,6 +95,7 @@
 			</div>
 		{:else}
 			{#each $executionEvents as event, i (i)}
+				{@const extra = extraInfo(event)}
 				<div class="log-line">
 					<span class="log-timestamp">{formatTimestamp(event.timestamp)}</span>
 					<span class="log-badge {badgeClass(event.type)}">{badgeLabel(event.type)}</span>
@@ -104,8 +105,8 @@
 					{#if event.pipeline_name}
 						<span class="log-pipeline">{event.pipeline_name}</span>
 					{/if}
-					{#if extraInfo(event)}
-						<span class="log-extra">{extraInfo(event)}</span>
+					{#if extra}
+						<span class="log-extra">{extra}</span>
 					{/if}
 				</div>
 			{/each}

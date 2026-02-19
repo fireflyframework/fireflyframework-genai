@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { Copy, RefreshCw, Check } from 'lucide-svelte';
 	import { nodes, edges } from '$lib/stores/pipeline';
 	import { api } from '$lib/api/client';
@@ -9,6 +9,7 @@
 	let loading = $state(false);
 	let error = $state('');
 	let copied = $state(false);
+	let copyTimer: ReturnType<typeof setTimeout> | null = null;
 
 	function serializeGraph() {
 		const currentNodes = get(nodes);
@@ -48,8 +49,10 @@
 		try {
 			await navigator.clipboard.writeText(code);
 			copied = true;
-			setTimeout(() => {
+			if (copyTimer) clearTimeout(copyTimer);
+			copyTimer = setTimeout(() => {
 				copied = false;
+				copyTimer = null;
 			}, 2000);
 		} catch {
 			// Clipboard API not available
@@ -61,6 +64,10 @@
 		if (get(nodes).length > 0) {
 			generateCode();
 		}
+	});
+
+	onDestroy(() => {
+		if (copyTimer) clearTimeout(copyTimer);
 	});
 </script>
 
