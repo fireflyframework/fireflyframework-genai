@@ -100,6 +100,11 @@ def create_studio_app(
     project_manager = ProjectManager(config.projects_dir)
     app.include_router(create_projects_router(project_manager))
 
+    # -- Execution WebSocket -----------------------------------------------
+    from fireflyframework_genai.studio.api.execution import create_execution_router
+
+    app.include_router(create_execution_router())
+
     # Store config on app state for downstream routers
     app.state.studio_config = config
 
