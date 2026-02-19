@@ -123,6 +123,11 @@ def create_studio_app(
 
     app.include_router(create_execution_router())
 
+    # -- Assistant WebSocket -----------------------------------------------
+    from fireflyframework_genai.studio.api.assistant import create_assistant_router
+
+    app.include_router(create_assistant_router())
+
     # Store config on app state for downstream routers
     app.state.studio_config = config
 
