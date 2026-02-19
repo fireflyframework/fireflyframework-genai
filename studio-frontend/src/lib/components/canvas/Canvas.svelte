@@ -6,7 +6,7 @@
 		Background,
 		BackgroundVariant
 	} from '@xyflow/svelte';
-	import { nodes, edges } from '$lib/stores/pipeline';
+	import { nodes, edges, selectedNodeId } from '$lib/stores/pipeline';
 	import AgentNode from './nodes/AgentNode.svelte';
 	import ToolNode from './nodes/ToolNode.svelte';
 	import ReasoningNode from './nodes/ReasoningNode.svelte';
@@ -28,6 +28,8 @@
 		fitView
 		colorMode="dark"
 		defaultEdgeOptions={{ animated: true }}
+		onnodeclick={({ node }) => selectedNodeId.set(node.id)}
+		onpaneclick={() => selectedNodeId.set(null)}
 	>
 		<Controls position="bottom-left" />
 		<MiniMap position="bottom-right" />
