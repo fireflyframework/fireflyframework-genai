@@ -110,6 +110,14 @@ def create_studio_app(
 
     app.include_router(create_monitoring_router())
 
+    # -- Checkpoint endpoints ----------------------------------------------
+    from fireflyframework_genai.studio.api.checkpoints import create_checkpoints_router
+    from fireflyframework_genai.studio.execution.checkpoint import CheckpointManager
+
+    checkpoint_manager = CheckpointManager()
+    app.include_router(create_checkpoints_router(checkpoint_manager))
+    app.state.checkpoint_manager = checkpoint_manager
+
     # -- Execution WebSocket -----------------------------------------------
     from fireflyframework_genai.studio.api.execution import create_execution_router
 

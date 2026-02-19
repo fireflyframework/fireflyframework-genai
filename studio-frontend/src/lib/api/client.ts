@@ -1,4 +1,11 @@
-import type { AgentInfo, ToolInfo, PatternInfo, ProjectInfo, UsageSummary } from '$lib/types/graph';
+import type {
+	AgentInfo,
+	ToolInfo,
+	PatternInfo,
+	ProjectInfo,
+	UsageSummary,
+	Checkpoint
+} from '$lib/types/graph';
 
 const BASE_URL = '/api';
 
@@ -51,5 +58,22 @@ export const api = {
 
 	monitoring: {
 		usage: () => request<UsageSummary>('/monitoring/usage')
+	},
+
+	checkpoints: {
+		list: () => request<Checkpoint[]>('/checkpoints'),
+		get: (index: number) => request<Checkpoint>(`/checkpoints/${index}`),
+		fork: (fromIndex: number, modifiedState: Record<string, unknown>) =>
+			request<Checkpoint>('/checkpoints/fork', {
+				method: 'POST',
+				body: JSON.stringify({ from_index: fromIndex, modified_state: modifiedState })
+			}),
+		diff: (indexA: number, indexB: number) =>
+			request<{ added: string[]; removed: string[]; changed: string[] }>('/checkpoints/diff', {
+				method: 'POST',
+				body: JSON.stringify({ index_a: indexA, index_b: indexB })
+			}),
+		clear: () =>
+			request<{ status: string }>('/checkpoints', { method: 'DELETE' })
 	}
 };
