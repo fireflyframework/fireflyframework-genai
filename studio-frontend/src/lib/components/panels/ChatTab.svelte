@@ -60,8 +60,12 @@
 				}
 			} else if (data.type === 'error') {
 				connectionError = data.message;
+				if (currentAssistantMsgId) {
+					completeMessage(currentAssistantMsgId, '');
+				} else {
+					chatStreaming.set(false);
+				}
 				currentAssistantMsgId = '';
-				chatStreaming.set(false);
 			}
 		};
 
