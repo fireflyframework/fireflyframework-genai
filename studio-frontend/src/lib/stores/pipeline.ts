@@ -10,6 +10,33 @@ export const selectedNode = derived(
 	([$nodes, $id]) => ($id ? $nodes.find((n) => n.id === $id) ?? null : null)
 );
 
+export type NodeExecutionState = 'idle' | 'running' | 'complete' | 'error';
+
+export const nodeStates = writable<Map<string, NodeExecutionState>>(new Map());
+
+export function setNodeState(nodeId: string, state: NodeExecutionState) {
+	nodeStates.update((map) => {
+		const next = new Map(map);
+		next.set(nodeId, state);
+		return next;
+	});
+	updateNodeData(nodeId, '_executionState', state);
+}
+
+export function clearNodeStates() {
+	nodeStates.update((map) => {
+		const next = new Map<string, NodeExecutionState>();
+		for (const [id] of map) {
+			next.set(id, 'idle');
+		}
+		return next;
+	});
+	// Also clear _executionState from all nodes
+	nodes.update((ns) =>
+		ns.map((n) => ({ ...n, data: { ...n.data, _executionState: 'idle' } }))
+	);
+}
+
 export function updateNodeData(nodeId: string, key: string, value: unknown) {
 	nodes.update((ns) =>
 		ns.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, [key]: value } } : n))

@@ -1,0 +1,99 @@
+import { StudioWebSocket } from '$lib/api/websocket';
+import { isRunning, isDebugging, activeNodes, pushExecutionEvent } from '$lib/stores/execution';
+import { setNodeState, clearNodeStates } from '$lib/stores/pipeline';
+import type { ExecutionEvent } from '$lib/types/graph';
+
+let ws: StudioWebSocket | null = null;
+const unsubscribers: Array<() => void> = [];
+
+/**
+ * Connect to the execution WebSocket and wire up event listeners
+ * that update the Svelte stores.
+ */
+export function connectExecution(): void {
+	if (ws) return;
+
+	ws = new StudioWebSocket('/ws/execution');
+	ws.connect();
+
+	unsubscribers.push(
+		ws.on('node_start', (event: ExecutionEvent) => {
+			if (event.node_id) {
+				activeNodes.update((set) => {
+					const next = new Set(set);
+					next.add(event.node_id!);
+					return next;
+				});
+				setNodeState(event.node_id, 'running');
+			}
+			pushExecutionEvent(event);
+		})
+	);
+
+	unsubscribers.push(
+		ws.on('node_complete', (event: ExecutionEvent) => {
+			if (event.node_id) {
+				activeNodes.update((set) => {
+					const next = new Set(set);
+					next.delete(event.node_id!);
+					return next;
+				});
+				setNodeState(event.node_id, 'complete');
+			}
+			pushExecutionEvent(event);
+		})
+	);
+
+	unsubscribers.push(
+		ws.on('node_error', (event: ExecutionEvent) => {
+			if (event.node_id) {
+				activeNodes.update((set) => {
+					const next = new Set(set);
+					next.delete(event.node_id!);
+					return next;
+				});
+				setNodeState(event.node_id, 'error');
+			}
+			pushExecutionEvent(event);
+		})
+	);
+
+	unsubscribers.push(
+		ws.on('pipeline_complete', (event: ExecutionEvent) => {
+			activeNodes.set(new Set());
+			isRunning.set(false);
+			isDebugging.set(false);
+			pushExecutionEvent(event);
+		})
+	);
+}
+
+/**
+ * Disconnect from the execution WebSocket and clean up listeners.
+ */
+export function disconnectExecution(): void {
+	for (const unsub of unsubscribers) unsub();
+	unsubscribers.length = 0;
+	ws?.disconnect();
+	ws = null;
+}
+
+/**
+ * Send a "run" action to the backend, resetting node states first.
+ */
+export function runPipeline(): void {
+	if (!ws) return;
+	clearNodeStates();
+	isRunning.set(true);
+	ws.send({ action: 'run' });
+}
+
+/**
+ * Send a "debug" action to the backend, resetting node states first.
+ */
+export function debugPipeline(): void {
+	if (!ws) return;
+	clearNodeStates();
+	isDebugging.set(true);
+	ws.send({ action: 'debug' });
+}

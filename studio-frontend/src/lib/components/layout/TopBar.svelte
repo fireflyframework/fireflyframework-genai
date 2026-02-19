@@ -3,6 +3,13 @@
 	import Bug from 'lucide-svelte/icons/bug';
 	import Settings from 'lucide-svelte/icons/settings';
 	import Bot from 'lucide-svelte/icons/bot';
+	import Loader from 'lucide-svelte/icons/loader';
+	import { isRunning, isDebugging } from '$lib/stores/execution';
+	import { runPipeline, debugPipeline } from '$lib/execution/bridge';
+
+	let running = $derived($isRunning);
+	let debugging = $derived($isDebugging);
+	let busy = $derived(running || debugging);
 </script>
 
 <header class="top-bar">
@@ -18,12 +25,21 @@
 	</div>
 
 	<div class="top-bar-right">
-		<button class="btn-run" title="Run">
-			<Play size={14} />
-			<span>Run</span>
+		<button class="btn-run" class:btn-run-active={running} disabled={busy} onclick={runPipeline} title="Run">
+			{#if running}
+				<span class="spin-icon"><Loader size={14} /></span>
+				<span>Running...</span>
+				<span class="pulse-dot"></span>
+			{:else}
+				<Play size={14} />
+				<span>Run</span>
+			{/if}
 		</button>
-		<button class="btn-icon" title="Debug">
+		<button class="btn-icon" class:btn-debug-active={debugging} disabled={busy} onclick={debugPipeline} title="Debug">
 			<Bug size={16} />
+			{#if debugging}
+				<span class="pulse-dot debug-dot"></span>
+			{/if}
 		</button>
 		<div class="divider"></div>
 		<button class="btn-icon" title="Settings">
@@ -110,14 +126,24 @@
 		font-size: 12px;
 		font-weight: 600;
 		cursor: pointer;
-		transition: opacity 0.15s;
+		transition: opacity 0.15s, background 0.3s ease;
 	}
 
-	.btn-run:hover {
+	.btn-run:hover:not(:disabled) {
 		opacity: 0.9;
 	}
 
+	.btn-run:disabled {
+		cursor: not-allowed;
+		opacity: 0.7;
+	}
+
+	.btn-run-active {
+		background: var(--color-success);
+	}
+
 	.btn-icon {
+		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -131,9 +157,18 @@
 		transition: background 0.15s, color 0.15s;
 	}
 
-	.btn-icon:hover {
+	.btn-icon:hover:not(:disabled) {
 		background: var(--color-bg-elevated);
 		color: var(--color-text-primary);
+	}
+
+	.btn-icon:disabled {
+		cursor: not-allowed;
+		opacity: 0.5;
+	}
+
+	.btn-debug-active {
+		color: var(--color-warning);
 	}
 
 	.divider {
@@ -141,5 +176,46 @@
 		height: 20px;
 		background: var(--color-border);
 		margin: 0 4px;
+	}
+
+	.pulse-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: white;
+		animation: pulse-indicator 1s ease-in-out infinite;
+	}
+
+	.debug-dot {
+		position: absolute;
+		top: 4px;
+		right: 4px;
+		width: 5px;
+		height: 5px;
+		background: var(--color-warning);
+	}
+
+	@keyframes pulse-indicator {
+		0%, 100% {
+			opacity: 0.4;
+		}
+		50% {
+			opacity: 1;
+		}
+	}
+
+	.spin-icon {
+		display: flex;
+		align-items: center;
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
 	}
 </style>

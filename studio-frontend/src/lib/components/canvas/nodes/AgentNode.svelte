@@ -1,16 +1,48 @@
 <script lang="ts">
 	import { Handle, Position } from '@xyflow/svelte';
-	import { Bot } from 'lucide-svelte';
+	import { Bot, CheckCircle2, AlertCircle } from 'lucide-svelte';
 
 	let { data } = $props();
+
+	let execState = $derived((data._executionState as string) ?? 'idle');
+	let showComplete = $state(false);
+	let completeTimer: ReturnType<typeof setTimeout> | undefined;
+
+	$effect(() => {
+		if (execState === 'complete') {
+			showComplete = true;
+			clearTimeout(completeTimer);
+			completeTimer = setTimeout(() => {
+				showComplete = false;
+			}, 3000);
+		} else {
+			showComplete = false;
+			clearTimeout(completeTimer);
+		}
+	});
 </script>
 
-<div class="agent-node">
+<div
+	class="agent-node"
+	class:exec-running={execState === 'running'}
+	class:exec-complete={execState === 'complete'}
+	class:exec-error={execState === 'error'}
+>
 	<div class="node-header">
 		<div class="icon-wrapper agent-icon">
 			<Bot size={14} />
 		</div>
 		<span class="node-label">{data.label || 'Agent'}</span>
+		{#if showComplete}
+			<span class="state-icon state-complete">
+				<CheckCircle2 size={14} />
+			</span>
+		{/if}
+		{#if execState === 'error'}
+			<span class="state-icon state-error">
+				<AlertCircle size={14} />
+			</span>
+		{/if}
 	</div>
 	{#if data.model}
 		<div class="node-detail">{data.model}</div>
@@ -27,6 +59,26 @@
 		padding: 12px 16px;
 		min-width: 180px;
 		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.05);
+		transition: border-color 0.3s ease, box-shadow 0.3s ease;
+	}
+	.agent-node.exec-running {
+		animation: pulse-agent 1.5s ease-in-out infinite;
+	}
+	.agent-node.exec-complete {
+		border-color: var(--color-success);
+		box-shadow: 0 0 12px rgba(34, 197, 94, 0.3);
+	}
+	.agent-node.exec-error {
+		border-color: var(--color-error);
+		box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+	}
+	@keyframes pulse-agent {
+		0%, 100% {
+			box-shadow: 0 0 8px rgba(99, 102, 241, 0.15);
+		}
+		50% {
+			box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+		}
 	}
 	.node-header {
 		display: flex;
@@ -58,5 +110,16 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+	.state-icon {
+		margin-left: auto;
+		display: flex;
+		align-items: center;
+	}
+	.state-complete {
+		color: var(--color-success);
+	}
+	.state-error {
+		color: var(--color-error);
 	}
 </style>
