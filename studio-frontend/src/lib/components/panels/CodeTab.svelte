@@ -56,9 +56,11 @@
 		}
 	}
 
-	// Generate code on mount
+	// Generate code on mount if there are nodes in the graph
 	onMount(() => {
-		generateCode();
+		if (get(nodes).length > 0) {
+			generateCode();
+		}
 	});
 </script>
 
@@ -73,16 +75,15 @@
 					<Copy size={13} />
 				{/if}
 			</button>
-			<button class="toolbar-btn" onclick={generateCode} title="Regenerate code" disabled={loading}>
-				<RefreshCw size={13} class={loading ? 'spin' : ''} />
+			<button class="toolbar-btn" class:spinning={loading} onclick={generateCode} title="Regenerate code" disabled={loading}>
+				<RefreshCw size={13} />
 			</button>
 		</div>
 	</div>
 
 	<div class="code-content">
 		{#if loading}
-			<div class="code-state">
-				<RefreshCw size={20} class="spin" />
+			<div class="code-state spinning-indicator">
 				<span>Generating code...</span>
 			</div>
 		{:else if error}
@@ -182,7 +183,7 @@
 		tab-size: 4;
 	}
 
-	:global(.spin) {
+	.spinning :global(svg) {
 		animation: spin 1s linear infinite;
 	}
 

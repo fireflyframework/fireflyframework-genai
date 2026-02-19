@@ -58,7 +58,6 @@
 
 <div
 	class="bottom-panel"
-	class:panel-open={$bottomPanelOpen}
 	class:dragging={isDragging}
 	style:height={$bottomPanelOpen ? `${panelHeight}px` : '36px'}
 >
@@ -122,21 +121,6 @@
 	.bottom-panel.dragging {
 		transition: none;
 		user-select: none;
-	}
-
-	.bottom-panel.panel-open {
-		animation: slideUp 0.2s ease-out;
-	}
-
-	@keyframes slideUp {
-		from {
-			opacity: 0;
-			transform: translateY(8px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
 	}
 
 	.drag-handle {

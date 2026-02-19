@@ -24,12 +24,12 @@
 		executionEvents.set([]);
 	}
 
-	function formatTimestamp(): string {
-		const now = new Date();
-		const h = String(now.getHours()).padStart(2, '0');
-		const m = String(now.getMinutes()).padStart(2, '0');
-		const s = String(now.getSeconds()).padStart(2, '0');
-		const ms = String(now.getMilliseconds()).padStart(3, '0');
+	function formatTimestamp(iso: string): string {
+		const d = new Date(iso);
+		const h = String(d.getHours()).padStart(2, '0');
+		const m = String(d.getMinutes()).padStart(2, '0');
+		const s = String(d.getSeconds()).padStart(2, '0');
+		const ms = String(d.getMilliseconds()).padStart(3, '0');
 		return `${h}:${m}:${s}.${ms}`;
 	}
 
@@ -96,7 +96,7 @@
 		{:else}
 			{#each $executionEvents as event, i (i)}
 				<div class="log-line">
-					<span class="log-timestamp">{formatTimestamp()}</span>
+					<span class="log-timestamp">{formatTimestamp(event.timestamp)}</span>
 					<span class="log-badge {badgeClass(event.type)}">{badgeLabel(event.type)}</span>
 					{#if event.node_id}
 						<span class="log-node">{event.node_id}</span>

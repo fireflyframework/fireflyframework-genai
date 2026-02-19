@@ -50,6 +50,7 @@ export interface ExecutionEvent {
 	error?: string;
 	success?: boolean;
 	duration_ms?: number;
+	timestamp: string;
 }
 
 export interface Checkpoint {
