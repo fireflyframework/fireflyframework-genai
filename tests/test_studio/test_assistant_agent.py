@@ -69,9 +69,7 @@ class TestCanvasTools:
         await tools["add_node"].execute(node_type="agent", label="A")
         await tools["add_node"].execute(node_type="tool", label="B")
 
-        result = await tools["connect_nodes"].execute(
-            source_id="node_1", target_id="node_2"
-        )
+        result = await tools["connect_nodes"].execute(source_id="node_1", target_id="node_2")
         assert len(canvas.edges) == 1
         assert canvas.edges[0].source == "node_1"
         assert canvas.edges[0].target == "node_2"
@@ -83,48 +81,36 @@ class TestCanvasTools:
     async def test_connect_nodes_rejects_self_loop(self, canvas, tools):
         await tools["add_node"].execute(node_type="agent", label="A")
         with pytest.raises(Exception, match="Cannot connect a node to itself"):
-            await tools["connect_nodes"].execute(
-                source_id="node_1", target_id="node_1"
-            )
+            await tools["connect_nodes"].execute(source_id="node_1", target_id="node_1")
 
     async def test_connect_nodes_rejects_missing_node(self, canvas, tools):
         await tools["add_node"].execute(node_type="agent", label="A")
         with pytest.raises(Exception, match="does not exist"):
-            await tools["connect_nodes"].execute(
-                source_id="node_1", target_id="node_999"
-            )
+            await tools["connect_nodes"].execute(source_id="node_1", target_id="node_999")
 
     # -- configure_node ------------------------------------------------------
 
     async def test_configure_node_updates_config(self, canvas, tools):
         await tools["add_node"].execute(node_type="agent", label="A")
-        result = await tools["configure_node"].execute(
-            node_id="node_1", key="model", value="openai:gpt-4o"
-        )
+        result = await tools["configure_node"].execute(node_id="node_1", key="model", value="openai:gpt-4o")
         assert canvas.nodes[0].config["model"] == "openai:gpt-4o"
         assert "model" in result
 
     async def test_configure_node_updates_label(self, canvas, tools):
         await tools["add_node"].execute(node_type="agent", label="A")
-        await tools["configure_node"].execute(
-            node_id="node_1", key="label", value="Renamed"
-        )
+        await tools["configure_node"].execute(node_id="node_1", key="label", value="Renamed")
         assert canvas.nodes[0].label == "Renamed"
 
     async def test_configure_node_rejects_missing_node(self, canvas, tools):
         with pytest.raises(Exception, match="does not exist"):
-            await tools["configure_node"].execute(
-                node_id="node_999", key="model", value="openai:gpt-4o"
-            )
+            await tools["configure_node"].execute(node_id="node_999", key="model", value="openai:gpt-4o")
 
     # -- remove_node ---------------------------------------------------------
 
     async def test_remove_node_removes_node_and_edges(self, canvas, tools):
         await tools["add_node"].execute(node_type="agent", label="A")
         await tools["add_node"].execute(node_type="tool", label="B")
-        await tools["connect_nodes"].execute(
-            source_id="node_1", target_id="node_2"
-        )
+        await tools["connect_nodes"].execute(source_id="node_1", target_id="node_2")
         assert len(canvas.nodes) == 2
         assert len(canvas.edges) == 1
 
@@ -156,12 +142,8 @@ class TestCanvasTools:
         await tools["add_node"].execute(node_type="agent", label="A")
         await tools["add_node"].execute(node_type="tool", label="B")
         await tools["add_node"].execute(node_type="condition", label="C")
-        await tools["connect_nodes"].execute(
-            source_id="node_1", target_id="node_2"
-        )
-        await tools["connect_nodes"].execute(
-            source_id="node_2", target_id="node_3"
-        )
+        await tools["connect_nodes"].execute(source_id="node_1", target_id="node_2")
+        await tools["connect_nodes"].execute(source_id="node_2", target_id="node_3")
 
         result = await tools["list_edges"].execute()
         data = json.loads(result)

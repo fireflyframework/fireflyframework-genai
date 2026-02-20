@@ -60,9 +60,7 @@ def _reset_usage_tracker():
 
 
 class TestMonitoringUsage:
-    async def test_usage_returns_valid_json_with_expected_fields(
-        self, client: httpx.AsyncClient
-    ):
+    async def test_usage_returns_valid_json_with_expected_fields(self, client: httpx.AsyncClient):
         resp = await client.get("/api/monitoring/usage")
         assert resp.status_code == 200
         body = resp.json()
@@ -82,9 +80,7 @@ class TestMonitoringUsage:
         for field in expected_fields:
             assert field in body, f"Missing field: {field}"
 
-    async def test_usage_returns_zeros_when_no_records(
-        self, client: httpx.AsyncClient
-    ):
+    async def test_usage_returns_zeros_when_no_records(self, client: httpx.AsyncClient):
         resp = await client.get("/api/monitoring/usage")
         assert resp.status_code == 200
         body = resp.json()
@@ -99,9 +95,7 @@ class TestMonitoringUsage:
         assert body["by_agent"] == {}
         assert body["by_model"] == {}
 
-    async def test_usage_reflects_recorded_data(
-        self, client: httpx.AsyncClient
-    ):
+    async def test_usage_reflects_recorded_data(self, client: httpx.AsyncClient):
         from fireflyframework_genai.observability.usage import (
             UsageRecord,
             default_usage_tracker,
@@ -147,9 +141,7 @@ class TestMonitoringUsage:
         assert model_data["input_tokens"] == 100
         assert model_data["total_tokens"] == 150
 
-    async def test_usage_aggregates_multiple_records(
-        self, client: httpx.AsyncClient
-    ):
+    async def test_usage_aggregates_multiple_records(self, client: httpx.AsyncClient):
         from fireflyframework_genai.observability.usage import (
             UsageRecord,
             default_usage_tracker,

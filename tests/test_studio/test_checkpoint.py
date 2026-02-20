@@ -17,13 +17,12 @@
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fireflyframework_genai.studio.execution.checkpoint import (
     Checkpoint,
     CheckpointManager,
 )
-
 
 # ---------------------------------------------------------------------------
 # Checkpoint dataclass
@@ -86,9 +85,9 @@ class TestCheckpointManagerCreate:
 
     def test_create_auto_sets_timestamp(self) -> None:
         mgr = CheckpointManager()
-        before = datetime.now(timezone.utc)
+        before = datetime.now(UTC)
         cp = mgr.create(node_id="n", state={}, inputs={})
-        after = datetime.now(timezone.utc)
+        after = datetime.now(UTC)
 
         ts = datetime.fromisoformat(cp.timestamp)
         assert before <= ts <= after

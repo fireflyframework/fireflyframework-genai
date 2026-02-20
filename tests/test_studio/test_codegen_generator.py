@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
+from fireflyframework_genai.studio.codegen.generator import generate_python
 from fireflyframework_genai.studio.codegen.models import (
     GraphEdge,
     GraphModel,
     GraphNode,
     NodeType,
 )
-
-from fireflyframework_genai.studio.codegen.generator import generate_python
-
 
 # ---------------------------------------------------------------------------
 # Helpers

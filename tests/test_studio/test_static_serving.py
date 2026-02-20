@@ -34,9 +34,7 @@ def static_dir(tmp_path: Path) -> Path:
     """Create a temporary static directory with a minimal SPA."""
     d = tmp_path / "static"
     d.mkdir()
-    (d / "index.html").write_text(
-        "<!doctype html><html><body>Firefly Studio</body></html>"
-    )
+    (d / "index.html").write_text("<!doctype html><html><body>Firefly Studio</body></html>")
     app_dir = d / "_app"
     app_dir.mkdir()
     (app_dir / "app.js").write_text("console.log('ok');")
@@ -44,9 +42,7 @@ def static_dir(tmp_path: Path) -> Path:
 
 
 class TestStaticServing:
-    async def test_serves_index_html_when_static_dir_exists(
-        self, static_dir: Path
-    ):
+    async def test_serves_index_html_when_static_dir_exists(self, static_dir: Path):
         """When bundled static files exist, / serves index.html."""
         with patch(
             "fireflyframework_genai.studio.server._get_default_static_dir",
@@ -55,16 +51,12 @@ class TestStaticServing:
             app = create_studio_app()
 
         transport = httpx.ASGITransport(app=app)
-        async with httpx.AsyncClient(
-            transport=transport, base_url="http://test"
-        ) as client:
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
             resp = await client.get("/")
             assert resp.status_code == 200
             assert "Firefly Studio" in resp.text
 
-    async def test_api_routes_work_with_static_serving(
-        self, static_dir: Path
-    ):
+    async def test_api_routes_work_with_static_serving(self, static_dir: Path):
         """API routes still work when static files are mounted."""
         with patch(
             "fireflyframework_genai.studio.server._get_default_static_dir",
@@ -73,9 +65,7 @@ class TestStaticServing:
             app = create_studio_app()
 
         transport = httpx.ASGITransport(app=app)
-        async with httpx.AsyncClient(
-            transport=transport, base_url="http://test"
-        ) as client:
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
             resp = await client.get("/api/health")
             assert resp.status_code == 200
             assert resp.json()["status"] == "ok"
@@ -85,9 +75,7 @@ class TestStaticServing:
         app = create_studio_app()
 
         transport = httpx.ASGITransport(app=app)
-        async with httpx.AsyncClient(
-            transport=transport, base_url="http://test"
-        ) as client:
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
             # API should still work
             resp = await client.get("/api/health")
             assert resp.status_code == 200

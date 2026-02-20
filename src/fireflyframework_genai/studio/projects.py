@@ -24,7 +24,7 @@ from __future__ import annotations
 import json
 import shutil
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -75,7 +75,7 @@ class ProjectManager:
         project_dir.mkdir(parents=True)
         (project_dir / "pipelines").mkdir()
 
-        created_at = datetime.now(timezone.utc).isoformat()
+        created_at = datetime.now(UTC).isoformat()
         meta = {
             "name": name,
             "description": description,
@@ -122,17 +122,11 @@ class ProjectManager:
 
     # -- Pipeline persistence ----------------------------------------------
 
-    def save_pipeline(
-        self, project_name: str, pipeline_name: str, graph: dict
-    ) -> None:
+    def save_pipeline(self, project_name: str, pipeline_name: str, graph: dict) -> None:
         """Persist a pipeline graph as JSON inside the project directory."""
-        pipeline_path = self._safe_path(
-            project_name, "pipelines", f"{pipeline_name}.json"
-        )
+        pipeline_path = self._safe_path(project_name, "pipelines", f"{pipeline_name}.json")
         if not pipeline_path.parent.exists():
-            raise FileNotFoundError(
-                f"Project '{project_name}' not found"
-            )
+            raise FileNotFoundError(f"Project '{project_name}' not found")
         pipeline_path.write_text(json.dumps(graph, indent=2))
 
     def load_pipeline(self, project_name: str, pipeline_name: str) -> dict:
@@ -143,11 +137,7 @@ class ProjectManager:
         FileNotFoundError
             If the pipeline JSON file does not exist.
         """
-        pipeline_path = self._safe_path(
-            project_name, "pipelines", f"{pipeline_name}.json"
-        )
+        pipeline_path = self._safe_path(project_name, "pipelines", f"{pipeline_name}.json")
         if not pipeline_path.is_file():
-            raise FileNotFoundError(
-                f"Pipeline '{pipeline_name}' not found in project '{project_name}'"
-            )
+            raise FileNotFoundError(f"Pipeline '{pipeline_name}' not found in project '{project_name}'")
         return json.loads(pipeline_path.read_text())

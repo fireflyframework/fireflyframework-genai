@@ -50,16 +50,12 @@ async def client(app):
 
 
 class TestRegistryAgents:
-    async def test_agents_returns_empty_list_when_none_registered(
-        self, client: httpx.AsyncClient
-    ):
+    async def test_agents_returns_empty_list_when_none_registered(self, client: httpx.AsyncClient):
         resp = await client.get("/api/registry/agents")
         assert resp.status_code == 200
         assert resp.json() == []
 
-    async def test_agents_returns_agent_info_after_registration(
-        self, client: httpx.AsyncClient
-    ):
+    async def test_agents_returns_agent_info_after_registration(self, client: httpx.AsyncClient):
         from pydantic_ai.models.test import TestModel
 
         from fireflyframework_genai.agents.base import FireflyAgent
@@ -91,16 +87,12 @@ class TestRegistryAgents:
 
 
 class TestRegistryTools:
-    async def test_tools_returns_empty_list_when_none_registered(
-        self, client: httpx.AsyncClient
-    ):
+    async def test_tools_returns_empty_list_when_none_registered(self, client: httpx.AsyncClient):
         resp = await client.get("/api/registry/tools")
         assert resp.status_code == 200
         assert resp.json() == []
 
-    async def test_tools_returns_tool_info_after_registration(
-        self, client: httpx.AsyncClient
-    ):
+    async def test_tools_returns_tool_info_after_registration(self, client: httpx.AsyncClient):
         from fireflyframework_genai.tools.base import BaseTool
         from fireflyframework_genai.tools.registry import tool_registry
 
@@ -125,16 +117,12 @@ class TestRegistryTools:
 
 
 class TestRegistryPatterns:
-    async def test_patterns_returns_empty_list_when_none_registered(
-        self, client: httpx.AsyncClient
-    ):
+    async def test_patterns_returns_empty_list_when_none_registered(self, client: httpx.AsyncClient):
         resp = await client.get("/api/registry/patterns")
         assert resp.status_code == 200
         assert resp.json() == []
 
-    async def test_patterns_returns_list_after_registration(
-        self, client: httpx.AsyncClient
-    ):
+    async def test_patterns_returns_list_after_registration(self, client: httpx.AsyncClient):
         from fireflyframework_genai.reasoning.registry import reasoning_registry
 
         reasoning_registry.register("chain-of-thought", object())

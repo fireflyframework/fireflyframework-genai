@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 
 @dataclass(frozen=True)
@@ -96,7 +96,7 @@ class CheckpointManager:
             node_id=node_id,
             state=state,
             inputs=inputs,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             branch_id=branch_id,
         )
         self._checkpoints.append(cp)
@@ -148,7 +148,7 @@ class CheckpointManager:
             node_id=parent.node_id,
             state=modified_state,
             inputs=parent.inputs,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             branch_id=branch_id,
             parent_index=from_index,
         )

@@ -19,9 +19,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import httpx
 import pytest
 
+from fireflyframework_genai.studio.config import StudioConfig
 from fireflyframework_genai.studio.projects import ProjectInfo, ProjectManager
+from fireflyframework_genai.studio.server import create_studio_app
 
 pytest.importorskip("fastapi", reason="fastapi not installed")
 pytest.importorskip("httpx", reason="httpx not installed")
@@ -156,13 +159,6 @@ class TestProjectManagerPathTraversal:
 # ---------------------------------------------------------------------------
 
 
-import httpx
-
-from fireflyframework_genai.studio.api.projects import create_projects_router
-from fireflyframework_genai.studio.config import StudioConfig
-from fireflyframework_genai.studio.server import create_studio_app
-
-
 @pytest.fixture()
 def app(tmp_path: Path):
     """Create a Studio app with projects_dir pointing to tmp_path."""
@@ -238,18 +234,13 @@ class TestProjectsAPI:
         resp = await client.get("/api/projects/proj/pipelines/nope")
         assert resp.status_code == 404
 
-    async def test_delete_nonexistent_project_returns_404(
-        self, client: httpx.AsyncClient
-    ):
+    async def test_delete_nonexistent_project_returns_404(self, client: httpx.AsyncClient):
         resp = await client.delete("/api/projects/nonexistent")
         assert resp.status_code == 404
 
-    async def test_save_pipeline_nonexistent_project_returns_404(
-        self, client: httpx.AsyncClient
-    ):
+    async def test_save_pipeline_nonexistent_project_returns_404(self, client: httpx.AsyncClient):
         resp = await client.post(
             "/api/projects/nonexistent/pipelines/test",
             json={"graph": {"nodes": [], "edges": []}},
         )
         assert resp.status_code == 404
-

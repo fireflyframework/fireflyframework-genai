@@ -70,18 +70,18 @@ def create_checkpoints_router(manager: CheckpointManager) -> APIRouter:
     async def get_checkpoint(index: int) -> dict[str, Any]:
         try:
             return asdict(manager.get(index))
-        except IndexError:
-            raise HTTPException(status_code=404, detail=f"Checkpoint {index} not found")
+        except IndexError as exc:
+            raise HTTPException(status_code=404, detail=f"Checkpoint {index} not found") from exc
 
     @router.post("/fork")
     async def fork_checkpoint(body: ForkRequest) -> dict[str, Any]:
         try:
             cp = manager.fork(body.from_index, body.modified_state)
-        except IndexError:
+        except IndexError as exc:
             raise HTTPException(
                 status_code=404,
                 detail=f"Checkpoint {body.from_index} not found",
-            )
+            ) from exc
         return asdict(cp)
 
     @router.post("/diff")
@@ -89,7 +89,7 @@ def create_checkpoints_router(manager: CheckpointManager) -> APIRouter:
         try:
             result = manager.diff(body.index_a, body.index_b)
         except IndexError as exc:
-            raise HTTPException(status_code=404, detail=str(exc))
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
         # Convert sets to sorted lists for JSON serialisation
         return {k: sorted(v) for k, v in result.items()}
 

@@ -47,18 +47,22 @@ async def _handle_chat(
         async with stream_ctx as stream:
             async for token in stream.stream_tokens():
                 full_text += token
-                await websocket.send_json({
-                    "type": "token",
-                    "content": token,
-                })
+                await websocket.send_json(
+                    {
+                        "type": "token",
+                        "content": token,
+                    }
+                )
 
             # Update message history with new messages
             message_history.extend(stream.new_messages())
 
-        await websocket.send_json({
-            "type": "response_complete",
-            "full_text": full_text,
-        })
+        await websocket.send_json(
+            {
+                "type": "response_complete",
+                "full_text": full_text,
+            }
+        )
 
     except Exception as exc:
         # Fallback: try non-streaming run
@@ -68,29 +72,33 @@ async def _handle_chat(
                 user_message,
                 message_history=message_history,
             )
-            response_text = (
-                str(result.output) if hasattr(result, "output") else str(result)
-            )
+            response_text = str(result.output) if hasattr(result, "output") else str(result)
 
             # Update message history from fallback result
             if hasattr(result, "new_messages"):
                 message_history.extend(result.new_messages())
 
-            await websocket.send_json({
-                "type": "token",
-                "content": response_text,
-            })
-            await websocket.send_json({
-                "type": "response_complete",
-                "full_text": response_text,
-            })
+            await websocket.send_json(
+                {
+                    "type": "token",
+                    "content": response_text,
+                }
+            )
+            await websocket.send_json(
+                {
+                    "type": "response_complete",
+                    "full_text": response_text,
+                }
+            )
 
         except Exception as fallback_exc:
             logger.error("Assistant chat failed: %s", fallback_exc)
-            await websocket.send_json({
-                "type": "error",
-                "message": f"Assistant error: {fallback_exc}",
-            })
+            await websocket.send_json(
+                {
+                    "type": "error",
+                    "message": f"Assistant error: {fallback_exc}",
+                }
+            )
 
 
 def create_assistant_router() -> APIRouter:
@@ -126,10 +134,12 @@ def create_assistant_router() -> APIRouter:
             agent = create_studio_assistant(canvas=canvas)
         except Exception as exc:
             logger.error("Failed to create studio assistant: %s", exc)
-            await websocket.send_json({
-                "type": "error",
-                "message": f"Assistant unavailable: {exc}",
-            })
+            await websocket.send_json(
+                {
+                    "type": "error",
+                    "message": f"Assistant unavailable: {exc}",
+                }
+            )
             await websocket.close()
             return
 
@@ -139,10 +149,12 @@ def create_assistant_router() -> APIRouter:
                 try:
                     message = json.loads(raw)
                 except json.JSONDecodeError:
-                    await websocket.send_json({
-                        "type": "error",
-                        "message": "Invalid JSON",
-                    })
+                    await websocket.send_json(
+                        {
+                            "type": "error",
+                            "message": "Invalid JSON",
+                        }
+                    )
                     continue
 
                 action = message.get("action")
@@ -150,25 +162,27 @@ def create_assistant_router() -> APIRouter:
                 if action == "chat":
                     user_message = message.get("message", "").strip()
                     if not user_message:
-                        await websocket.send_json({
-                            "type": "error",
-                            "message": "Empty message",
-                        })
+                        await websocket.send_json(
+                            {
+                                "type": "error",
+                                "message": "Empty message",
+                            }
+                        )
                         continue
 
-                    await _handle_chat(
-                        websocket, agent, user_message, message_history
-                    )
+                    await _handle_chat(websocket, agent, user_message, message_history)
 
                 elif action == "clear_history":
                     message_history.clear()
                     await websocket.send_json({"type": "history_cleared"})
 
                 else:
-                    await websocket.send_json({
-                        "type": "error",
-                        "message": f"Unknown action: {action}",
-                    })
+                    await websocket.send_json(
+                        {
+                            "type": "error",
+                            "message": f"Unknown action: {action}",
+                        }
+                    )
 
         except WebSocketDisconnect:
             logger.info("Assistant WebSocket disconnected")

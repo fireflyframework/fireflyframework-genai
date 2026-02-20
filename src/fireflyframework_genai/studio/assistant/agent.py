@@ -104,10 +104,7 @@ def create_canvas_tools(canvas: CanvasState) -> list[BaseTool]:
     ) -> str:
         """Add a node of the given type to the canvas and return its info."""
         if node_type not in _VALID_NODE_TYPES:
-            raise ValueError(
-                f"Invalid node_type '{node_type}'. "
-                f"Must be one of: {', '.join(sorted(_VALID_NODE_TYPES))}"
-            )
+            raise ValueError(f"Invalid node_type '{node_type}'. Must be one of: {', '.join(sorted(_VALID_NODE_TYPES))}")
         node = CanvasNode(
             id=canvas.next_id("node"),
             type=node_type,
@@ -192,11 +189,7 @@ def create_canvas_tools(canvas: CanvasState) -> list[BaseTool]:
             raise ValueError(f"Node '{node_id}' does not exist.")
 
         canvas.nodes = [n for n in canvas.nodes if n.id != node_id]
-        canvas.edges = [
-            e
-            for e in canvas.edges
-            if e.source != node_id and e.target != node_id
-        ]
+        canvas.edges = [e for e in canvas.edges if e.source != node_id and e.target != node_id]
         return f"Removed node '{node_id}' and its connected edges."
 
     @firefly_tool(

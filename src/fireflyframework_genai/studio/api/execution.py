@@ -65,8 +65,7 @@ def create_execution_router() -> APIRouter:
                     await websocket.send_json(
                         {
                             "type": "error",
-                            "message": "Execution is not fully wired yet. "
-                            "PipelineEngine integration is pending.",
+                            "message": "Execution is not fully wired yet. PipelineEngine integration is pending.",
                         }
                     )
                     await websocket.send_json(

@@ -109,25 +109,17 @@ INVALID_GRAPH = {
 class TestCodegenToCode:
     """Tests for the POST /api/codegen/to-code endpoint."""
 
-    async def test_single_agent_node_returns_firefly_agent(
-        self, client: httpx.AsyncClient
-    ):
+    async def test_single_agent_node_returns_firefly_agent(self, client: httpx.AsyncClient):
         """A single agent node should generate code containing FireflyAgent."""
-        resp = await client.post(
-            "/api/codegen/to-code", json={"graph": SINGLE_AGENT_GRAPH}
-        )
+        resp = await client.post("/api/codegen/to-code", json={"graph": SINGLE_AGENT_GRAPH})
         assert resp.status_code == 200
         body = resp.json()
         assert "code" in body
         assert "FireflyAgent" in body["code"]
 
-    async def test_two_nodes_with_edge_returns_pipeline_builder(
-        self, client: httpx.AsyncClient
-    ):
+    async def test_two_nodes_with_edge_returns_pipeline_builder(self, client: httpx.AsyncClient):
         """Two nodes connected by an edge should generate PipelineBuilder code."""
-        resp = await client.post(
-            "/api/codegen/to-code", json={"graph": TWO_NODES_WITH_EDGE_GRAPH}
-        )
+        resp = await client.post("/api/codegen/to-code", json={"graph": TWO_NODES_WITH_EDGE_GRAPH})
         assert resp.status_code == 200
         body = resp.json()
         assert "code" in body
@@ -135,16 +127,12 @@ class TestCodegenToCode:
 
     async def test_invalid_graph_returns_error(self, client: httpx.AsyncClient):
         """An invalid graph (bad node type) should return 422."""
-        resp = await client.post(
-            "/api/codegen/to-code", json={"graph": INVALID_GRAPH}
-        )
+        resp = await client.post("/api/codegen/to-code", json={"graph": INVALID_GRAPH})
         assert resp.status_code == 422
 
     async def test_response_has_code_key(self, client: httpx.AsyncClient):
         """The response should always have a 'code' key on success."""
-        resp = await client.post(
-            "/api/codegen/to-code", json={"graph": SINGLE_AGENT_GRAPH}
-        )
+        resp = await client.post("/api/codegen/to-code", json={"graph": SINGLE_AGENT_GRAPH})
         assert resp.status_code == 200
         body = resp.json()
         assert "code" in body

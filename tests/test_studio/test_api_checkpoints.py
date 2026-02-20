@@ -67,12 +67,8 @@ class TestListCheckpoints:
         client: httpx.AsyncClient,
         checkpoint_manager: CheckpointManager,
     ):
-        checkpoint_manager.create(
-            node_id="agent-1", state={"key": "value"}, inputs={"prompt": "hello"}
-        )
-        checkpoint_manager.create(
-            node_id="tool-1", state={"result": 42}, inputs={"arg": "x"}
-        )
+        checkpoint_manager.create(node_id="agent-1", state={"key": "value"}, inputs={"prompt": "hello"})
+        checkpoint_manager.create(node_id="tool-1", state={"result": 42}, inputs={"arg": "x"})
 
         resp = await client.get("/api/checkpoints")
         assert resp.status_code == 200
@@ -96,9 +92,7 @@ class TestGetCheckpoint:
         client: httpx.AsyncClient,
         checkpoint_manager: CheckpointManager,
     ):
-        checkpoint_manager.create(
-            node_id="agent-1", state={"key": "value"}, inputs={"prompt": "hello"}
-        )
+        checkpoint_manager.create(node_id="agent-1", state={"key": "value"}, inputs={"prompt": "hello"})
 
         resp = await client.get("/api/checkpoints/0")
         assert resp.status_code == 200
@@ -131,9 +125,7 @@ class TestForkCheckpoint:
         client: httpx.AsyncClient,
         checkpoint_manager: CheckpointManager,
     ):
-        checkpoint_manager.create(
-            node_id="agent-1", state={"key": "value"}, inputs={"prompt": "hello"}
-        )
+        checkpoint_manager.create(node_id="agent-1", state={"key": "value"}, inputs={"prompt": "hello"})
 
         resp = await client.post(
             "/api/checkpoints/fork",
@@ -209,12 +201,8 @@ class TestClearCheckpoints:
         client: httpx.AsyncClient,
         checkpoint_manager: CheckpointManager,
     ):
-        checkpoint_manager.create(
-            node_id="agent-1", state={"key": "value"}, inputs={}
-        )
-        checkpoint_manager.create(
-            node_id="agent-2", state={"key": "value2"}, inputs={}
-        )
+        checkpoint_manager.create(node_id="agent-1", state={"key": "value"}, inputs={})
+        checkpoint_manager.create(node_id="agent-2", state={"key": "value2"}, inputs={})
 
         resp = await client.delete("/api/checkpoints")
         assert resp.status_code == 200

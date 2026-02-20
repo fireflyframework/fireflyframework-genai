@@ -28,7 +28,6 @@ from pydantic import BaseModel  # type: ignore[import-not-found]
 
 from fireflyframework_genai.studio.projects import ProjectManager
 
-
 # ---------------------------------------------------------------------------
 # Request / response models
 # ---------------------------------------------------------------------------
@@ -102,9 +101,7 @@ def create_projects_router(manager: ProjectManager) -> APIRouter:
         return {"status": "deleted"}
 
     @router.post("/{project_name}/pipelines/{pipeline_name}")
-    async def save_pipeline(
-        project_name: str, pipeline_name: str, body: SavePipelineRequest
-    ) -> dict[str, str]:
+    async def save_pipeline(project_name: str, pipeline_name: str, body: SavePipelineRequest) -> dict[str, str]:
         try:
             manager.save_pipeline(project_name, pipeline_name, body.graph)
         except FileNotFoundError as exc:
@@ -114,9 +111,7 @@ def create_projects_router(manager: ProjectManager) -> APIRouter:
         return {"status": "saved"}
 
     @router.get("/{project_name}/pipelines/{pipeline_name}")
-    async def load_pipeline(
-        project_name: str, pipeline_name: str
-    ) -> dict[str, Any]:
+    async def load_pipeline(project_name: str, pipeline_name: str) -> dict[str, Any]:
         try:
             return manager.load_pipeline(project_name, pipeline_name)
         except FileNotFoundError as exc:

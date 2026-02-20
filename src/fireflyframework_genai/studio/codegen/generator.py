@@ -94,13 +94,7 @@ def _emit_agent(node: GraphNode) -> str:
 
     instr_literal = _format_string_literal(instructions)
 
-    return (
-        f"{name} = FireflyAgent(\n"
-        f'    name="{name}",\n'
-        f'    model="{model}",\n'
-        f"    instructions={instr_literal},\n"
-        f")"
-    )
+    return f'{name} = FireflyAgent(\n    name="{name}",\n    model="{model}",\n    instructions={instr_literal},\n)'
 
 
 def _emit_pipeline(agent_nodes: list[GraphNode], graph: GraphModel) -> str:

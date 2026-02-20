@@ -22,6 +22,7 @@ over a WebSocket connection to the Studio frontend.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 from collections import deque
 
 
@@ -120,10 +121,8 @@ class StudioEventHandler:
         Parameters:
             timeout: Maximum seconds to wait. Defaults to ``5.0``.
         """
-        try:
+        with contextlib.suppress(TimeoutError):
             await asyncio.wait_for(self._notify.wait(), timeout=timeout)
-        except asyncio.TimeoutError:
-            pass
 
     # ------------------------------------------------------------------
     # Internal helpers

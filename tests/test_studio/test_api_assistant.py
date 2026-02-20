@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-import os
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -40,7 +39,7 @@ def app(monkeypatch):
 class TestAssistantWebSocket:
     def test_assistant_ws_accepts_connection(self, app):
         client = TestClient(app)
-        with client.websocket_connect("/ws/assistant") as ws:
+        with client.websocket_connect("/ws/assistant"):
             # Connection accepted -- just close cleanly
             pass
 
