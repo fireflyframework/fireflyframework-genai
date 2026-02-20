@@ -16,6 +16,7 @@ helps you build pipelines through natural language.
 - [Quick Start](#quick-start)
 - [CLI Reference](#cli-reference)
 - [Configuration](#configuration)
+- [Settings & Provider Credentials](#settings--provider-credentials)
 - [Architecture](#architecture)
 - [The Canvas](#the-canvas)
 - [Node Types](#node-types)
@@ -24,9 +25,14 @@ helps you build pipelines through natural language.
 - [Project Management](#project-management)
 - [Pipeline Execution](#pipeline-execution)
 - [Checkpoints & Time-Travel Debugging](#checkpoints--time-travel-debugging)
+- [Evaluation Lab](#evaluation-lab)
+- [Experiments](#experiments)
+- [File Browser](#file-browser)
+- [Deploy](#deploy)
 - [Keyboard Shortcuts](#keyboard-shortcuts)
 - [REST API Reference](#rest-api-reference)
 - [WebSocket API Reference](#websocket-api-reference)
+- [Desktop App](#desktop-app)
 - [Programmatic Usage](#programmatic-usage)
 - [Frontend Development](#frontend-development)
 
@@ -71,9 +77,15 @@ python -c "from fireflyframework_genai.studio import launch_studio; launch_studi
 ```
 
 Studio starts at `http://127.0.0.1:8470` by default and opens your browser.
-You'll see a dark-themed IDE with a visual canvas, a component palette on
-the left, a configuration panel on the right, and a bottom panel with code
-generation, console, timeline, and AI assistant tabs.
+
+On first launch, a **Setup Wizard** guides you through configuring your
+AI provider credentials (OpenAI, Anthropic, Google, etc.) and default model
+settings. You can skip the wizard and configure providers later via the
+Settings modal (`Cmd/Ctrl + ,`).
+
+After setup, you'll see a dark-themed IDE with a visual canvas, a component
+palette on the left, a configuration panel on the right, and a bottom panel
+with code generation, console, timeline, and AI assistant tabs.
 
 ---
 
@@ -140,6 +152,77 @@ firefly studio
 
 ---
 
+## Settings & Provider Credentials
+
+Studio provides a built-in Settings system for managing AI provider
+credentials and model defaults directly from the UI — no manual
+environment variables required.
+
+### How It Works
+
+Settings are persisted at `~/.firefly-studio/settings.json` with `0600`
+(owner-only) file permissions. On startup, saved API keys are injected
+into `os.environ` so that PydanticAI picks them up via its standard
+provider env vars. **Existing environment variables always take
+precedence** over saved settings.
+
+### First-Start Wizard
+
+On first launch (no `settings.json` found), a 5-step wizard appears:
+
+1. **Welcome** — Introduction to Studio
+2. **Select Providers** — Choose which providers to configure (OpenAI
+   pre-selected)
+3. **Enter Keys** — Password inputs for selected providers only
+4. **Default Model** — Set default model string, temperature, and retries
+5. **Done** — Confirmation and "Open Studio" button
+
+You can skip the wizard at any time — Studio works without credentials
+if you've set API keys as environment variables.
+
+### Settings Modal
+
+Open the Settings modal anytime via:
+- **Gear icon** in the top bar
+- **Keyboard shortcut:** `Cmd/Ctrl + ,`
+- **Command palette:** type "Settings"
+
+The modal has two tabs:
+
+| Tab | Contents |
+|---|---|
+| **Provider Credentials** | API key inputs for each provider, "Configured" badge for active keys |
+| **Model Defaults** | Default model string, temperature slider (0–2), retries count |
+
+### Supported Providers
+
+| Provider | Credential Fields | Env Variable(s) |
+|---|---|---|
+| OpenAI | API Key | `OPENAI_API_KEY` |
+| Anthropic | API Key | `ANTHROPIC_API_KEY` |
+| Google Gemini | API Key | `GOOGLE_API_KEY` |
+| Groq | API Key | `GROQ_API_KEY` |
+| Mistral | API Key | `MISTRAL_API_KEY` |
+| DeepSeek | API Key | `DEEPSEEK_API_KEY` |
+| Cohere | API Key | `CO_API_KEY` |
+| Azure OpenAI | API Key + Endpoint URL | `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT` |
+| Amazon Bedrock | Access Key + Secret + Region | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION` |
+| Ollama | Base URL (no key needed) | `OLLAMA_BASE_URL` |
+
+### Settings API
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/settings` | `GET` | Current settings (API keys masked) |
+| `/api/settings` | `POST` | Save/merge settings |
+| `/api/settings/status` | `GET` | Check first-start and setup status |
+
+API keys in `GET` responses are always masked (e.g., `****abc1`). The
+`POST` endpoint uses merge semantics: `null` credential fields preserve
+existing values; non-null values overwrite.
+
+---
+
 ## Architecture
 
 Studio is composed of a Python backend (FastAPI) and a SvelteKit 5 frontend
@@ -159,11 +242,15 @@ that compiles to a static SPA and is bundled inside the Python package.
           +---------+---------+
           |  FastAPI Backend   |
           |                    |
+          |  /api/settings     |   Provider credentials & model defaults
           |  /api/projects     |   Project CRUD
           |  /api/registry     |   Agent/tool/pattern discovery
           |  /api/codegen      |   Python code generation
           |  /api/monitoring   |   Usage metrics
           |  /api/checkpoints  |   Checkpoint management
+          |  /api/evaluate     |   Evaluation lab
+          |  /api/experiments  |   A/B experiments
+          |  /api/files        |   Project file browsing
           |  /ws/execution     |   Pipeline execution (WebSocket)
           |  /ws/assistant     |   AI assistant chat (WebSocket)
           +---------+---------+
@@ -222,14 +309,20 @@ During pipeline execution, nodes show real-time state:
 
 ## Node Types
 
-Studio supports four node types that map to framework components:
+Studio supports ten node types that map to framework components:
 
 | Node Type | Framework Class | Description |
 |---|---|---|
-| **Agent** | `FireflyAgent` | An LLM-powered agent with model, instructions, and tools |
-| **Tool** | `BaseTool` | A tool that an agent can invoke |
-| **Reasoning** | `ReasoningPattern` | A reasoning pattern (ReAct, CoT, etc.) |
-| **Condition** | Conditional edge | A branching condition in the pipeline |
+| **Agent** | `FireflyAgent` / `AgentStep` | An LLM-powered agent with model, instructions, and tools |
+| **Tool** | `BaseTool` / `CallableStep` | A tool that an agent can invoke |
+| **Reasoning** | `ReasoningPattern` / `ReasoningStep` | A reasoning pattern (ReAct, CoT, etc.) |
+| **Pipeline Step** | `CallableStep` | A generic pass-through step |
+| **Fan Out** | `FanOutStep` | Split input into parallel branches |
+| **Fan In** | `FanInStep` | Merge parallel branches back together |
+| **Condition** | `BranchStep` | A branching condition in the pipeline |
+| **Memory** | `CallableStep` | Store, retrieve, or clear values in context memory |
+| **Validator** | `CallableStep` | Validate input against rules (not_empty, is_string, etc.) |
+| **Custom Code** | `CallableStep` | Execute user-authored async Python code |
 
 ### Node Configuration
 
@@ -299,13 +392,14 @@ The assistant can:
 
 ### Requirements
 
-The AI assistant requires a configured LLM provider. Set one of these
+The AI assistant requires a configured LLM provider. You can configure
+credentials through the **Settings modal** (`Cmd/Ctrl + ,`) or via
 environment variables:
 
 ```bash
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
-GEMINI_API_KEY=...
+GOOGLE_API_KEY=...
 ```
 
 The assistant uses the framework's default model (`FIREFLY_GENAI_DEFAULT_MODEL`).
@@ -371,9 +465,16 @@ real-time pipeline execution with event streaming.
 | `node_skip` | `node_id`, `pipeline_name`, `reason` | Node skipped |
 | `pipeline_complete` | `pipeline_name`, `success`, `duration_ms` | Pipeline finished |
 
-> **Note:** Pipeline execution is currently a stub. The WebSocket endpoint
-> accepts connections and responds to `run`/`debug` actions, but full
-> `PipelineEngine` integration is pending.
+### How Execution Works
+
+1. The frontend sends the current canvas graph (nodes + edges + metadata) via WebSocket.
+2. The backend compiles the graph into a `PipelineEngine` using the graph-to-engine compiler.
+3. The engine runs asynchronously, and the `StudioEventHandler` collects events.
+4. Events are streamed back to the frontend in real time for node state visualization.
+5. On completion, a `pipeline_result` message includes success status, output, and duration.
+
+In **debug mode**, checkpoints are automatically created at each node completion for
+time-travel debugging via the Timeline tab.
 
 ---
 
@@ -405,6 +506,85 @@ Each checkpoint captures:
 
 ---
 
+## Evaluation Lab
+
+The Evaluation Lab lets you test your pipeline against JSONL datasets
+to measure quality.
+
+### Workflow
+
+1. **Upload a dataset** -- JSONL file where each line has `"input"` and
+   optionally `"expected_output"` fields
+2. **Select a dataset** from the project's dataset list
+3. **Run evaluation** -- Compiles the current canvas graph and runs each
+   test case through the pipeline
+4. **View results** -- Pass/fail rate, individual test results with
+   input/expected/actual comparisons
+
+### API
+
+| Endpoint | Description |
+|---|---|
+| `POST /api/projects/{name}/datasets/upload` | Upload a JSONL dataset |
+| `GET /api/projects/{name}/datasets` | List datasets for a project |
+| `POST /api/evaluate/run` | Run a pipeline against a dataset |
+
+---
+
+## Experiments
+
+Experiments let you define A/B comparisons between pipeline variants.
+
+### Features
+
+- **Create experiments** with named variants and traffic allocation
+- **Run variants manually** against the current canvas pipeline
+- **View results** per variant
+
+Advanced features (automatic traffic splitting, statistical significance)
+are planned for a future release.
+
+### API
+
+| Endpoint | Description |
+|---|---|
+| `GET /api/projects/{name}/experiments` | List experiments |
+| `POST /api/projects/{name}/experiments` | Create an experiment |
+| `GET /api/projects/{name}/experiments/{id}` | Get experiment details |
+| `DELETE /api/projects/{name}/experiments/{id}` | Delete an experiment |
+| `POST /api/projects/{name}/experiments/{id}/run` | Run a variant |
+
+---
+
+## File Browser
+
+The Files page provides a read-only file explorer for project directories.
+
+- Recursive file listing with directory tree
+- File content preview for text files
+- Security: path traversal protection, binary file rejection, 2 MiB size limit
+
+### API
+
+| Endpoint | Description |
+|---|---|
+| `GET /api/projects/{name}/files` | Recursive file listing |
+| `GET /api/projects/{name}/files/{path}` | Read file content |
+
+---
+
+## Deploy
+
+The Deploy page helps you export your pipeline:
+
+- **Python Script** -- Generate a standalone Python script from the current
+  canvas graph using the codegen API
+- **Docker Container** -- Coming soon
+- **REST API** -- Coming soon
+- **Cloud Function** -- Coming soon
+
+---
+
 ## Keyboard Shortcuts
 
 ### General
@@ -412,6 +592,7 @@ Each checkpoint captures:
 | Shortcut | Action |
 |---|---|
 | `Cmd/Ctrl + K` | Open command palette |
+| `Cmd/Ctrl + ,` | Open settings |
 | `?` | Toggle keyboard shortcuts help |
 | `Cmd/Ctrl + /` | Toggle AI assistant panel |
 
@@ -433,8 +614,9 @@ Each checkpoint captures:
 
 ### Command Palette
 
-The command palette (`Cmd+K`) provides fuzzy search across 25 commands
-in four categories: Navigation, Add Node, Pipeline Actions, and View.
+The command palette (`Cmd+K`) provides fuzzy search across commands
+in five categories: Navigation, Add Node, Settings, Pipeline Actions,
+and View.
 
 ---
 
@@ -449,6 +631,33 @@ GET /api/health
 ```
 
 Returns `{"status": "ok", "version": "26.02.07"}`.
+
+### Settings
+
+```
+GET  /api/settings           # Current settings (keys masked)
+POST /api/settings           # Save / merge settings
+GET  /api/settings/status    # First-start and setup status check
+```
+
+#### Save Settings Request
+
+```json
+{
+  "credentials": {"openai_api_key": "sk-...", "anthropic_api_key": null},
+  "model_defaults": {"default_model": "openai:gpt-4o", "temperature": 0.7, "retries": 3},
+  "setup_complete": true
+}
+```
+
+Fields set to `null` are preserved from existing settings. Non-null
+values overwrite.
+
+#### Settings Status Response
+
+```json
+{"first_start": false, "setup_complete": true}
+```
 
 ### Registry
 
@@ -505,6 +714,37 @@ POST /api/codegen/to-code
 {"code": "from fireflyframework_genai.agents import FireflyAgent\n..."}
 ```
 
+### Files
+
+```
+GET /api/projects/{name}/files             # List all files
+GET /api/projects/{name}/files/{path}      # Read file content
+```
+
+### Evaluation
+
+```
+POST /api/projects/{name}/datasets/upload  # Upload JSONL dataset
+GET  /api/projects/{name}/datasets         # List datasets
+POST /api/evaluate/run                     # Run pipeline against dataset
+```
+
+#### Run Evaluation Request
+
+```json
+{"project": "my-project", "dataset": "tests.jsonl", "graph": {"nodes": [...], "edges": [...]}}
+```
+
+### Experiments
+
+```
+GET    /api/projects/{name}/experiments              # List experiments
+POST   /api/projects/{name}/experiments              # Create experiment
+GET    /api/projects/{name}/experiments/{id}          # Get experiment
+DELETE /api/projects/{name}/experiments/{id}          # Delete experiment
+POST   /api/projects/{name}/experiments/{id}/run      # Run variant
+```
+
 ### Monitoring
 
 ```
@@ -534,8 +774,8 @@ WS /ws/execution
 #### Send
 
 ```json
-{"action": "run", "pipeline": "my-pipeline"}
-{"action": "debug", "pipeline": "my-pipeline"}
+{"action": "run", "graph": {"nodes": [...], "edges": [...], "metadata": {...}}, "inputs": "optional user input"}
+{"action": "debug", "graph": {"nodes": [...], "edges": [...]}, "inputs": "optional"}
 ```
 
 #### Receive
@@ -545,6 +785,7 @@ WS /ws/execution
 {"type": "node_complete", "node_id": "agent-1", "pipeline_name": "my-pipeline", "latency_ms": 1234.5}
 {"type": "node_error", "node_id": "agent-1", "pipeline_name": "my-pipeline", "error": "..."}
 {"type": "pipeline_complete", "pipeline_name": "my-pipeline", "success": true, "duration_ms": 5678.9}
+{"type": "pipeline_result", "success": true, "output": "...", "duration_ms": 5678.9, "pipeline_name": "my-pipeline"}
 ```
 
 ### Assistant WebSocket
@@ -569,6 +810,49 @@ WS /ws/assistant
 {"type": "tool_result", "tool": "add_node", "result": "Added node agent-1"}
 {"type": "done"}
 ```
+
+---
+
+## Desktop App
+
+Firefly Studio can be packaged as a standalone desktop application using
+Tauri 2 + PyInstaller. The desktop app bundles the Python server as a
+sidecar binary.
+
+### Architecture
+
+```
+  Tauri (Rust + WebView)
+         |
+    spawn sidecar
+         |
+  PyInstaller bundle
+  (FastAPI + Studio)
+         |
+    http://127.0.0.1:<port>
+```
+
+1. Tauri finds a free port, spawns the PyInstaller sidecar
+2. Polls `/api/health` until the server is ready (30s timeout)
+3. Navigates the webview to `http://127.0.0.1:<port>`
+4. On window close, kills the sidecar process
+
+### Building
+
+```bash
+# Build the PyInstaller sidecar
+uv run pyinstaller studio-desktop/pyinstaller/firefly_studio.spec --noconfirm
+
+# Build the Tauri desktop app (requires Rust toolchain)
+cd studio-desktop && cargo tauri build
+```
+
+### CI/CD
+
+The desktop build is automated via `.github/workflows/desktop.yml`:
+- Triggered by `desktop-v*` tags
+- Builds for macOS (arm64 + x86), Linux, and Windows
+- Produces `.dmg`, `.AppImage`, `.deb`, `.msi`, `.exe` installers
 
 ---
 
@@ -693,10 +977,11 @@ studio-frontend/
       files/+page.svelte
     lib/
       components/
-        layout/               # AppShell, Sidebar, TopBar, CommandPalette
+        layout/               # AppShell, Sidebar, TopBar, CommandPalette,
+                              # SettingsModal, FirstStartWizard
         canvas/               # Canvas, NodePalette, node components
         panels/               # BottomPanel, ConfigPanel, ChatTab, CodeTab
-      stores/                 # Svelte stores (pipeline, execution, ui, chat)
+      stores/                 # Svelte stores (pipeline, execution, ui, chat, settings)
       api/                    # REST client, WebSocket client
       execution/              # Execution bridge
       types/                  # TypeScript type definitions
