@@ -16,12 +16,23 @@
 
 from __future__ import annotations
 
-from fireflyframework_genai.studio.config import StudioConfig
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from fireflyframework_genai.studio.config import StudioConfig
 
 __all__ = [
     "StudioConfig",
     "launch_studio",
 ]
+
+
+def __getattr__(name: str) -> object:
+    if name == "StudioConfig":
+        from fireflyframework_genai.studio.config import StudioConfig
+
+        return StudioConfig
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def launch_studio() -> None:

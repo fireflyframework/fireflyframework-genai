@@ -316,6 +316,7 @@
 						{#each codeLines as line, i}
 							<tr class="code-line">
 								<td class="line-number">{i + 1}</td>
+								<!-- SAFETY: line is HTML-escaped by escapeHtml() before highlightPython() adds trusted <span> tags -->
 								<td class="line-content">{@html line}</td>
 							</tr>
 						{/each}

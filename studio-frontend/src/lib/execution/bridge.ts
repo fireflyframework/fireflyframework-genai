@@ -66,6 +66,22 @@ export function connectExecution(): void {
 			pushExecutionEvent(event);
 		})
 	);
+
+	// Reset state on WebSocket close/error to prevent stuck UI
+	unsubscribers.push(
+		ws.on('_close', () => {
+			activeNodes.set(new Set());
+			isRunning.set(false);
+			isDebugging.set(false);
+		})
+	);
+	unsubscribers.push(
+		ws.on('_error', () => {
+			activeNodes.set(new Set());
+			isRunning.set(false);
+			isDebugging.set(false);
+		})
+	);
 }
 
 /**

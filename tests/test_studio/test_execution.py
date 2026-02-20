@@ -217,6 +217,9 @@ class TestExecutionWebSocket:
             data = ws.receive_json()
             assert data["type"] == "error"
             assert "not fully wired" in data["message"].lower()
+            complete = ws.receive_json()
+            assert complete["type"] == "pipeline_complete"
+            assert complete["success"] is False
 
     async def test_websocket_unknown_action(self, app):
         """Test that unknown actions get an error response."""

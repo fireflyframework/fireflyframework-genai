@@ -15,9 +15,19 @@ export class StudioWebSocket {
 	connect(): void {
 		this.ws = new WebSocket(this.url);
 		this.ws.onmessage = (event) => {
-			const data = JSON.parse(event.data) as ExecutionEvent;
-			this.notify(data.type, data);
-			this.notify('*', data);
+			try {
+				const data = JSON.parse(event.data) as ExecutionEvent;
+				this.notify(data.type, data);
+				this.notify('*', data);
+			} catch {
+				console.warn('[StudioWebSocket] Unparseable frame:', event.data);
+			}
+		};
+		this.ws.onclose = () => {
+			this.notify('_close', { type: '_close' } as ExecutionEvent);
+		};
+		this.ws.onerror = () => {
+			this.notify('_error', { type: '_error' } as ExecutionEvent);
 		};
 	}
 

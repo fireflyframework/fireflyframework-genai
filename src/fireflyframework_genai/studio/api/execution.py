@@ -61,12 +61,20 @@ def create_execution_router() -> APIRouter:
 
                 action = message.get("action")
 
-                if action == "run":
+                if action in ("run", "debug"):
                     await websocket.send_json(
                         {
                             "type": "error",
                             "message": "Execution is not fully wired yet. "
                             "PipelineEngine integration is pending.",
+                        }
+                    )
+                    await websocket.send_json(
+                        {
+                            "type": "pipeline_complete",
+                            "success": False,
+                            "duration_ms": 0.0,
+                            "pipeline_name": "unknown",
                         }
                     )
                 else:

@@ -107,6 +107,10 @@ class TestProjectManagerDelete:
         manager.delete("doomed")
         assert manager.list_all() == []
 
+    def test_delete_nonexistent_raises(self, manager: ProjectManager):
+        with pytest.raises(FileNotFoundError, match="not found"):
+            manager.delete("nonexistent")
+
 
 class TestProjectManagerPipelines:
     def test_save_pipeline(self, manager: ProjectManager):
@@ -127,6 +131,24 @@ class TestProjectManagerPipelines:
         manager.create("proj")
         with pytest.raises(FileNotFoundError):
             manager.load_pipeline("proj", "nonexistent")
+
+    def test_save_pipeline_nonexistent_project_raises(self, manager: ProjectManager):
+        with pytest.raises(FileNotFoundError, match="not found"):
+            manager.save_pipeline("nonexistent", "pipe", {"nodes": [], "edges": []})
+
+
+class TestProjectManagerPathTraversal:
+    def test_create_path_traversal_raises(self, manager: ProjectManager):
+        with pytest.raises(ValueError, match="Invalid path component"):
+            manager.create("../../etc/evil")
+
+    def test_delete_path_traversal_raises(self, manager: ProjectManager):
+        with pytest.raises(ValueError, match="Invalid path component"):
+            manager.delete("../../../tmp/evil")
+
+    def test_save_pipeline_path_traversal_raises(self, manager: ProjectManager):
+        with pytest.raises(ValueError, match="Invalid path component"):
+            manager.save_pipeline("../../etc", "pipe", {})
 
 
 # ---------------------------------------------------------------------------
@@ -215,3 +237,19 @@ class TestProjectsAPI:
         await client.post("/api/projects", json={"name": "proj"})
         resp = await client.get("/api/projects/proj/pipelines/nope")
         assert resp.status_code == 404
+
+    async def test_delete_nonexistent_project_returns_404(
+        self, client: httpx.AsyncClient
+    ):
+        resp = await client.delete("/api/projects/nonexistent")
+        assert resp.status_code == 404
+
+    async def test_save_pipeline_nonexistent_project_returns_404(
+        self, client: httpx.AsyncClient
+    ):
+        resp = await client.post(
+            "/api/projects/nonexistent/pipelines/test",
+            json={"graph": {"nodes": [], "edges": []}},
+        )
+        assert resp.status_code == 404
+

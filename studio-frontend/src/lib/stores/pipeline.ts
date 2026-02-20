@@ -39,6 +39,10 @@ export function clearNodeStates() {
 
 let _nodeIdCounter = 0;
 
+export function resetNodeCounter(): void {
+	_nodeIdCounter = 0;
+}
+
 export function addNode(type: string, label: string): void {
 	_nodeIdCounter++;
 	const id = `${type}-${_nodeIdCounter}`;

@@ -93,14 +93,24 @@ def create_projects_router(manager: ProjectManager) -> APIRouter:
 
     @router.delete("/{name}")
     async def delete_project(name: str) -> dict[str, str]:
-        manager.delete(name)
+        try:
+            manager.delete(name)
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
         return {"status": "deleted"}
 
     @router.post("/{project_name}/pipelines/{pipeline_name}")
     async def save_pipeline(
         project_name: str, pipeline_name: str, body: SavePipelineRequest
     ) -> dict[str, str]:
-        manager.save_pipeline(project_name, pipeline_name, body.graph)
+        try:
+            manager.save_pipeline(project_name, pipeline_name, body.graph)
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
         return {"status": "saved"}
 
     @router.get("/{project_name}/pipelines/{pipeline_name}")

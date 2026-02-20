@@ -70,7 +70,14 @@
 		};
 
 		socket.onclose = () => {
+			if (currentAssistantMsgId) {
+				completeMessage(currentAssistantMsgId, '[Connection lost]');
+				currentAssistantMsgId = '';
+			} else {
+				chatStreaming.set(false);
+			}
 			ws = null;
+			connectionError = 'Reconnecting...';
 			reconnectTimer = setTimeout(connectWs, 3000);
 		};
 

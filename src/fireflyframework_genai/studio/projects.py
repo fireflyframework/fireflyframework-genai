@@ -48,8 +48,15 @@ class ProjectManager:
     """
 
     def __init__(self, base_dir: Path) -> None:
-        self._base_dir = Path(base_dir)
+        self._base_dir = Path(base_dir).resolve()
         self._base_dir.mkdir(parents=True, exist_ok=True)
+
+    def _safe_path(self, *parts: str) -> Path:
+        """Resolve a path and assert it stays within the base directory."""
+        resolved = (self._base_dir / Path(*parts)).resolve()
+        if not str(resolved).startswith(str(self._base_dir)):
+            raise ValueError(f"Invalid path component: {parts}")
+        return resolved
 
     # -- Project CRUD ------------------------------------------------------
 
@@ -61,7 +68,7 @@ class ProjectManager:
         ValueError
             If a project with *name* already exists.
         """
-        project_dir = self._base_dir / name
+        project_dir = self._safe_path(name)
         if project_dir.exists():
             raise ValueError(f"Project '{name}' already exists")
 
@@ -101,8 +108,16 @@ class ProjectManager:
         return projects
 
     def delete(self, name: str) -> None:
-        """Remove a project directory and all its contents."""
-        project_dir = self._base_dir / name
+        """Remove a project directory and all its contents.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the project does not exist.
+        """
+        project_dir = self._safe_path(name)
+        if not project_dir.exists():
+            raise FileNotFoundError(f"Project '{name}' not found")
         shutil.rmtree(project_dir)
 
     # -- Pipeline persistence ----------------------------------------------
@@ -111,9 +126,13 @@ class ProjectManager:
         self, project_name: str, pipeline_name: str, graph: dict
     ) -> None:
         """Persist a pipeline graph as JSON inside the project directory."""
-        pipeline_path = (
-            self._base_dir / project_name / "pipelines" / f"{pipeline_name}.json"
+        pipeline_path = self._safe_path(
+            project_name, "pipelines", f"{pipeline_name}.json"
         )
+        if not pipeline_path.parent.exists():
+            raise FileNotFoundError(
+                f"Project '{project_name}' not found"
+            )
         pipeline_path.write_text(json.dumps(graph, indent=2))
 
     def load_pipeline(self, project_name: str, pipeline_name: str) -> dict:
@@ -124,8 +143,8 @@ class ProjectManager:
         FileNotFoundError
             If the pipeline JSON file does not exist.
         """
-        pipeline_path = (
-            self._base_dir / project_name / "pipelines" / f"{pipeline_name}.json"
+        pipeline_path = self._safe_path(
+            project_name, "pipelines", f"{pipeline_name}.json"
         )
         if not pipeline_path.is_file():
             raise FileNotFoundError(
