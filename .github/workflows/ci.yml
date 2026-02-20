@@ -68,7 +68,7 @@ jobs:
         working-directory: studio-frontend
       - run: npm run build
         working-directory: studio-frontend
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: frontend-dist
           path: studio-frontend/build/
@@ -106,7 +106,7 @@ jobs:
         with:
           python-version: '3.13'
       - run: uv build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: dist
           path: dist/

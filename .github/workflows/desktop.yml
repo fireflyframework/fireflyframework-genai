@@ -41,7 +41,7 @@ jobs:
       - name: Build sidecar
         run: uv run pyinstaller studio-desktop/pyinstaller/firefly_studio.spec --noconfirm
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: firefly-studio-sidecar
           path: dist/firefly-studio/
@@ -76,7 +76,7 @@ jobs:
         run: cargo tauri build
         working-directory: studio-desktop
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: desktop-macos-arm64
           path: studio-desktop/src-tauri/target/release/bundle/dmg/*.dmg
