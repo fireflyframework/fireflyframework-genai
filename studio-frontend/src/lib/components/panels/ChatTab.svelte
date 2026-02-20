@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { SendHorizonal, Trash2, Bot, User, Wrench, Loader } from 'lucide-svelte';
+	import { marked } from 'marked';
 	import {
 		chatMessages,
 		chatStreaming,
@@ -11,6 +12,18 @@
 		addToolCall,
 		clearChat
 	} from '$lib/stores/chat';
+
+	function sanitizeHtml(html: string): string {
+		return html
+			.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+			.replace(/\bon\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+	}
+
+	function renderMarkdown(content: string): string {
+		if (!content) return '';
+		const raw = marked(content, { async: false }) as string;
+		return sanitizeHtml(raw);
+	}
 
 	let inputText = $state('');
 	let messagesContainer: HTMLDivElement | undefined = $state(undefined);
@@ -185,10 +198,14 @@
 							>
 							<span class="message-time">{formatTime(message.timestamp)}</span>
 						</div>
-						<div class="message-content">
-							{message.content}
-							{#if message.streaming}
-								<span class="streaming-cursor"></span>
+						<div class="message-content" class:markdown={message.role === 'assistant'}>
+							{#if message.role === 'assistant'}
+								{@html renderMarkdown(message.content)}
+								{#if message.streaming}
+									<span class="streaming-cursor"></span>
+								{/if}
+							{:else}
+								{message.content}
 							{/if}
 						</div>
 						{#if message.toolCalls && message.toolCalls.length > 0}
@@ -376,6 +393,111 @@
 		background: var(--color-bg-elevated, #1a1a26);
 		border-radius: 8px;
 		padding: 8px 12px;
+	}
+
+	.message-content.markdown {
+		white-space: normal;
+	}
+
+	.message-content.markdown :global(p) {
+		margin: 0 0 8px;
+	}
+
+	.message-content.markdown :global(p:last-child) {
+		margin-bottom: 0;
+	}
+
+	.message-content.markdown :global(h1),
+	.message-content.markdown :global(h2),
+	.message-content.markdown :global(h3),
+	.message-content.markdown :global(h4),
+	.message-content.markdown :global(h5),
+	.message-content.markdown :global(h6) {
+		margin: 12px 0 6px;
+		font-weight: 600;
+		line-height: 1.3;
+	}
+
+	.message-content.markdown :global(h1) {
+		font-size: 16px;
+	}
+
+	.message-content.markdown :global(h2) {
+		font-size: 14px;
+	}
+
+	.message-content.markdown :global(h3) {
+		font-size: 13px;
+	}
+
+	.message-content.markdown :global(code) {
+		font-family: var(--font-mono, 'JetBrains Mono', ui-monospace, monospace);
+		font-size: 11px;
+		background: rgba(255, 255, 255, 0.06);
+		padding: 1px 4px;
+		border-radius: 3px;
+	}
+
+	.message-content.markdown :global(pre) {
+		background: rgba(0, 0, 0, 0.3);
+		border-radius: 6px;
+		padding: 10px 12px;
+		overflow-x: auto;
+		margin: 8px 0;
+	}
+
+	.message-content.markdown :global(pre code) {
+		background: none;
+		padding: 0;
+		font-size: 11px;
+		line-height: 1.5;
+	}
+
+	.message-content.markdown :global(ul),
+	.message-content.markdown :global(ol) {
+		margin: 6px 0;
+		padding-left: 20px;
+	}
+
+	.message-content.markdown :global(li) {
+		margin-bottom: 2px;
+	}
+
+	.message-content.markdown :global(blockquote) {
+		border-left: 3px solid var(--color-accent, #ff6b35);
+		margin: 8px 0;
+		padding: 4px 12px;
+		color: var(--color-text-secondary, #8888a0);
+	}
+
+	.message-content.markdown :global(a) {
+		color: var(--color-accent, #ff6b35);
+		text-decoration: underline;
+	}
+
+	.message-content.markdown :global(hr) {
+		border: none;
+		border-top: 1px solid var(--color-border, #2a2a3a);
+		margin: 10px 0;
+	}
+
+	.message-content.markdown :global(table) {
+		border-collapse: collapse;
+		width: 100%;
+		margin: 8px 0;
+		font-size: 11px;
+	}
+
+	.message-content.markdown :global(th),
+	.message-content.markdown :global(td) {
+		border: 1px solid var(--color-border, #2a2a3a);
+		padding: 4px 8px;
+		text-align: left;
+	}
+
+	.message-content.markdown :global(th) {
+		background: rgba(255, 255, 255, 0.04);
+		font-weight: 600;
 	}
 
 	.streaming-cursor {

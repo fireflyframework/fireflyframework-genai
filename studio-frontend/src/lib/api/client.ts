@@ -3,8 +3,16 @@ import type {
 	ToolInfo,
 	PatternInfo,
 	ProjectInfo,
+	FileEntry,
+	FileContent,
+	DatasetInfo,
+	EvalRunResult,
+	Experiment,
 	UsageSummary,
-	Checkpoint
+	Checkpoint,
+	StudioSettingsResponse,
+	SaveSettingsPayload,
+	SettingsStatus
 } from '$lib/types/graph';
 
 const BASE_URL = '/api';
@@ -48,6 +56,56 @@ export const api = {
 			request<object>(`/projects/${project}/pipelines/${pipeline}`)
 	},
 
+	files: {
+		list: (project: string) => request<FileEntry[]>(`/projects/${project}/files`),
+		read: (project: string, path: string) => request<FileContent>(`/projects/${project}/files/${path}`)
+	},
+
+	evaluate: {
+		uploadDataset: (project: string, file: File) => {
+			const formData = new FormData();
+			formData.append('file', file);
+			return fetch(`${BASE_URL}/projects/${project}/datasets/upload`, {
+				method: 'POST',
+				body: formData
+			}).then(async (resp) => {
+				if (!resp.ok) {
+					const error = await resp.json().catch(() => ({ detail: resp.statusText }));
+					throw new Error(error.detail || resp.statusText);
+				}
+				return resp.json() as Promise<{ filename: string; test_cases: number; status: string }>;
+			});
+		},
+		listDatasets: (project: string) =>
+			request<DatasetInfo[]>(`/projects/${project}/datasets`),
+		run: (project: string, dataset: string, graph: object) =>
+			request<EvalRunResult>('/evaluate/run', {
+				method: 'POST',
+				body: JSON.stringify({ project, dataset, graph })
+			})
+	},
+
+	experiments: {
+		list: (project: string) => request<Experiment[]>(`/projects/${project}/experiments`),
+		create: (project: string, name: string, variants: Array<{ name: string; pipeline: string; traffic: number }>) =>
+			request<Experiment>(`/projects/${project}/experiments`, {
+				method: 'POST',
+				body: JSON.stringify({ name, variants })
+			}),
+		get: (project: string, expId: string) =>
+			request<Experiment>(`/projects/${project}/experiments/${expId}`),
+		delete: (project: string, expId: string) =>
+			request<{ status: string }>(`/projects/${project}/experiments/${expId}`, { method: 'DELETE' }),
+		runVariant: (project: string, expId: string, variantName: string, graph: object, input?: string) =>
+			request<{ experiment_id: string; variant_name: string; success: boolean; output: string }>(
+				`/projects/${project}/experiments/${expId}/run`,
+				{
+					method: 'POST',
+					body: JSON.stringify({ variant_name: variantName, graph, input: input ?? '' })
+				}
+			)
+	},
+
 	codegen: {
 		toCode: (graph: object) =>
 			request<{ code: string }>('/codegen/to-code', {
@@ -75,5 +133,15 @@ export const api = {
 			}),
 		clear: () =>
 			request<{ status: string }>('/checkpoints', { method: 'DELETE' })
+	},
+
+	settings: {
+		get: () => request<StudioSettingsResponse>('/settings'),
+		save: (payload: SaveSettingsPayload) =>
+			request<StudioSettingsResponse>('/settings', {
+				method: 'POST',
+				body: JSON.stringify(payload)
+			}),
+		status: () => request<SettingsStatus>('/settings/status')
 	}
 };

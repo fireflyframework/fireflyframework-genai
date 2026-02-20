@@ -4,8 +4,10 @@
 	import Sidebar from './Sidebar.svelte';
 	import CommandPalette from './CommandPalette.svelte';
 	import ShortcutsModal from './ShortcutsModal.svelte';
-	import { commandPaletteOpen, bottomPanelOpen, bottomPanelTab, shortcutsModalOpen } from '$lib/stores/ui';
-	import { nodes, edges, selectedNodeId } from '$lib/stores/pipeline';
+	import SettingsModal from './SettingsModal.svelte';
+	import FirstStartWizard from './FirstStartWizard.svelte';
+	import { commandPaletteOpen, bottomPanelOpen, bottomPanelTab, shortcutsModalOpen, settingsModalOpen } from '$lib/stores/ui';
+	import { nodes, edges, selectedNodeId, getGraphSnapshot } from '$lib/stores/pipeline';
 	import { runPipeline, debugPipeline } from '$lib/execution/bridge';
 
 	let { children } = $props();
@@ -27,6 +29,13 @@
 	function handleKeydown(e: KeyboardEvent) {
 		const meta = e.metaKey || e.ctrlKey;
 
+		// Cmd/Ctrl + ,  —  open settings
+		if (e.key === ',' && meta) {
+			e.preventDefault();
+			settingsModalOpen.set(true);
+			return;
+		}
+
 		// Cmd/Ctrl + K  —  toggle command palette
 		if (e.key === 'k' && meta) {
 			e.preventDefault();
@@ -37,14 +46,14 @@
 		// Cmd/Ctrl + Enter  —  run pipeline
 		if (e.key === 'Enter' && meta) {
 			e.preventDefault();
-			runPipeline();
+			runPipeline(getGraphSnapshot());
 			return;
 		}
 
 		// Cmd/Ctrl + Shift + D  —  toggle debug mode
 		if (e.key === 'D' && meta && e.shiftKey) {
 			e.preventDefault();
-			debugPipeline();
+			debugPipeline(getGraphSnapshot());
 			return;
 		}
 
@@ -127,6 +136,8 @@
 
 <CommandPalette />
 <ShortcutsModal />
+<SettingsModal />
+<FirstStartWizard />
 
 <style>
 	.app-shell {

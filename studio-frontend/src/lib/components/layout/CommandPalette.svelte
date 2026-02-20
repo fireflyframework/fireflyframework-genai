@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { commandPaletteOpen, bottomPanelOpen, bottomPanelTab, rightPanelOpen } from '$lib/stores/ui';
-	import { addNode } from '$lib/stores/pipeline';
+	import { commandPaletteOpen, bottomPanelOpen, bottomPanelTab, rightPanelOpen, settingsModalOpen } from '$lib/stores/ui';
+	import { addNode, getGraphSnapshot } from '$lib/stores/pipeline';
 	import { runPipeline, debugPipeline } from '$lib/execution/bridge';
 	import type { Component } from 'svelte';
 
@@ -34,6 +34,7 @@
 	import Clock from 'lucide-svelte/icons/clock';
 	import MessageSquare from 'lucide-svelte/icons/message-square';
 	import Search from 'lucide-svelte/icons/search';
+	import SettingsIcon from 'lucide-svelte/icons/settings';
 
 	interface Command {
 		id: string;
@@ -64,9 +65,12 @@
 		{ id: 'node-fanout', label: 'Add Fan Out Node', category: 'Add Node', icon: GitFork, action: () => addNode('fan_out', 'Fan Out') },
 		{ id: 'node-fanin', label: 'Add Fan In Node', category: 'Add Node', icon: GitMerge, action: () => addNode('fan_in', 'Fan In') },
 
+		// Settings
+		{ id: 'open-settings', label: 'Open Settings', category: 'Settings', icon: SettingsIcon, action: () => settingsModalOpen.set(true), shortcut: '\u2318,' },
+
 		// Pipeline Actions
-		{ id: 'pipeline-run', label: 'Run Pipeline', category: 'Pipeline Actions', icon: Play, action: () => runPipeline() },
-		{ id: 'pipeline-debug', label: 'Debug Pipeline', category: 'Pipeline Actions', icon: Bug, action: () => debugPipeline() },
+		{ id: 'pipeline-run', label: 'Run Pipeline', category: 'Pipeline Actions', icon: Play, action: () => runPipeline(getGraphSnapshot()) },
+		{ id: 'pipeline-debug', label: 'Debug Pipeline', category: 'Pipeline Actions', icon: Bug, action: () => debugPipeline(getGraphSnapshot()) },
 
 		// View / Panels
 		{ id: 'view-bottom-panel', label: 'Toggle Bottom Panel', category: 'View', icon: PanelBottom, action: () => bottomPanelOpen.update((v) => !v) },

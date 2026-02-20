@@ -1,8 +1,37 @@
-import { writable, derived } from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
 import type { Node, Edge } from '@xyflow/svelte';
 
 export const nodes = writable<Node[]>([]);
 export const edges = writable<Edge[]>([]);
+
+/**
+ * Snapshot the current canvas graph into the format expected by the backend
+ * GraphModel (nodes + edges + metadata).
+ */
+export function getGraphSnapshot(): object {
+	const currentNodes = get(nodes);
+	const currentEdges = get(edges);
+	return {
+		nodes: currentNodes.map((n) => ({
+			id: n.id,
+			type: n.type ?? 'pipeline_step',
+			label: n.data?.label ?? n.id,
+			position: n.position,
+			data: n.data ?? {},
+			width: n.measured?.width ?? n.width ?? null,
+			height: n.measured?.height ?? n.height ?? null
+		})),
+		edges: currentEdges.map((e) => ({
+			id: e.id,
+			source: e.source,
+			target: e.target,
+			source_handle: e.sourceHandle ?? 'output',
+			target_handle: e.targetHandle ?? 'input',
+			label: e.label ?? null
+		})),
+		metadata: {}
+	};
+}
 export const selectedNodeId = writable<string | null>(null);
 
 export const selectedNode = derived(

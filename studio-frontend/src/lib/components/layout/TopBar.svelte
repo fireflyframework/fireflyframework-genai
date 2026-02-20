@@ -6,14 +6,26 @@
 	import Loader from 'lucide-svelte/icons/loader';
 	import { isRunning, isDebugging } from '$lib/stores/execution';
 	import { runPipeline, debugPipeline } from '$lib/execution/bridge';
+	import { getGraphSnapshot } from '$lib/stores/pipeline';
+	import { settingsModalOpen } from '$lib/stores/ui';
+	import logo from '$lib/assets/favicon.svg';
 
 	let running = $derived($isRunning);
 	let debugging = $derived($isDebugging);
 	let busy = $derived(running || debugging);
+
+	function handleRun() {
+		runPipeline(getGraphSnapshot());
+	}
+
+	function handleDebug() {
+		debugPipeline(getGraphSnapshot());
+	}
 </script>
 
 <header class="top-bar">
 	<div class="top-bar-left">
+		<img src={logo} alt="Firefly Studio" class="brand-logo" />
 		<span class="brand">Firefly Studio</span>
 		<span class="separator">/</span>
 		<button class="project-selector">
@@ -25,7 +37,7 @@
 	</div>
 
 	<div class="top-bar-right">
-		<button class="btn-run" class:btn-run-active={running} disabled={busy} onclick={runPipeline} title="Run">
+		<button class="btn-run" class:btn-run-active={running} disabled={busy} onclick={handleRun} title="Run">
 			{#if running}
 				<span class="spin-icon"><Loader size={14} /></span>
 				<span>Running...</span>
@@ -35,14 +47,14 @@
 				<span>Run</span>
 			{/if}
 		</button>
-		<button class="btn-icon" class:btn-debug-active={debugging} disabled={busy} onclick={debugPipeline} title="Debug">
+		<button class="btn-icon" class:btn-debug-active={debugging} disabled={busy} onclick={handleDebug} title="Debug">
 			<Bug size={16} />
 			{#if debugging}
 				<span class="pulse-dot debug-dot"></span>
 			{/if}
 		</button>
 		<div class="divider"></div>
-		<button class="btn-icon" title="Settings">
+		<button class="btn-icon" title="Settings" onclick={() => settingsModalOpen.set(true)}>
 			<Settings size={16} />
 		</button>
 		<button class="btn-icon" title="AI Assistant">
@@ -68,6 +80,12 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
+	}
+
+	.brand-logo {
+		width: 24px;
+		height: 24px;
+		border-radius: 5px;
 	}
 
 	.brand {

@@ -67,6 +67,15 @@ export function connectExecution(): void {
 		})
 	);
 
+	unsubscribers.push(
+		ws.on('pipeline_result', (event: ExecutionEvent) => {
+			activeNodes.set(new Set());
+			isRunning.set(false);
+			isDebugging.set(false);
+			pushExecutionEvent(event);
+		})
+	);
+
 	// Reset state on WebSocket close/error to prevent stuck UI
 	unsubscribers.push(
 		ws.on('_close', () => {
@@ -95,29 +104,29 @@ export function disconnectExecution(): void {
 }
 
 /**
- * Send a "run" action to the backend, resetting node states first.
+ * Send a "run" action with the current graph to the backend.
  */
-export function runPipeline(): boolean {
+export function runPipeline(graph: object, inputs?: string): boolean {
 	if (!ws) {
 		console.warn('[bridge] Cannot run pipeline: execution WebSocket not connected');
 		return false;
 	}
 	clearNodeStates();
 	isRunning.set(true);
-	ws.send({ action: 'run' });
+	ws.send({ action: 'run', graph, inputs: inputs ?? null });
 	return true;
 }
 
 /**
- * Send a "debug" action to the backend, resetting node states first.
+ * Send a "debug" action with the current graph to the backend.
  */
-export function debugPipeline(): boolean {
+export function debugPipeline(graph: object, inputs?: string): boolean {
 	if (!ws) {
 		console.warn('[bridge] Cannot debug pipeline: execution WebSocket not connected');
 		return false;
 	}
 	clearNodeStates();
 	isDebugging.set(true);
-	ws.send({ action: 'debug' });
+	ws.send({ action: 'debug', graph, inputs: inputs ?? null });
 	return true;
 }

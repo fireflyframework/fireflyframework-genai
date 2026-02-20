@@ -20,6 +20,7 @@
 			category: 'General',
 			shortcuts: [
 				{ keys: `${mod} + K`, description: 'Open command palette' },
+				{ keys: `${mod} + ,`, description: 'Open settings' },
 				{ keys: `${mod} + /`, description: 'Toggle AI assistant' },
 				{ keys: '?', description: 'Show keyboard shortcuts' },
 				{ keys: 'Esc', description: 'Close modal / palette' }
