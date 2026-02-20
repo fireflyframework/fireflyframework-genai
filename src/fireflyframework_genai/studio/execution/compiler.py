@@ -29,6 +29,7 @@ Usage::
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from typing import Any
 
 from fireflyframework_genai.pipeline.builder import PipelineBuilder
@@ -268,14 +269,14 @@ def _compile_memory(node: GraphNode) -> CallableStep:
 
         if action == "store":
             value = inputs.get("input", inputs.get("value"))
-            memory.store(key, value)
+            memory.set_fact(key, value)
             return value
         elif action == "clear":
-            memory.clear(key)
+            memory.working.delete(key)
             return None
         else:
             # retrieve
-            return memory.retrieve(key)
+            return memory.get_fact(key)
 
     return CallableStep(_memory_op)
 
@@ -337,8 +338,14 @@ def _compile_custom_code(node: GraphNode) -> CallableStep:
     if execute_fn is None or not callable(execute_fn):
         raise CompilationError(f"CUSTOM_CODE node {node.id!r} must define 'async def execute(context, inputs) -> Any'")
 
+    # At this point execute_fn is a callable; capture a typed reference
+    _fn: Callable[..., Any] = execute_fn
+
     async def _run_custom(context: PipelineContext, inputs: dict[str, Any]) -> Any:
-        return await execute_fn(context, inputs)
+        result = _fn(context, inputs)
+        if hasattr(result, "__await__"):
+            return await result
+        return result
 
     return CallableStep(_run_custom)
 

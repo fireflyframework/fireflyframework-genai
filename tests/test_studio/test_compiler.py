@@ -572,7 +572,7 @@ class TestCompileMemoryNode:
 
         result = await step.execute(ctx, {"key": "my_key", "input": "my_value"})
         assert result == "my_value"
-        mock_memory.store.assert_called_once_with("my_key", "my_value")
+        mock_memory.set_fact.assert_called_once_with("my_key", "my_value")
 
     async def test_memory_retrieve_action(self):
         node = _make_node("m3", NodeType.MEMORY, data={"memory_action": "retrieve"})
@@ -581,12 +581,12 @@ class TestCompileMemoryNode:
         step = engine._dag.nodes["m3"].step
 
         mock_memory = MagicMock()
-        mock_memory.retrieve.return_value = "stored_value"
+        mock_memory.get_fact.return_value = "stored_value"
         ctx = PipelineContext(inputs=None, memory=mock_memory)
 
         result = await step.execute(ctx, {"key": "my_key"})
         assert result == "stored_value"
-        mock_memory.retrieve.assert_called_once_with("my_key")
+        mock_memory.get_fact.assert_called_once_with("my_key")
 
     async def test_memory_clear_action(self):
         node = _make_node("m4", NodeType.MEMORY, data={"memory_action": "clear"})
@@ -599,7 +599,7 @@ class TestCompileMemoryNode:
 
         result = await step.execute(ctx, {"key": "my_key"})
         assert result is None
-        mock_memory.clear.assert_called_once_with("my_key")
+        mock_memory.working.delete.assert_called_once_with("my_key")
 
     async def test_memory_no_manager_returns_input(self):
         node = _make_node("m5", NodeType.MEMORY, data={"memory_action": "store"})
@@ -618,7 +618,7 @@ class TestCompileMemoryNode:
         step = engine._dag.nodes["m6"].step
 
         mock_memory = MagicMock()
-        mock_memory.retrieve.return_value = "retrieved"
+        mock_memory.get_fact.return_value = "retrieved"
         ctx = PipelineContext(inputs=None, memory=mock_memory)
 
         result = await step.execute(ctx, {"key": "k"})
@@ -636,7 +636,7 @@ class TestCompileMemoryNode:
 
         result = await step.execute(ctx, {"key": "k", "value": "from_value"})
         assert result == "from_value"
-        mock_memory.store.assert_called_once_with("k", "from_value")
+        mock_memory.set_fact.assert_called_once_with("k", "from_value")
 
 
 # ---------------------------------------------------------------------------

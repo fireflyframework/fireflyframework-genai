@@ -119,7 +119,7 @@ def _run_studio(args: argparse.Namespace) -> None:
     from fireflyframework_genai.studio.server import create_studio_app
 
     config = StudioConfig(
-        _env_file=None,
+        _env_file=None,  # type: ignore[call-arg]  # pydantic-settings init kwarg
         host=args.host,
         port=args.port,
         open_browser=not args.no_browser,

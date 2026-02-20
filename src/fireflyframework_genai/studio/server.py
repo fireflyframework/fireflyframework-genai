@@ -24,6 +24,7 @@ import importlib.metadata
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -173,21 +174,20 @@ def create_studio_app(
     return app
 
 
-def _get_default_static_dir() -> Any:
+def _get_default_static_dir() -> Path:
     """Return the default path to the bundled static directory.
 
     Handles both normal installs and PyInstaller frozen bundles where
     data files are extracted to ``sys._MEIPASS``.
     """
     import sys
-    from pathlib import Path
 
     if getattr(sys, "frozen", False):
         return Path(sys._MEIPASS) / "fireflyframework_genai" / "studio" / "static"  # type: ignore[attr-defined]
     return Path(__file__).parent / "static"
 
 
-def _mount_static_files(app: Any, static_dir: Any | None = None) -> None:
+def _mount_static_files(app: Any, static_dir: Path | None = None) -> None:
     """Mount the bundled Studio frontend as static files.
 
     When the ``studio/static/`` directory contains a built SvelteKit SPA

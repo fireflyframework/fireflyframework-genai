@@ -22,8 +22,7 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter  # type: ignore[import-not-found]
-from fastapi.responses import JSONResponse  # type: ignore[import-not-found]
+from fastapi import APIRouter, HTTPException  # type: ignore[import-not-found]
 from pydantic import BaseModel, ValidationError
 
 from fireflyframework_genai.studio.codegen.generator import generate_python
@@ -61,10 +60,7 @@ def create_codegen_router() -> APIRouter:
             graph = GraphModel.model_validate(req.graph)
         except ValidationError as exc:
             logger.warning("Invalid graph model: %s", exc)
-            return JSONResponse(
-                status_code=422,
-                content={"detail": exc.errors()},
-            )
+            raise HTTPException(status_code=422, detail=exc.errors()) from exc
 
         code = generate_python(graph)
         return {"code": code}
