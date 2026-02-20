@@ -10,6 +10,13 @@
 		condition: CircleDot
 	};
 
+	const nodeColorMap: Record<string, string> = {
+		agent: '#6366f1',
+		tool: '#8b5cf6',
+		reasoning: '#ec4899',
+		condition: '#06b6d4'
+	};
+
 	const modelOptions = [
 		'openai:gpt-4o',
 		'openai:gpt-4o-mini',
@@ -98,7 +105,10 @@
 	<aside class="config-panel">
 		<div class="panel-header">
 			<div class="header-left">
-				<div class="header-icon">
+				<div
+					class="header-icon"
+					style:--node-color={nodeColorMap[node.type ?? ''] ?? '#ff6b35'}
+				>
 					<NodeIcon size={14} />
 				</div>
 				<span class="header-title">Node Properties</span>
@@ -234,8 +244,8 @@
 		width: 24px;
 		height: 24px;
 		border-radius: 6px;
-		background: rgba(255, 107, 53, 0.15);
-		color: var(--color-accent, #ff6b35);
+		background: oklch(from var(--node-color, #ff6b35) l c h / 15%);
+		color: var(--node-color, #ff6b35);
 		display: flex;
 		align-items: center;
 		justify-content: center;

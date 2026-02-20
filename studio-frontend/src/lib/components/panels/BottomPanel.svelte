@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { fade } from 'svelte/transition';
 	import { Terminal, Code, Clock, MessageSquare, ChevronDown, ChevronUp } from 'lucide-svelte';
 	import { bottomPanelOpen, bottomPanelTab } from '$lib/stores/ui';
 	import ConsoleTab from './ConsoleTab.svelte';
@@ -94,15 +95,19 @@
 
 	{#if $bottomPanelOpen}
 		<div class="tab-content">
-			{#if $bottomPanelTab === 'console'}
-				<ConsoleTab />
-			{:else if $bottomPanelTab === 'code'}
-				<CodeTab />
-			{:else if $bottomPanelTab === 'timeline'}
-				<TimelineTab />
-			{:else if $bottomPanelTab === 'chat'}
-				<ChatTab />
-			{/if}
+			{#key $bottomPanelTab}
+				<div class="tab-content-inner" transition:fade={{ duration: 120 }}>
+					{#if $bottomPanelTab === 'console'}
+						<ConsoleTab />
+					{:else if $bottomPanelTab === 'code'}
+						<CodeTab />
+					{:else if $bottomPanelTab === 'timeline'}
+						<TimelineTab />
+					{:else if $bottomPanelTab === 'chat'}
+						<ChatTab />
+					{/if}
+				</div>
+			{/key}
 		</div>
 	{/if}
 </div>
@@ -124,7 +129,7 @@
 	}
 
 	.drag-handle {
-		height: 5px;
+		height: 12px;
 		cursor: ns-resize;
 		display: flex;
 		align-items: center;
@@ -208,5 +213,11 @@
 	.tab-content {
 		flex: 1;
 		overflow: hidden;
+		position: relative;
+	}
+
+	.tab-content-inner {
+		width: 100%;
+		height: 100%;
 	}
 </style>

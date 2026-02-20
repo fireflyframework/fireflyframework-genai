@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { Handle, Position } from '@xyflow/svelte';
-	import { CircleDot, CheckCircle2, AlertCircle } from 'lucide-svelte';
+	import { scale } from 'svelte/transition';
+	import CircleDot from 'lucide-svelte/icons/circle-dot';
+	import CheckCircle2 from 'lucide-svelte/icons/check-circle-2';
+	import AlertCircle from 'lucide-svelte/icons/alert-circle';
 
 	let { data } = $props();
 
@@ -33,7 +36,7 @@
 			</div>
 			<span class="node-label">{data.label || 'Condition'}</span>
 			{#if showComplete}
-				<span class="state-icon state-complete">
+				<span class="state-icon state-complete" transition:scale={{ duration: 200, start: 0.6 }}>
 					<CheckCircle2 size={10} />
 				</span>
 			{/if}
@@ -71,9 +74,28 @@
 		justify-content: center;
 		box-shadow: 0 4px 12px rgba(136, 136, 160, 0.05);
 		transition: border-color 0.3s ease, box-shadow 0.3s ease;
+		position: relative;
 	}
 	.diamond.exec-running {
-		animation: pulse-condition 1.5s ease-in-out infinite;
+		border-color: transparent;
+	}
+	.diamond.exec-running::after {
+		content: '';
+		position: absolute;
+		inset: -2px;
+		padding: 2px;
+		background: conic-gradient(
+			from 0deg,
+			transparent 0%,
+			#8888a0 30%,
+			transparent 60%
+		);
+		-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+		-webkit-mask-composite: xor;
+		mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+		mask-composite: exclude;
+		animation: spin-border 1.2s linear infinite;
+		pointer-events: none;
 	}
 	.diamond.exec-complete {
 		border-color: var(--color-success);
@@ -83,12 +105,9 @@
 		border-color: var(--color-error);
 		box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
 	}
-	@keyframes pulse-condition {
-		0%, 100% {
-			box-shadow: 0 0 8px rgba(136, 136, 160, 0.15);
-		}
-		50% {
-			box-shadow: 0 0 20px rgba(136, 136, 160, 0.4);
+	@keyframes spin-border {
+		to {
+			transform: rotate(360deg);
 		}
 	}
 	.diamond-content {

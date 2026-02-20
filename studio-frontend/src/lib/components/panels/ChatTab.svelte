@@ -148,7 +148,9 @@
 	<div class="messages" bind:this={messagesContainer}>
 		{#if $chatMessages.length === 0}
 			<div class="empty-state">
-				<Bot size={28} />
+				<div class="empty-icon-circle">
+					<Bot size={48} />
+				</div>
 				<span class="empty-title">Firefly Assistant</span>
 				<span class="empty-hint"
 					>Ask me to help build your agent pipeline. I can add nodes, connect them, configure
@@ -268,8 +270,20 @@
 		height: 100%;
 		gap: 10px;
 		color: var(--color-text-secondary, #8888a0);
-		opacity: 0.5;
+		opacity: 0.7;
 		padding: 24px;
+	}
+
+	.empty-icon-circle {
+		width: 72px;
+		height: 72px;
+		border-radius: 50%;
+		background: oklch(from var(--color-accent, #ff6b35) l c h / 10%);
+		color: var(--color-accent, #ff6b35);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 4px;
 	}
 
 	.empty-title {
