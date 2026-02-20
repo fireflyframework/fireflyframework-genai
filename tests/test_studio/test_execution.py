@@ -206,20 +206,47 @@ class TestExecutionWebSocket:
 
         return create_studio_app()
 
-    async def test_websocket_connect_and_run_stub(self, app):
-        """Test that the WebSocket endpoint accepts connections and
-        responds to a run action with a not-yet-wired message."""
+    async def test_websocket_run_with_graph(self, app):
+        """Test that the WebSocket endpoint compiles and runs a graph,
+        returning execution events and a pipeline_result."""
+        from starlette.testclient import TestClient
+
+        graph = {
+            "nodes": [
+                {
+                    "id": "n1",
+                    "type": "pipeline_step",
+                    "label": "Step 1",
+                    "position": {"x": 0, "y": 0},
+                    "data": {},
+                }
+            ],
+            "edges": [],
+            "metadata": {"name": "test-pipeline"},
+        }
+        client = TestClient(app)
+        with client.websocket_connect("/ws/execution") as ws:
+            ws.send_json({"action": "run", "graph": graph, "inputs": "hello"})
+            # Collect messages until pipeline_result
+            messages = []
+            for _ in range(20):
+                msg = ws.receive_json()
+                messages.append(msg)
+                if msg["type"] == "pipeline_result":
+                    break
+            result = messages[-1]
+            assert result["type"] == "pipeline_result"
+            assert result["success"] is True
+
+    async def test_websocket_run_missing_graph(self, app):
+        """Test that a run action without a graph returns an error."""
         from starlette.testclient import TestClient
 
         client = TestClient(app)
         with client.websocket_connect("/ws/execution") as ws:
-            ws.send_json({"action": "run", "pipeline": "test"})
+            ws.send_json({"action": "run"})
             data = ws.receive_json()
             assert data["type"] == "error"
-            assert "not fully wired" in data["message"].lower()
-            complete = ws.receive_json()
-            assert complete["type"] == "pipeline_complete"
-            assert complete["success"] is False
 
     async def test_websocket_unknown_action(self, app):
         """Test that unknown actions get an error response."""

@@ -40,6 +40,15 @@ async def _lifespan(app: Any) -> AsyncIterator[None]:
     """FastAPI lifespan: startup and shutdown hooks for Studio."""
     # -- Startup -----------------------------------------------------------
     logger.info("Firefly Studio starting up")
+
+    # Load persisted settings and inject API keys into the environment
+    # so that PydanticAI providers pick them up automatically.
+    from fireflyframework_genai.studio.settings import apply_settings_to_env, load_settings
+
+    settings_path = getattr(app.state, "settings_path", None)
+    settings = load_settings(settings_path)
+    apply_settings_to_env(settings)
+
     yield
     # -- Shutdown ----------------------------------------------------------
     logger.info("Firefly Studio shutting down")
@@ -47,12 +56,16 @@ async def _lifespan(app: Any) -> AsyncIterator[None]:
 
 def create_studio_app(
     config: Any | None = None,
+    settings_path: Any | None = None,
 ) -> Any:
     """Create a FastAPI application for Firefly Studio.
 
     Parameters:
         config: Optional :class:`~fireflyframework_genai.studio.config.StudioConfig`.
             When *None*, a default ``StudioConfig()`` is created.
+        settings_path: Optional :class:`~pathlib.Path` to the settings JSON
+            file.  When *None*, the default ``~/.firefly-studio/settings.json``
+            is used.  Useful for tests.
 
     Returns:
         A configured :class:`fastapi.FastAPI` instance.
@@ -74,6 +87,9 @@ def create_studio_app(
         lifespan=_lifespan,
     )
 
+    # Store settings path on app state for the lifespan hook
+    app.state.settings_path = settings_path
+
     # -- CORS middleware ---------------------------------------------------
     app.add_middleware(
         CORSMiddleware,
@@ -88,6 +104,11 @@ def create_studio_app(
     async def health() -> dict[str, str]:
         return {"status": "ok", "version": pkg_version}
 
+    # -- Settings endpoints ------------------------------------------------
+    from fireflyframework_genai.studio.api.settings import create_settings_router
+
+    app.include_router(create_settings_router(settings_path))
+
     # -- Registry endpoints ------------------------------------------------
     from fireflyframework_genai.studio.api.registry import create_registry_router
 
@@ -99,6 +120,21 @@ def create_studio_app(
 
     project_manager = ProjectManager(config.projects_dir)
     app.include_router(create_projects_router(project_manager))
+
+    # -- File browsing endpoints -------------------------------------------
+    from fireflyframework_genai.studio.api.files import create_files_router
+
+    app.include_router(create_files_router(project_manager))
+
+    # -- Evaluation endpoints ----------------------------------------------
+    from fireflyframework_genai.studio.api.evaluate import create_evaluate_router
+
+    app.include_router(create_evaluate_router(project_manager))
+
+    # -- Experiments endpoints ---------------------------------------------
+    from fireflyframework_genai.studio.api.experiments import create_experiments_router
+
+    app.include_router(create_experiments_router(project_manager))
 
     # -- Code generation endpoints -----------------------------------------
     from fireflyframework_genai.studio.api.codegen import create_codegen_router
@@ -138,9 +174,16 @@ def create_studio_app(
 
 
 def _get_default_static_dir() -> Any:
-    """Return the default path to the bundled static directory."""
+    """Return the default path to the bundled static directory.
+
+    Handles both normal installs and PyInstaller frozen bundles where
+    data files are extracted to ``sys._MEIPASS``.
+    """
+    import sys
     from pathlib import Path
 
+    if getattr(sys, "frozen", False):
+        return Path(sys._MEIPASS) / "fireflyframework_genai" / "studio" / "static"  # type: ignore[attr-defined]
     return Path(__file__).parent / "static"
 
 
