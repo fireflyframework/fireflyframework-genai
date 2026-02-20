@@ -120,6 +120,9 @@ uv.lock
 # Vibe coding
 .vibe/
 
+# Design/plan docs (local only)
+docs/plans/
+
 # Studio bundled frontend (build artifact — run scripts/build_studio.py)
 src/fireflyframework_genai/studio/static/*
 !src/fireflyframework_genai/studio/static/.gitkeep
