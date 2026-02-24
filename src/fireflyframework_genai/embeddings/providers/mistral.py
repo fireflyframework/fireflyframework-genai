@@ -46,6 +46,6 @@ class MistralEmbedder(BaseEmbedder):
                 model=self._model,
                 inputs=texts,
             )
-            return [list(item.embedding) for item in response.data]
+            return [list(item.embedding) for item in response.data if item.embedding is not None]
         except Exception as exc:
             raise EmbeddingProviderError(f"Mistral embedding failed: {exc}") from exc

@@ -6,7 +6,7 @@ import logging
 from typing import Any
 
 try:
-    from pinecone import Pinecone
+    from pinecone import Pinecone  # type: ignore[import-untyped]
 except ImportError:
     Pinecone = None  # type: ignore[assignment,misc]
 

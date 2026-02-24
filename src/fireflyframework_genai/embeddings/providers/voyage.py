@@ -6,7 +6,7 @@ import logging
 from typing import Any
 
 try:
-    import voyageai
+    import voyageai  # type: ignore[import-untyped]
 except ImportError:
     voyageai = None  # type: ignore[assignment]
 

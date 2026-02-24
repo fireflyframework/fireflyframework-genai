@@ -7,7 +7,7 @@ import logging
 from typing import Any
 
 try:
-    import google.generativeai as genai
+    import google.generativeai as genai  # type: ignore[import-untyped]
 except ImportError:
     genai = None  # type: ignore[assignment]
 
@@ -46,7 +46,7 @@ class GoogleEmbedder(BaseEmbedder):
         """Embed a single batch of texts via the Google Generative AI API."""
         try:
             result = await asyncio.to_thread(
-                genai.embed_content,
+                genai.embed_content,  # type: ignore[union-attr]
                 model=self._model,
                 content=texts,
             )

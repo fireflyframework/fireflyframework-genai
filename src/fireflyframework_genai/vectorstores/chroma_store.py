@@ -6,7 +6,7 @@ import logging
 from typing import Any
 
 try:
-    import chromadb
+    import chromadb  # type: ignore[import-untyped]
 except ImportError:
     chromadb = None  # type: ignore[assignment]
 

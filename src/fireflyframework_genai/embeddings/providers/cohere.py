@@ -52,6 +52,9 @@ class CohereEmbedder(BaseEmbedder):
                 input_type=input_type,
                 embedding_types=["float"],
             )
-            return [list(e) for e in response.embeddings.float_]
+            embeddings = response.embeddings
+            if embeddings is None or embeddings.float_ is None:
+                return []
+            return [list(e) for e in embeddings.float_]
         except Exception as exc:
             raise EmbeddingProviderError(f"Cohere embedding failed: {exc}") from exc

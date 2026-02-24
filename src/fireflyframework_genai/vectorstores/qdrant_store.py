@@ -6,8 +6,8 @@ import logging
 from typing import Any
 
 try:
-    from qdrant_client import AsyncQdrantClient
-    from qdrant_client.models import (
+    from qdrant_client import AsyncQdrantClient  # type: ignore[import-untyped]
+    from qdrant_client.models import (  # type: ignore[import-untyped]
         Distance,
         FieldCondition,
         Filter,
@@ -63,7 +63,7 @@ class QdrantVectorStore(BaseVectorStore):
 
     async def _upsert(self, documents: list[VectorDocument], namespace: str) -> None:
         points = [
-            PointStruct(
+            PointStruct(  # type: ignore[misc]
                 id=doc.id,
                 vector=doc.embedding,
                 payload={"text": doc.text, "_namespace": namespace, **doc.metadata},
@@ -82,17 +82,17 @@ class QdrantVectorStore(BaseVectorStore):
         namespace: str,
         filters: list[SearchFilter] | None,
     ) -> list[SearchResult]:
-        must_conditions = [FieldCondition(key="_namespace", match=MatchValue(value=namespace))]
+        must_conditions = [FieldCondition(key="_namespace", match=MatchValue(value=namespace))]  # type: ignore[misc]
         if filters:
             for f in filters:
                 if f.operator == "eq":
-                    must_conditions.append(FieldCondition(key=f.field, match=MatchValue(value=f.value)))
+                    must_conditions.append(FieldCondition(key=f.field, match=MatchValue(value=f.value)))  # type: ignore[misc]
 
         results = await self._client.search(
             collection_name=self._collection_name,
             query_vector=query_embedding,
             limit=top_k,
-            query_filter=Filter(must=must_conditions),
+            query_filter=Filter(must=must_conditions),  # type: ignore[misc]
         )
 
         search_results = []
@@ -112,7 +112,7 @@ class QdrantVectorStore(BaseVectorStore):
     async def _delete(self, ids: list[str], namespace: str) -> None:
         await self._client.delete(
             collection_name=self._collection_name,
-            points_selector=PointIdsList(
+            points_selector=PointIdsList(  # type: ignore[misc]
                 points=ids,
             ),
         )
