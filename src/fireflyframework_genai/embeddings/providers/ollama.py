@@ -34,10 +34,7 @@ class OllamaEmbedder(BaseEmbedder):
     ) -> None:
         super().__init__(model=model, dimensions=dimensions, **kwargs)
         if httpx is None:
-            raise ImportError(
-                "The 'httpx' package is required for OllamaEmbedder. "
-                "Install it with: pip install httpx"
-            )
+            raise ImportError("The 'httpx' package is required for OllamaEmbedder. Install it with: pip install httpx")
         self._base_url = base_url.rstrip("/")
         self._client = httpx.AsyncClient(base_url=self._base_url, timeout=120.0)
 

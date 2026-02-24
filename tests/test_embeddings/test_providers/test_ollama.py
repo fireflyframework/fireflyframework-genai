@@ -15,9 +15,7 @@ class TestOllamaEmbedder:
         mock_httpx.AsyncClient.return_value = mock_client
 
         mock_response = MagicMock()
-        mock_response.json.return_value = {
-            "embeddings": [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
-        }
+        mock_response.json.return_value = {"embeddings": [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]}
         mock_response.raise_for_status = MagicMock()
         mock_client.post = AsyncMock(return_value=mock_response)
 
@@ -34,9 +32,7 @@ class TestOllamaEmbedder:
         mock_httpx.AsyncClient.return_value = mock_client
 
         mock_response = MagicMock()
-        mock_response.json.return_value = {
-            "embeddings": [[0.1, 0.2, 0.3]]
-        }
+        mock_response.json.return_value = {"embeddings": [[0.1, 0.2, 0.3]]}
         mock_response.raise_for_status = MagicMock()
         mock_client.post = AsyncMock(return_value=mock_response)
 

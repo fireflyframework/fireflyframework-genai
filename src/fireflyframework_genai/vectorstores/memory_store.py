@@ -63,9 +63,7 @@ class InMemoryVectorStore(BaseVectorStore):
                 ns_data.pop(id_, None)
 
     @staticmethod
-    def _apply_filters(
-        docs: list[VectorDocument], filters: list[SearchFilter]
-    ) -> list[VectorDocument]:
+    def _apply_filters(docs: list[VectorDocument], filters: list[SearchFilter]) -> list[VectorDocument]:
         result = docs
         for f in filters:
             result = [d for d in result if _match_filter(d, f)]

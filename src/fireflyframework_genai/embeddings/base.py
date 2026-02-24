@@ -81,9 +81,7 @@ class BaseEmbedder(ABC):
             except EmbeddingError:
                 raise
             except Exception as exc:
-                raise EmbeddingError(
-                    f"Embedding failed for batch starting at index {i}: {exc}"
-                ) from exc
+                raise EmbeddingError(f"Embedding failed for batch starting at index {i}: {exc}") from exc
 
         dims = len(all_embeddings[0]) if all_embeddings else (self._dimensions or 0)
 

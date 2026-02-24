@@ -26,7 +26,6 @@ except ImportError:
     MatchValue = None  # type: ignore[assignment,misc]
     PointIdsList = None  # type: ignore[assignment,misc]
 
-from fireflyframework_genai.exceptions import VectorStoreConnectionError, VectorStoreError
 from fireflyframework_genai.vectorstores.base import BaseVectorStore
 from fireflyframework_genai.vectorstores.types import SearchFilter, SearchResult, VectorDocument
 
@@ -56,8 +55,7 @@ class QdrantVectorStore(BaseVectorStore):
         super().__init__(**kwargs)
         if AsyncQdrantClient is None:
             raise ImportError(
-                "qdrant-client package is required for QdrantVectorStore. "
-                "Install it with: pip install qdrant-client"
+                "qdrant-client package is required for QdrantVectorStore. Install it with: pip install qdrant-client"
             )
         self._client = AsyncQdrantClient(url=url, api_key=api_key)
         self._collection_name = collection_name
@@ -88,9 +86,7 @@ class QdrantVectorStore(BaseVectorStore):
         if filters:
             for f in filters:
                 if f.operator == "eq":
-                    must_conditions.append(
-                        FieldCondition(key=f.field, match=MatchValue(value=f.value))
-                    )
+                    must_conditions.append(FieldCondition(key=f.field, match=MatchValue(value=f.value)))
 
         results = await self._client.search(
             collection_name=self._collection_name,

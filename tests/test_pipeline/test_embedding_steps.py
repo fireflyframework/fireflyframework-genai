@@ -60,10 +60,7 @@ class TestRetrievalStep:
     async def test_custom_top_k(self):
         embedder = _FakeEmbedder()
         store = InMemoryVectorStore(embedder=embedder)
-        docs = [
-            VectorDocument(id=str(i), text=f"doc{i}", embedding=[float(i), 0.0, 1.0])
-            for i in range(5)
-        ]
+        docs = [VectorDocument(id=str(i), text=f"doc{i}", embedding=[float(i), 0.0, 1.0]) for i in range(5)]
         await store.upsert(docs)
 
         step = RetrievalStep(store=store, embedder=embedder, top_k=3)

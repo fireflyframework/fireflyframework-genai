@@ -35,8 +35,7 @@ class MistralEmbedder(BaseEmbedder):
         super().__init__(model=model, dimensions=dimensions, **kwargs)
         if Mistral is None:
             raise ImportError(
-                "The 'mistralai' package is required for MistralEmbedder. "
-                "Install it with: pip install mistralai"
+                "The 'mistralai' package is required for MistralEmbedder. Install it with: pip install mistralai"
             )
         self._client = Mistral(api_key=api_key or "")
 

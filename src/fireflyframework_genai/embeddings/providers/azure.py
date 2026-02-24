@@ -38,10 +38,7 @@ class AzureEmbedder(BaseEmbedder):
     ) -> None:
         super().__init__(model=model, dimensions=dimensions, **kwargs)
         if AsyncAzureOpenAI is None:
-            raise ImportError(
-                "The 'openai' package is required for AzureEmbedder. "
-                "Install it with: pip install openai"
-            )
+            raise ImportError("The 'openai' package is required for AzureEmbedder. Install it with: pip install openai")
         self._client = AsyncAzureOpenAI(
             azure_endpoint=azure_endpoint,
             api_version=api_version,

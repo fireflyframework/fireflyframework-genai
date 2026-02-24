@@ -71,10 +71,7 @@ class TestInMemoryVectorStore:
 
     async def test_top_k_limits(self):
         store = InMemoryVectorStore()
-        docs = [
-            VectorDocument(id=str(i), text=f"doc{i}", embedding=[float(i), 0.0])
-            for i in range(10)
-        ]
+        docs = [VectorDocument(id=str(i), text=f"doc{i}", embedding=[float(i), 0.0]) for i in range(10)]
         await store.upsert(docs)
         results = await store.search([5.0, 0.0], top_k=3)
         assert len(results) == 3

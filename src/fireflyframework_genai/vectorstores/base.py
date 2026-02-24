@@ -24,9 +24,7 @@ logger = logging.getLogger(__name__)
 class VectorStoreProtocol(Protocol):
     """Structural protocol for vector stores."""
 
-    async def upsert(
-        self, documents: list[VectorDocument], namespace: str = "default"
-    ) -> None: ...
+    async def upsert(self, documents: list[VectorDocument], namespace: str = "default") -> None: ...
 
     async def search(
         self,
@@ -44,9 +42,7 @@ class VectorStoreProtocol(Protocol):
         filters: list[SearchFilter] | None = None,
     ) -> list[SearchResult]: ...
 
-    async def delete(
-        self, ids: list[str], namespace: str = "default"
-    ) -> None: ...
+    async def delete(self, ids: list[str], namespace: str = "default") -> None: ...
 
 
 class BaseVectorStore(ABC):
@@ -65,9 +61,7 @@ class BaseVectorStore(ABC):
     def __init__(self, embedder: EmbeddingProtocol | None = None, **kwargs: Any) -> None:
         self._embedder = embedder
 
-    async def upsert(
-        self, documents: list[VectorDocument], namespace: str = "default"
-    ) -> None:
+    async def upsert(self, documents: list[VectorDocument], namespace: str = "default") -> None:
         """Upsert documents, auto-embedding any that lack embeddings."""
         needs_embedding = [d for d in documents if d.embedding is None]
         if needs_embedding:
@@ -111,15 +105,11 @@ class BaseVectorStore(ABC):
     ) -> list[SearchResult]:
         """Convenience: embed query text and search."""
         if self._embedder is None:
-            raise ValueError(
-                "search_text requires an embedder. Pass one to the constructor."
-            )
+            raise ValueError("search_text requires an embedder. Pass one to the constructor.")
         query_embedding = await self._embedder.embed_one(query)
         return await self.search(query_embedding, top_k, namespace, filters)
 
-    async def delete(
-        self, ids: list[str], namespace: str = "default"
-    ) -> None:
+    async def delete(self, ids: list[str], namespace: str = "default") -> None:
         """Delete documents by ID."""
         try:
             await self._delete(ids, namespace)
@@ -129,9 +119,7 @@ class BaseVectorStore(ABC):
             raise VectorStoreError(f"Delete failed: {exc}") from exc
 
     @abstractmethod
-    async def _upsert(
-        self, documents: list[VectorDocument], namespace: str
-    ) -> None: ...
+    async def _upsert(self, documents: list[VectorDocument], namespace: str) -> None: ...
 
     @abstractmethod
     async def _search(

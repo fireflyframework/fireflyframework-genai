@@ -36,10 +36,7 @@ class BedrockEmbedder(BaseEmbedder):
     ) -> None:
         super().__init__(model=model, dimensions=dimensions, **kwargs)
         if boto3 is None:
-            raise ImportError(
-                "The 'boto3' package is required for BedrockEmbedder. "
-                "Install it with: pip install boto3"
-            )
+            raise ImportError("The 'boto3' package is required for BedrockEmbedder. Install it with: pip install boto3")
         self._client = boto3.client("bedrock-runtime", region_name=region)
 
     async def _embed_batch(self, texts: list[str], **kwargs: Any) -> list[list[float]]:

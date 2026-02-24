@@ -37,8 +37,7 @@ class CohereEmbedder(BaseEmbedder):
         super().__init__(model=model, dimensions=dimensions, **kwargs)
         if AsyncCohere is None:
             raise ImportError(
-                "The 'cohere' package is required for CohereEmbedder. "
-                "Install it with: pip install cohere"
+                "The 'cohere' package is required for CohereEmbedder. Install it with: pip install cohere"
             )
         self._input_type = input_type
         self._client = AsyncCohere(api_key=api_key)

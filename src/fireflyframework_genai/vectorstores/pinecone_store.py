@@ -10,7 +10,6 @@ try:
 except ImportError:
     Pinecone = None  # type: ignore[assignment,misc]
 
-from fireflyframework_genai.exceptions import VectorStoreConnectionError, VectorStoreError
 from fireflyframework_genai.vectorstores.base import BaseVectorStore
 from fireflyframework_genai.vectorstores.types import SearchFilter, SearchResult, VectorDocument
 
@@ -36,8 +35,7 @@ class PineconeVectorStore(BaseVectorStore):
         super().__init__(**kwargs)
         if Pinecone is None:
             raise ImportError(
-                "pinecone package is required for PineconeVectorStore. "
-                "Install it with: pip install pinecone"
+                "pinecone package is required for PineconeVectorStore. Install it with: pip install pinecone"
             )
         self._pc = Pinecone(api_key=api_key)
         self._index = self._pc.Index(index_name)

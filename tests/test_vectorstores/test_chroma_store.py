@@ -20,9 +20,7 @@ class TestChromaVectorStore:
         from fireflyframework_genai.vectorstores.chroma_store import ChromaVectorStore
 
         store = ChromaVectorStore(collection_name="test")
-        await store.upsert(
-            [VectorDocument(id="1", text="hello", embedding=[1.0, 0.0])]
-        )
+        await store.upsert([VectorDocument(id="1", text="hello", embedding=[1.0, 0.0])])
         mock_collection.upsert.assert_called_once()
         call_kwargs = mock_collection.upsert.call_args
         assert call_kwargs[1]["ids"] == ["1"]

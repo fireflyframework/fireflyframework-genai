@@ -10,7 +10,6 @@ try:
 except ImportError:
     chromadb = None  # type: ignore[assignment]
 
-from fireflyframework_genai.exceptions import VectorStoreConnectionError, VectorStoreError
 from fireflyframework_genai.vectorstores.base import BaseVectorStore
 from fireflyframework_genai.vectorstores.types import SearchFilter, SearchResult, VectorDocument
 
@@ -36,8 +35,7 @@ class ChromaVectorStore(BaseVectorStore):
         super().__init__(**kwargs)
         if chromadb is None:
             raise ImportError(
-                "chromadb package is required for ChromaVectorStore. "
-                "Install it with: pip install chromadb"
+                "chromadb package is required for ChromaVectorStore. Install it with: pip install chromadb"
             )
         self._client = client or chromadb.Client()
         self._collection_name = collection_name
@@ -78,11 +76,7 @@ class ChromaVectorStore(BaseVectorStore):
                 doc = VectorDocument(
                     id=doc_id,
                     text=results["documents"][0][i] if results["documents"] else "",
-                    metadata={
-                        k: v
-                        for k, v in (results["metadatas"][0][i] or {}).items()
-                        if k != "_namespace"
-                    },
+                    metadata={k: v for k, v in (results["metadatas"][0][i] or {}).items() if k != "_namespace"},
                 )
                 score = 1.0 - (results["distances"][0][i] if results["distances"] else 0.0)
                 search_results.append(SearchResult(document=doc, score=score))

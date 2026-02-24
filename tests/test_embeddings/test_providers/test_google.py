@@ -11,9 +11,7 @@ from fireflyframework_genai.embeddings.types import EmbeddingResult
 class TestGoogleEmbedder:
     @patch("fireflyframework_genai.embeddings.providers.google.genai")
     async def test_embed_batch(self, mock_genai):
-        mock_genai.embed_content.return_value = {
-            "embedding": [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
-        }
+        mock_genai.embed_content.return_value = {"embedding": [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]}
 
         embedder = GoogleEmbedder()
         result = await embedder.embed(["hello", "world"])
@@ -24,9 +22,7 @@ class TestGoogleEmbedder:
 
     @patch("fireflyframework_genai.embeddings.providers.google.genai")
     async def test_embed_one(self, mock_genai):
-        mock_genai.embed_content.return_value = {
-            "embedding": [[0.1, 0.2, 0.3]]
-        }
+        mock_genai.embed_content.return_value = {"embedding": [[0.1, 0.2, 0.3]]}
 
         embedder = GoogleEmbedder()
         vec = await embedder.embed_one("hello")

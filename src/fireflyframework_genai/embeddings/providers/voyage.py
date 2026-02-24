@@ -35,8 +35,7 @@ class VoyageEmbedder(BaseEmbedder):
         super().__init__(model=model, dimensions=dimensions, **kwargs)
         if voyageai is None:
             raise ImportError(
-                "The 'voyageai' package is required for VoyageEmbedder. "
-                "Install it with: pip install voyageai"
+                "The 'voyageai' package is required for VoyageEmbedder. Install it with: pip install voyageai"
             )
         self._client = voyageai.AsyncClient(api_key=api_key)
 
