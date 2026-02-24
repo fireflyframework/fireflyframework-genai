@@ -105,7 +105,7 @@ class BaseVectorStore(ABC):
     ) -> list[SearchResult]:
         """Convenience: embed query text and search."""
         if self._embedder is None:
-            raise ValueError("search_text requires an embedder. Pass one to the constructor.")
+            raise VectorStoreError("search_text requires an embedder. Pass one to the constructor.")
         query_embedding = await self._embedder.embed_one(query)
         return await self.search(query_embedding, top_k, namespace, filters)
 

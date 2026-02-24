@@ -31,7 +31,7 @@ class AzureEmbedder(BaseEmbedder):
         model: str,
         dimensions: int | None = None,
         *,
-        azure_endpoint: str = "",
+        azure_endpoint: str,
         api_version: str = "2024-02-01",
         api_key: str | None = None,
         **kwargs: Any,

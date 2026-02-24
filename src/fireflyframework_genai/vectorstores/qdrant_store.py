@@ -112,5 +112,7 @@ class QdrantVectorStore(BaseVectorStore):
     async def _delete(self, ids: list[str], namespace: str) -> None:
         await self._client.delete(
             collection_name=self._collection_name,
-            points_selector=PointIdsList(points=ids),
+            points_selector=PointIdsList(
+                points=ids,
+            ),
         )

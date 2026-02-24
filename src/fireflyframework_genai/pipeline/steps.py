@@ -23,8 +23,10 @@ import logging
 from collections.abc import Callable, Coroutine
 from typing import Any, Protocol, runtime_checkable
 
+from fireflyframework_genai.embeddings.base import EmbeddingProtocol
 from fireflyframework_genai.pipeline.context import PipelineContext
 from fireflyframework_genai.types import AgentLike
+from fireflyframework_genai.vectorstores.base import VectorStoreProtocol
 
 logger = logging.getLogger(__name__)
 
@@ -365,7 +367,7 @@ class EmbeddingStep:
 
     def __init__(
         self,
-        embedder: Any,
+        embedder: EmbeddingProtocol,
         *,
         input_key: str = "input",
     ) -> None:
@@ -393,9 +395,9 @@ class RetrievalStep:
 
     def __init__(
         self,
-        store: Any,
+        store: VectorStoreProtocol,
         *,
-        embedder: Any | None = None,
+        embedder: EmbeddingProtocol | None = None,
         top_k: int = 5,
         input_key: str = "input",
     ) -> None:

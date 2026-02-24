@@ -43,12 +43,12 @@ class ChromaVectorStore(BaseVectorStore):
 
     async def _upsert(self, documents: list[VectorDocument], namespace: str) -> None:
         ids = [doc.id for doc in documents]
-        embeddings = [doc.embedding for doc in documents if doc.embedding is not None]
+        embeddings = [doc.embedding for doc in documents]
         texts = [doc.text for doc in documents]
         metadatas = [{**doc.metadata, "_namespace": namespace} for doc in documents]
         self._collection.upsert(
             ids=ids,
-            embeddings=embeddings,
+            embeddings=embeddings,  # type: ignore[arg-type]
             documents=texts,
             metadatas=metadatas,
         )
@@ -83,4 +83,4 @@ class ChromaVectorStore(BaseVectorStore):
         return search_results
 
     async def _delete(self, ids: list[str], namespace: str) -> None:
-        self._collection.delete(ids=ids)
+        self._collection.delete(ids=ids, where={"_namespace": namespace})

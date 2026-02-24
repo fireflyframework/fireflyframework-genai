@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import pytest
-
 from fireflyframework_genai.embeddings.base import BaseEmbedder, EmbeddingProtocol
-from fireflyframework_genai.embeddings.types import EmbeddingResult, EmbeddingUsage
+from fireflyframework_genai.embeddings.types import EmbeddingResult
 
 
 class _FakeEmbedder(BaseEmbedder):

@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
-
 from fireflyframework_genai.embeddings.providers.openai import OpenAIEmbedder
 from fireflyframework_genai.embeddings.types import EmbeddingResult
 

@@ -129,7 +129,7 @@ class TestChromaVectorStore:
 
         store = ChromaVectorStore(collection_name="test")
         await store.delete(["1", "2"])
-        mock_collection.delete.assert_called_once_with(ids=["1", "2"])
+        mock_collection.delete.assert_called_once_with(ids=["1", "2"], where={"_namespace": "default"})
 
     @patch("fireflyframework_genai.vectorstores.chroma_store.chromadb")
     async def test_custom_client(self, mock_chromadb):
@@ -139,7 +139,7 @@ class TestChromaVectorStore:
 
         from fireflyframework_genai.vectorstores.chroma_store import ChromaVectorStore
 
-        store = ChromaVectorStore(collection_name="my_coll", client=custom_client)
+        ChromaVectorStore(collection_name="my_coll", client=custom_client)
         # Should use the custom client, not create a new one
         mock_chromadb.Client.assert_not_called()
         custom_client.get_or_create_collection.assert_called_once_with(name="my_coll")

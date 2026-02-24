@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from fireflyframework_genai.embeddings.providers.google import GoogleEmbedder
 from fireflyframework_genai.embeddings.types import EmbeddingResult

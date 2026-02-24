@@ -37,7 +37,7 @@ class MistralEmbedder(BaseEmbedder):
             raise ImportError(
                 "The 'mistralai' package is required for MistralEmbedder. Install it with: pip install mistralai"
             )
-        self._client = Mistral(api_key=api_key or "")
+        self._client = Mistral(api_key=api_key)
 
     async def _embed_batch(self, texts: list[str], **kwargs: Any) -> list[list[float]]:
         """Embed a single batch of texts via the Mistral API."""
