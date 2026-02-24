@@ -39,6 +39,8 @@ from fireflyframework_genai.exceptions import (
     DatabaseConnectionError,
     DatabaseStoreError,
     DelegationError,
+    EmbeddingError,
+    EmbeddingProviderError,
     ExperimentError,
     ExplainabilityError,
     ExposureError,
@@ -63,6 +65,8 @@ from fireflyframework_genai.exceptions import (
     ToolGuardError,
     ToolNotFoundError,
     ToolTimeoutError,
+    VectorStoreConnectionError,
+    VectorStoreError,
 )
 from fireflyframework_genai.logging import configure_logging, enable_debug
 from fireflyframework_genai.plugin import PluginDiscovery
@@ -122,6 +126,10 @@ __all__ = [
     "RateLimitError",
     "DatabaseStoreError",
     "DatabaseConnectionError",
+    "EmbeddingError",
+    "EmbeddingProviderError",
+    "VectorStoreError",
+    "VectorStoreConnectionError",
     "MemoryError",
     "AgentDepsT",
     "AgentLike",
