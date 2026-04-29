@@ -89,8 +89,11 @@ class IngestionResult(BaseModel):
         files_processed: Number of files successfully mapped (errors excluded).
         records_written: Map of table name to row count actually written.
         errors: Non-fatal errors captured during the run.
+        run_id: Identifier passed to the run for traceability, if any.
+            Echoed back from the caller; the service does not generate it.
     """
 
     files_processed: int = 0
     records_written: dict[str, int] = Field(default_factory=dict)
     errors: list[IngestionError] = Field(default_factory=list)
+    run_id: str | None = None

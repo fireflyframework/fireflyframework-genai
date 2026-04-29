@@ -57,15 +57,20 @@ class IngestionService:
         self._sink = sink
         self._schema = schema
 
-    async def run_incremental(self, since: str | None = None) -> IngestionResult:
+    async def run_incremental(
+        self,
+        since: str | None = None,
+        *,
+        run_id: str | None = None,
+    ) -> IngestionResult:
         cursor = since if since is not None else await self._source.current_cursor()
-        return await self._run(since=cursor)
+        return await self._run(since=cursor, run_id=run_id)
 
-    async def run_full_rebuild(self) -> IngestionResult:
-        return await self._run(since=None)
+    async def run_full_rebuild(self, *, run_id: str | None = None) -> IngestionResult:
+        return await self._run(since=None, run_id=run_id)
 
-    async def _run(self, since: str | None) -> IngestionResult:
-        result = IngestionResult()
+    async def _run(self, since: str | None, run_id: str | None = None) -> IngestionResult:
+        result = IngestionResult(run_id=run_id)
         started = time.perf_counter()
 
         # Phase 1: pull every changed file into the local cache, in order.

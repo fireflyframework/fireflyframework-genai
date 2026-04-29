@@ -14,6 +14,6 @@
 
 """Concrete sink implementations."""
 
-from fireflyframework_agentic.ingestion.adapters.sinks.duckdb_sink import DuckDBSink
+from fireflyframework_agentic.ingestion.adapters.sinks.sqlite_sink import SQLiteSink
 
-__all__ = ["DuckDBSink"]
+__all__ = ["SQLiteSink"]

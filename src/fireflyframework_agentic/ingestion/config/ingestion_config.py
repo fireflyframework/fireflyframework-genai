@@ -25,7 +25,7 @@ from pydantic import BaseModel, Field
 
 from fireflyframework_agentic.ingestion.adapters import EnvSecretsProvider
 from fireflyframework_agentic.ingestion.adapters.mappers import ScriptMapper
-from fireflyframework_agentic.ingestion.adapters.sinks import DuckDBSink
+from fireflyframework_agentic.ingestion.adapters.sinks import SQLiteSink
 from fireflyframework_agentic.ingestion.adapters.sources import (
     SharePointSource,
     SharePointSourceConfig,
@@ -52,8 +52,8 @@ class MapperSection(BaseModel):
 
 
 class SinkSection(BaseModel):
-    type: Literal["duckdb"]
-    mode: Literal["in-memory"] = "in-memory"
+    type: Literal["sqlite"]
+    mode: Literal["in-memory", "file"] = "in-memory"
     path: Path | None = None
 
 
@@ -128,12 +128,12 @@ def build_mapper(section: MapperSection) -> MapperPort:
 
 
 def build_sink(section: SinkSection) -> StructuredSinkPort:
-    if section.type == "duckdb":
+    if section.type == "sqlite":
         if section.mode == "in-memory":
-            return DuckDBSink(":memory:")
+            return SQLiteSink(":memory:")
         if section.path is None:
-            raise IngestionConfigError(f"duckdb sink mode={section.mode!r} requires sink.path")
-        return DuckDBSink(str(section.path))
+            raise IngestionConfigError(f"sqlite sink mode={section.mode!r} requires sink.path")
+        return SQLiteSink(str(section.path))
     raise IngestionConfigError(f"unknown sink type: {section.type!r}")
 
 

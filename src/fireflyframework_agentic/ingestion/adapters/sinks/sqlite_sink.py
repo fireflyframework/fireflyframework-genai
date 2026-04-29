@@ -12,14 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""DuckDB sink: builds an in-memory normalized database from typed records."""
+"""SQLite sink: builds a normalized database from typed records.
+
+Stdlib-only (sqlite3). On every :meth:`begin` the target tables are
+dropped and recreated from the schema, so the database always reflects
+the current run. Identifiers (table/column names) are validated through
+:func:`fireflyframework_agentic.security.identifiers.validate_identifier`
+before any string interpolation; values always go through ``?``
+placeholders.
+"""
 
 from __future__ import annotations
 
+import json
 import logging
+import sqlite3
 from collections.abc import Iterable
 from datetime import date, datetime
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from fireflyframework_agentic.ingestion.domain import (
     ColumnSpec,
@@ -29,67 +39,66 @@ from fireflyframework_agentic.ingestion.domain import (
     TargetSchema,
     TypedRecord,
 )
-
-if TYPE_CHECKING:
-    import duckdb
+from fireflyframework_agentic.security.identifiers import validate_identifier
 
 logger = logging.getLogger(__name__)
 
 
-_DUCKDB_TYPES: dict[ColumnType, str] = {
-    "string": "VARCHAR",
-    "integer": "BIGINT",
-    "float": "DOUBLE",
-    "boolean": "BOOLEAN",
-    "date": "DATE",
-    "datetime": "TIMESTAMP",
-    "json": "JSON",
+_SQLITE_TYPES: dict[ColumnType, str] = {
+    "string": "TEXT",
+    "integer": "INTEGER",
+    "float": "REAL",
+    "boolean": "INTEGER",
+    "date": "TEXT",
+    "datetime": "TEXT",
+    "json": "TEXT",
 }
 
 
-class DuckDBSink:
-    """In-memory DuckDB sink with idempotent rebuild on every run.
+class SQLiteSink:
+    """SQLite sink with idempotent rebuild on every run.
 
-    Each call to :meth:`begin` drops any pre-existing tables and recreates
-    them from *schema*. Rows are validated against :class:`ColumnSpec`
-    before insertion; invalid rows are skipped and accumulated in
-    :attr:`validation_errors`.
+    Each call to :meth:`begin` drops any pre-existing tables in the
+    schema and recreates them. Rows are validated against
+    :class:`ColumnSpec` before insertion; invalid rows are skipped and
+    accumulated in :attr:`validation_errors`.
+
+    Parameters:
+        db_path: Path to the SQLite file, or ``":memory:"`` for an
+            ephemeral in-process database. Defaults to ``":memory:"``.
     """
 
     def __init__(self, db_path: str = ":memory:") -> None:
-        try:
-            import duckdb as _duckdb
-        except ImportError as exc:
-            raise ImportError(
-                "DuckDBSink requires the 'ingestion-duckdb' extra: "
-                "pip install fireflyframework-agentic[ingestion-duckdb]"
-            ) from exc
-        self._duckdb_module = _duckdb
-        self._conn: duckdb.DuckDBPyConnection | None = None
         self._db_path = db_path
+        self._conn: sqlite3.Connection | None = None
         self._schema: TargetSchema | None = None
         self._counts: dict[str, int] = {}
         self.validation_errors: list[IngestionError] = []
 
     @property
-    def connection(self) -> duckdb.DuckDBPyConnection:
+    def connection(self) -> sqlite3.Connection:
         if self._conn is None:
-            raise RuntimeError("DuckDBSink: begin() must be called first")
+            raise RuntimeError("SQLiteSink: begin() must be called first")
         return self._conn
 
     def begin(self, schema: TargetSchema) -> None:
         if self._conn is None:
-            self._conn = self._duckdb_module.connect(self._db_path)
+            self._conn = sqlite3.connect(self._db_path)
+            self._conn.execute("PRAGMA foreign_keys = ON")
         self._schema = schema
         self._counts = {t.name: 0 for t in schema.tables}
         self.validation_errors = []
-        for table in schema.tables:
+        # Drop in reverse order so FK targets survive until their referrers
+        # have been dropped; recreate in declared order.
+        for table in reversed(schema.tables):
             self._conn.execute(f"DROP TABLE IF EXISTS {self._quote(table.name)}")
+        for table in schema.tables:
             self._conn.execute(self._create_table_sql(table))
+        self._conn.commit()
 
     def write(self, records: Iterable[TypedRecord]) -> None:
         if self._conn is None or self._schema is None:
-            raise RuntimeError("DuckDBSink: begin() must be called first")
+            raise RuntimeError("SQLiteSink: begin() must be called first")
         for record in records:
             try:
                 table = self._schema.table(record.table)
@@ -108,10 +117,13 @@ class DuckDBSink:
             placeholders = ", ".join(["?"] * len(table.columns))
             cols = ", ".join(self._quote(c.name) for c in table.columns)
             sql = f"INSERT INTO {self._quote(table.name)} ({cols}) VALUES ({placeholders})"
-            self._conn.execute(sql, [coerced[c.name] for c in table.columns])
+            self._conn.execute(sql, [self._adapt(c, coerced[c.name]) for c in table.columns])
             self._counts[table.name] += 1
+        self._conn.commit()
 
     def finalize(self) -> dict[str, int]:
+        if self._conn is not None:
+            self._conn.commit()
         return dict(self._counts)
 
     def close(self) -> None:
@@ -202,19 +214,40 @@ class DuckDBSink:
             return value
         raise ValueError(f"unknown column type {ctype!r}")
 
+    @staticmethod
+    def _adapt(column: ColumnSpec, value: Any) -> Any:
+        """Convert a coerced Python value to a sqlite3-compatible scalar."""
+        if value is None:
+            return None
+        ctype = column.type
+        if ctype == "boolean":
+            return 1 if value else 0
+        if ctype == "date":
+            return value.isoformat()
+        if ctype == "datetime":
+            return value.isoformat()
+        if ctype == "json":
+            return json.dumps(value)
+        return value
+
     def _create_table_sql(self, table: TableSpec) -> str:
         cols = []
         for c in table.columns:
-            duck_type = _DUCKDB_TYPES[c.type]
+            sqlite_type = _SQLITE_TYPES[c.type]
             constraints: list[str] = []
             if not c.nullable:
                 constraints.append("NOT NULL")
             if c.primary_key:
                 constraints.append("PRIMARY KEY")
             constraint_clause = (" " + " ".join(constraints)) if constraints else ""
-            cols.append(f"{self._quote(c.name)} {duck_type}{constraint_clause}")
+            cols.append(f"{self._quote(c.name)} {sqlite_type}{constraint_clause}")
+        for fk in table.foreign_keys:
+            cols.append(
+                f"FOREIGN KEY ({self._quote(fk.column)}) "
+                f"REFERENCES {self._quote(fk.references_table)}({self._quote(fk.references_column)})"
+            )
         return f"CREATE TABLE {self._quote(table.name)} ({', '.join(cols)})"
 
     @staticmethod
     def _quote(identifier: str) -> str:
-        return '"' + identifier.replace('"', '""') + '"'
+        return '"' + validate_identifier(identifier) + '"'

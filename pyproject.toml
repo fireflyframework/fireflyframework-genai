@@ -109,18 +109,15 @@ ingestion-sharepoint = [
     "httpx>=0.28.0",
     "pyyaml>=6.0",
 ]
-ingestion-duckdb = [
-    "duckdb>=1.0.0",
-]
 ingestion-keyvault = [
     "azure-identity>=1.19.0",
     "azure-keyvault-secrets>=4.9.0",
 ]
 ingestion = [
-    "fireflyframework-agentic[ingestion-sharepoint,ingestion-duckdb]",
+    "fireflyframework-agentic[ingestion-sharepoint]",
 ]
 all = [
-    "fireflyframework-agentic[rest,queues,postgres,mongodb,security,http,costs,embeddings,openai-embeddings,cohere-embeddings,google-embeddings,mistral-embeddings,voyage-embeddings,azure-embeddings,bedrock-embeddings,ollama-embeddings,vectorstores-chroma,vectorstores-pinecone,vectorstores-qdrant,ingestion-sharepoint,ingestion-duckdb,ingestion-keyvault]",
+    "fireflyframework-agentic[rest,queues,postgres,mongodb,security,http,costs,embeddings,openai-embeddings,cohere-embeddings,google-embeddings,mistral-embeddings,voyage-embeddings,azure-embeddings,bedrock-embeddings,ollama-embeddings,vectorstores-chroma,vectorstores-pinecone,vectorstores-qdrant,ingestion-sharepoint,ingestion-keyvault]",
 ]
 dev = [
     "pytest>=8.3.0",

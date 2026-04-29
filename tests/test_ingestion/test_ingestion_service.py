@@ -15,7 +15,7 @@
 """Integration tests for IngestionService with a FakeSource and real adapters.
 
 The fake replaces only the *port* (DataSourcePort), so the rest of the
-pipeline (ScriptMapper loading real Python files, DuckDBSink running
+pipeline (ScriptMapper loading real Python files, SQLiteSink running
 in-memory) is exercised end-to-end. This is the most valuable shape of
 test for hexagonal code: the boundary closest to the outside world is
 faked, everything else is real.
@@ -30,7 +30,7 @@ from pathlib import Path
 import pytest
 
 from fireflyframework_agentic.ingestion.adapters.mappers import ScriptMapper
-from fireflyframework_agentic.ingestion.adapters.sinks import DuckDBSink
+from fireflyframework_agentic.ingestion.adapters.sinks import SQLiteSink
 from fireflyframework_agentic.ingestion.domain import (
     ColumnSpec,
     ForeignKeySpec,
@@ -111,7 +111,7 @@ def _csv_raw(name: str, source_id: str, path: Path) -> RawFile:
     )
 
 
-async def test_end_to_end_pipeline_writes_to_duckdb(schema: TargetSchema, tmp_path: Path):
+async def test_end_to_end_pipeline_writes_to_sqlite(schema: TargetSchema, tmp_path: Path):
     customers = tmp_path / "customers_q1.csv"
     customers.write_text("id,name,tier\n1,Alpha,gold\n2,Beta,silver\n")
     sales = tmp_path / "sales_q1.csv"
@@ -123,7 +123,7 @@ async def test_end_to_end_pipeline_writes_to_duckdb(schema: TargetSchema, tmp_pa
         ]
     )
     mapper = ScriptMapper(FIXTURES_DIR / "scripts")
-    sink = DuckDBSink()
+    sink = SQLiteSink()
     try:
         svc = IngestionService(source, mapper, sink, schema)
         result = await svc.run_full_rebuild()
@@ -152,7 +152,7 @@ async def test_unsupported_file_records_error_and_continues(schema: TargetSchema
         ]
     )
     mapper = ScriptMapper(FIXTURES_DIR / "scripts")
-    sink = DuckDBSink()
+    sink = SQLiteSink()
     try:
         svc = IngestionService(source, mapper, sink, schema)
         result = await svc.run_full_rebuild()
@@ -166,7 +166,7 @@ async def test_unsupported_file_records_error_and_continues(schema: TargetSchema
 async def test_run_incremental_uses_persisted_cursor_when_since_is_none(schema: TargetSchema, tmp_path: Path):
     source = FakeSource(files=[], initial_cursor="saved-cursor")
     mapper = ScriptMapper(FIXTURES_DIR / "scripts")
-    sink = DuckDBSink()
+    sink = SQLiteSink()
     try:
         svc = IngestionService(source, mapper, sink, schema)
         await svc.run_incremental()
@@ -187,7 +187,7 @@ async def test_fetch_failure_recorded_as_error(schema: TargetSchema, tmp_path: P
 
     source = FailingSource([_csv_raw("customers_q1.csv", "fake:c", customers)])
     mapper = ScriptMapper(FIXTURES_DIR / "scripts")
-    sink = DuckDBSink()
+    sink = SQLiteSink()
     try:
         svc = IngestionService(source, mapper, sink, schema)
         result = await svc.run_full_rebuild()
@@ -212,7 +212,7 @@ async def test_mapping_script_failure_recorded_as_error(schema: TargetSchema, tm
     f.write_text("x")
     source = FakeSource([_csv_raw("boom.csv", "fake:b", f)])
     mapper = ScriptMapper(bad)
-    sink = DuckDBSink()
+    sink = SQLiteSink()
     try:
         svc = IngestionService(source, mapper, sink, schema)
         result = await svc.run_full_rebuild()
@@ -239,7 +239,7 @@ async def test_sink_validation_errors_propagate_to_result(schema: TargetSchema, 
     f.write_text("x")
     source = FakeSource([_csv_raw("sales-bad.csv", "fake:sb", f)])
     mapper = ScriptMapper(bad_scripts)
-    sink = DuckDBSink()
+    sink = SQLiteSink()
     try:
         svc = IngestionService(source, mapper, sink, schema)
         result = await svc.run_full_rebuild()

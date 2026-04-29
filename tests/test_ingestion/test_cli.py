@@ -54,7 +54,7 @@ def _write_basic_config(tmp_path: Path) -> Path:
             },
         },
         "mapper": {"type": "script", "scripts_dir": str(tmp_path / "scripts")},
-        "sink": {"type": "duckdb", "mode": "in-memory"},
+        "sink": {"type": "sqlite", "mode": "in-memory"},
         "schema": str(tmp_path / "schema.yaml"),
         "state": {
             "cache_dir": str(tmp_path / "cache"),

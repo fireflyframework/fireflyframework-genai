@@ -48,15 +48,13 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import re
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from typing import Any
 
 from fireflyframework_agentic.exceptions import DatabaseConnectionError, DatabaseStoreError
 from fireflyframework_agentic.memory.types import MemoryEntry
-
-_SAFE_IDENTIFIER = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
+from fireflyframework_agentic.security.identifiers import _SAFE_IDENTIFIER
 
 _sync_pool = ThreadPoolExecutor(max_workers=4)
 

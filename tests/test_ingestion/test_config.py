@@ -23,7 +23,7 @@ import yaml
 
 from fireflyframework_agentic.ingestion.adapters import EnvSecretsProvider
 from fireflyframework_agentic.ingestion.adapters.mappers import ScriptMapper
-from fireflyframework_agentic.ingestion.adapters.sinks import DuckDBSink
+from fireflyframework_agentic.ingestion.adapters.sinks import SQLiteSink
 from fireflyframework_agentic.ingestion.adapters.sources import SharePointSource
 from fireflyframework_agentic.ingestion.config import (
     IngestionConfig,
@@ -73,7 +73,7 @@ def _write_minimal_setup(tmp_path: Path) -> Path:
             },
         },
         "mapper": {"type": "script", "scripts_dir": str(tmp_path / "scripts")},
-        "sink": {"type": "duckdb", "mode": "in-memory"},
+        "sink": {"type": "sqlite", "mode": "in-memory"},
         "schema": str(tmp_path / "schema.yaml"),
         "state": {
             "cache_dir": str(tmp_path / "cache"),
@@ -92,7 +92,7 @@ def test_parses_full_config(tmp_path: Path):
     assert cfg.source.type == "sharepoint"
     assert cfg.source.config["drive_id"] == "drive-1"
     assert cfg.mapper.type == "script"
-    assert cfg.sink.type == "duckdb"
+    assert cfg.sink.type == "sqlite"
     assert cfg.secrets.type == "env"
 
 
@@ -131,9 +131,9 @@ def test_build_mapper_returns_script_mapper(tmp_path: Path):
     assert isinstance(mapper, ScriptMapper)
 
 
-def test_build_sink_in_memory_returns_duckdb(tmp_path: Path):
-    sink = build_sink(SinkSection(type="duckdb", mode="in-memory"))
-    assert isinstance(sink, DuckDBSink)
+def test_build_sink_in_memory_returns_sqlite(tmp_path: Path):
+    sink = build_sink(SinkSection(type="sqlite", mode="in-memory"))
+    assert isinstance(sink, SQLiteSink)
     sink.close()
 
 
