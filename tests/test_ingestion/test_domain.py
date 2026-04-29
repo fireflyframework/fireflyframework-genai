@@ -160,9 +160,7 @@ def test_target_schema_rejects_fk_with_unknown_local_column():
 
 
 def test_target_schema_table_lookup():
-    s = TargetSchema(
-        tables=[TableSpec(name="sales", columns=[ColumnSpec(name="id", type="integer")])]
-    )
+    s = TargetSchema(tables=[TableSpec(name="sales", columns=[ColumnSpec(name="id", type="integer")])])
     assert s.table("sales").name == "sales"
     with pytest.raises(KeyError):
         s.table("missing")

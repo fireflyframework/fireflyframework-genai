@@ -91,9 +91,7 @@ class SharePointSource:
     ) -> None:
         self._config = config
         self._secrets = secrets
-        self._client = http_client or httpx.AsyncClient(
-            timeout=config.request_timeout_seconds
-        )
+        self._client = http_client or httpx.AsyncClient(timeout=config.request_timeout_seconds)
         self._owns_client = http_client is None
         self._token: _Token | None = None
         self._config.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -150,13 +148,9 @@ class SharePointSource:
         if stream:
             follow_redirects = kwargs.pop("follow_redirects", False)
             request = self._client.build_request(method, url, headers=headers, **kwargs)
-            response = await self._client.send(
-                request, stream=True, follow_redirects=follow_redirects
-            )
+            response = await self._client.send(request, stream=True, follow_redirects=follow_redirects)
         else:
-            response = await self._client.request(
-                method, url, headers=headers, **kwargs
-            )
+            response = await self._client.request(method, url, headers=headers, **kwargs)
         response.raise_for_status()
         return response
 
@@ -178,9 +172,7 @@ class SharePointSource:
     # -- listing ----------------------------------------------------------
 
     async def list_changed(self, since: str | None) -> AsyncIterator[RawFile]:
-        url = since or (
-            f"{GRAPH_ROOT}/drives/{self._config.drive_id}/root/delta"
-        )
+        url = since or (f"{GRAPH_ROOT}/drives/{self._config.drive_id}/root/delta")
         delta_link: str | None = None
         while True:
             response = await self._request("GET", url)
@@ -252,9 +244,7 @@ class SharePointSource:
             tmp.replace(local_path)
         finally:
             await response.aclose()
-        meta_path.write_text(
-            json.dumps({"etag": file.etag, "fetched_at": datetime.now(UTC).isoformat()})
-        )
+        meta_path.write_text(json.dumps({"etag": file.etag, "fetched_at": datetime.now(UTC).isoformat()}))
         return local_path
 
     # -- helpers ----------------------------------------------------------
@@ -267,5 +257,3 @@ class SharePointSource:
         if not source_id.startswith("sharepoint:"):
             raise ValueError(f"unexpected source_id {source_id!r}")
         return source_id.removeprefix("sharepoint:")
-
-

@@ -107,10 +107,7 @@ class DuckDBSink:
                 continue
             placeholders = ", ".join(["?"] * len(table.columns))
             cols = ", ".join(self._quote(c.name) for c in table.columns)
-            sql = (
-                f"INSERT INTO {self._quote(table.name)} ({cols}) "
-                f"VALUES ({placeholders})"
-            )
+            sql = f"INSERT INTO {self._quote(table.name)} ({cols}) VALUES ({placeholders})"
             self._conn.execute(sql, [coerced[c.name] for c in table.columns])
             self._counts[table.name] += 1
 
@@ -122,9 +119,7 @@ class DuckDBSink:
             self._conn.close()
             self._conn = None
 
-    def _validate_and_coerce(
-        self, table: TableSpec, row: dict[str, Any]
-    ) -> dict[str, Any] | None:
+    def _validate_and_coerce(self, table: TableSpec, row: dict[str, Any]) -> dict[str, Any] | None:
         coerced: dict[str, Any] = {}
         for column in table.columns:
             value = row.get(column.name)
@@ -135,10 +130,7 @@ class DuckDBSink:
                 self.validation_errors.append(
                     IngestionError(
                         kind="RowValidationError",
-                        message=(
-                            f"column {table.name}.{column.name} is non-nullable "
-                            f"but row provided no value"
-                        ),
+                        message=(f"column {table.name}.{column.name} is non-nullable but row provided no value"),
                         details={"row": row},
                     )
                 )
@@ -149,10 +141,7 @@ class DuckDBSink:
                 self.validation_errors.append(
                     IngestionError(
                         kind="RowValidationError",
-                        message=(
-                            f"column {table.name}.{column.name} ({column.type}): "
-                            f"{exc}"
-                        ),
+                        message=(f"column {table.name}.{column.name} ({column.type}): {exc}"),
                         details={"row": row, "value": repr(value)},
                     )
                 )
@@ -162,10 +151,7 @@ class DuckDBSink:
             self.validation_errors.append(
                 IngestionError(
                     kind="RowValidationError",
-                    message=(
-                        f"row contains unknown columns for table {table.name}: "
-                        f"{sorted(unknown)}"
-                    ),
+                    message=(f"row contains unknown columns for table {table.name}: {sorted(unknown)}"),
                     details={"row": row},
                 )
             )
@@ -175,9 +161,7 @@ class DuckDBSink:
     @staticmethod
     def _coerce(column: ColumnSpec, value: Any) -> Any:
         if column.enum_values is not None and value not in column.enum_values:
-            raise ValueError(
-                f"value {value!r} not in enum {column.enum_values}"
-            )
+            raise ValueError(f"value {value!r} not in enum {column.enum_values}")
         ctype = column.type
         if ctype == "string":
             return str(value)

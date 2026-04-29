@@ -36,6 +36,4 @@ class EnvSecretsProvider:
         try:
             return self._env[key]
         except KeyError as exc:
-            raise SecretNotFoundError(
-                f"environment variable {key!r} is not set"
-            ) from exc
+            raise SecretNotFoundError(f"environment variable {key!r} is not set") from exc

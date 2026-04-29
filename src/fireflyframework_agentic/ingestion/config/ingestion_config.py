@@ -58,12 +58,8 @@ class SinkSection(BaseModel):
 
 
 class StateSection(BaseModel):
-    cache_dir: Path = Field(
-        default_factory=lambda: Path.home() / ".fireflyframework/ingestion/cache"
-    )
-    delta_file: Path = Field(
-        default_factory=lambda: Path.home() / ".fireflyframework/ingestion/delta.json"
-    )
+    cache_dir: Path = Field(default_factory=lambda: Path.home() / ".fireflyframework/ingestion/cache")
+    delta_file: Path = Field(default_factory=lambda: Path.home() / ".fireflyframework/ingestion/delta.json")
 
 
 class SecretsSection(BaseModel):
@@ -99,9 +95,7 @@ def build_secrets_provider(section: SecretsSection) -> SecretsProvider:
         return EnvSecretsProvider()
     if section.type == "azure-keyvault":
         if not section.vault_url:
-            raise IngestionConfigError(
-                "secrets.type=azure-keyvault requires secrets.vault_url"
-            )
+            raise IngestionConfigError("secrets.type=azure-keyvault requires secrets.vault_url")
         # Lazy import: this code path requires the optional extra.
         from fireflyframework_agentic.ingestion.adapters.keyvault_provider import (
             AzureKeyVaultSecretsProvider,
@@ -138,9 +132,7 @@ def build_sink(section: SinkSection) -> StructuredSinkPort:
         if section.mode == "in-memory":
             return DuckDBSink(":memory:")
         if section.path is None:
-            raise IngestionConfigError(
-                f"duckdb sink mode={section.mode!r} requires sink.path"
-            )
+            raise IngestionConfigError(f"duckdb sink mode={section.mode!r} requires sink.path")
         return DuckDBSink(str(section.path))
     raise IngestionConfigError(f"unknown sink type: {section.type!r}")
 

@@ -111,17 +111,11 @@ def _csv_raw(name: str, source_id: str, path: Path) -> RawFile:
     )
 
 
-async def test_end_to_end_pipeline_writes_to_duckdb(
-    schema: TargetSchema, tmp_path: Path
-):
+async def test_end_to_end_pipeline_writes_to_duckdb(schema: TargetSchema, tmp_path: Path):
     customers = tmp_path / "customers_q1.csv"
     customers.write_text("id,name,tier\n1,Alpha,gold\n2,Beta,silver\n")
     sales = tmp_path / "sales_q1.csv"
-    sales.write_text(
-        "id,customer_id,day,amount,paid\n"
-        "10,1,2026-01-15,99.5,true\n"
-        "11,2,2026-02-20,12.0,false\n"
-    )
+    sales.write_text("id,customer_id,day,amount,paid\n10,1,2026-01-15,99.5,true\n11,2,2026-02-20,12.0,false\n")
     source = FakeSource(
         [
             _csv_raw("customers_q1.csv", "fake:cust1", customers),
@@ -146,9 +140,7 @@ async def test_end_to_end_pipeline_writes_to_duckdb(
         sink.close()
 
 
-async def test_unsupported_file_records_error_and_continues(
-    schema: TargetSchema, tmp_path: Path
-):
+async def test_unsupported_file_records_error_and_continues(schema: TargetSchema, tmp_path: Path):
     customers = tmp_path / "customers_q1.csv"
     customers.write_text("id,name,tier\n1,Alpha,gold\n")
     unrelated = tmp_path / "weird.bin"
@@ -171,9 +163,7 @@ async def test_unsupported_file_records_error_and_continues(
         sink.close()
 
 
-async def test_run_incremental_uses_persisted_cursor_when_since_is_none(
-    schema: TargetSchema, tmp_path: Path
-):
+async def test_run_incremental_uses_persisted_cursor_when_since_is_none(schema: TargetSchema, tmp_path: Path):
     source = FakeSource(files=[], initial_cursor="saved-cursor")
     mapper = ScriptMapper(FIXTURES_DIR / "scripts")
     sink = DuckDBSink()
@@ -202,17 +192,12 @@ async def test_fetch_failure_recorded_as_error(schema: TargetSchema, tmp_path: P
         svc = IngestionService(source, mapper, sink, schema)
         result = await svc.run_full_rebuild()
         assert result.files_processed == 0
-        assert any(
-            e.kind == "FetchError" and "network down" in e.message
-            for e in result.errors
-        )
+        assert any(e.kind == "FetchError" and "network down" in e.message for e in result.errors)
     finally:
         sink.close()
 
 
-async def test_mapping_script_failure_recorded_as_error(
-    schema: TargetSchema, tmp_path: Path
-):
+async def test_mapping_script_failure_recorded_as_error(schema: TargetSchema, tmp_path: Path):
     bad = tmp_path / "scripts"
     bad.mkdir()
     (bad / "boom.py").write_text(
@@ -232,17 +217,12 @@ async def test_mapping_script_failure_recorded_as_error(
         svc = IngestionService(source, mapper, sink, schema)
         result = await svc.run_full_rebuild()
         assert result.files_processed == 0
-        assert any(
-            e.kind == "MappingScriptError" and "kaboom" in e.message
-            for e in result.errors
-        )
+        assert any(e.kind == "MappingScriptError" and "kaboom" in e.message for e in result.errors)
     finally:
         sink.close()
 
 
-async def test_sink_validation_errors_propagate_to_result(
-    schema: TargetSchema, tmp_path: Path
-):
+async def test_sink_validation_errors_propagate_to_result(schema: TargetSchema, tmp_path: Path):
     # A script that emits an invalid row (missing required customer_id).
     bad_scripts = tmp_path / "scripts"
     bad_scripts.mkdir()

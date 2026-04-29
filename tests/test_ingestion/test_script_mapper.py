@@ -87,9 +87,7 @@ def test_supports_returns_true_for_matching_pattern(scripts_dir: Path, tmp_path:
     assert mapper.supports(raw)
 
 
-def test_supports_returns_false_when_no_pattern_matches(
-    scripts_dir: Path, tmp_path: Path
-):
+def test_supports_returns_false_when_no_pattern_matches(scripts_dir: Path, tmp_path: Path):
     mapper = ScriptMapper(scripts_dir)
     f = tmp_path / "unrelated.txt"
     f.write_text("nope")
@@ -97,9 +95,7 @@ def test_supports_returns_false_when_no_pattern_matches(
     assert not mapper.supports(raw)
 
 
-def test_map_dispatches_to_matching_script(
-    scripts_dir: Path, schema: TargetSchema, tmp_path: Path
-):
+def test_map_dispatches_to_matching_script(scripts_dir: Path, schema: TargetSchema, tmp_path: Path):
     mapper = ScriptMapper(scripts_dir)
     f = tmp_path / "customers_q1.csv"
     f.write_text("id,name,tier\n1,Alpha,gold\n2,Beta,silver\n")
@@ -109,9 +105,7 @@ def test_map_dispatches_to_matching_script(
     assert all(r.table == "customers" for r in records)
 
 
-def test_map_raises_when_no_script_matches(
-    scripts_dir: Path, schema: TargetSchema, tmp_path: Path
-):
+def test_map_raises_when_no_script_matches(scripts_dir: Path, schema: TargetSchema, tmp_path: Path):
     mapper = ScriptMapper(scripts_dir)
     f = tmp_path / "unrelated.txt"
     f.write_text("nope")
@@ -144,10 +138,7 @@ def test_loader_raises_when_script_missing_map(tmp_path: Path):
 def test_loader_raises_when_script_pattern_invalid_regex(tmp_path: Path):
     bad = tmp_path / "scripts"
     bad.mkdir()
-    (bad / "bad.py").write_text(
-        "PATTERN = '['  # invalid regex\n"
-        "def map(f, s): yield None\n"
-    )
+    (bad / "bad.py").write_text("PATTERN = '['  # invalid regex\ndef map(f, s): yield None\n")
     with pytest.raises(MappingScriptError, match="not a valid regex"):
         ScriptMapper(bad)
 

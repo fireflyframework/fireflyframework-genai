@@ -70,9 +70,7 @@ class ScriptMapper:
     def __init__(self, scripts_dir: str | Path) -> None:
         self._scripts_dir = Path(scripts_dir)
         if not self._scripts_dir.is_dir():
-            raise MappingScriptError(
-                f"scripts_dir {self._scripts_dir} does not exist or is not a directory"
-            )
+            raise MappingScriptError(f"scripts_dir {self._scripts_dir} does not exist or is not a directory")
         self._scripts: list[_LoadedScript] = self._load_all(self._scripts_dir)
 
     @property
@@ -89,14 +87,10 @@ class ScriptMapper:
     def map(self, file: RawFile, schema: TargetSchema) -> Iterator[TypedRecord]:
         matches = [s for s in self._scripts if s.matches(file)]
         if not matches:
-            raise MappingScriptError(
-                f"no mapping script matches file {file.source_id!r}"
-            )
+            raise MappingScriptError(f"no mapping script matches file {file.source_id!r}")
         if len(matches) > 1:
             paths = [str(s.path) for s in matches]
-            raise MultipleMappersError(
-                f"multiple mapping scripts match {file.source_id!r}: {paths}"
-            )
+            raise MultipleMappersError(f"multiple mapping scripts match {file.source_id!r}: {paths}")
         yield from matches[0].map_fn(file, schema)
 
     @staticmethod
@@ -113,9 +107,7 @@ class ScriptMapper:
 
     @staticmethod
     def _load_module(path: Path) -> ModuleType:
-        spec = importlib.util.spec_from_file_location(
-            f"firefly_mapping_{path.stem}", path
-        )
+        spec = importlib.util.spec_from_file_location(f"firefly_mapping_{path.stem}", path)
         if spec is None or spec.loader is None:
             raise MappingScriptError(f"could not import script {path}")
         module = importlib.util.module_from_spec(spec)
@@ -123,9 +115,7 @@ class ScriptMapper:
         try:
             spec.loader.exec_module(module)
         except Exception as exc:
-            raise MappingScriptError(
-                f"error executing script {path}: {exc}"
-            ) from exc
+            raise MappingScriptError(f"error executing script {path}: {exc}") from exc
         return module
 
     @staticmethod
@@ -137,14 +127,9 @@ class ScriptMapper:
             try:
                 return re.compile(pattern)
             except re.error as exc:
-                raise MappingScriptError(
-                    f"script {path} PATTERN is not a valid regex: {exc}"
-                ) from exc
+                raise MappingScriptError(f"script {path} PATTERN is not a valid regex: {exc}") from exc
         if not isinstance(pattern, re.Pattern):
-            raise MappingScriptError(
-                f"script {path} PATTERN must be a re.Pattern or str, "
-                f"got {type(pattern).__name__}"
-            )
+            raise MappingScriptError(f"script {path} PATTERN must be a re.Pattern or str, got {type(pattern).__name__}")
         return pattern
 
     @staticmethod

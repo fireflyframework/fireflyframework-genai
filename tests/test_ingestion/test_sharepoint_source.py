@@ -50,9 +50,7 @@ def _config(tmp_path: Path) -> SharePointSourceConfig:
 
 
 def _secrets() -> EnvSecretsProvider:
-    return EnvSecretsProvider(
-        {"TENANT": "tenant-1", "CLIENT": "client-1", "SECRET": "client-secret-1"}
-    )
+    return EnvSecretsProvider({"TENANT": "tenant-1", "CLIENT": "client-1", "SECRET": "client-secret-1"})
 
 
 def _make_handler(routes: dict[str, httpx.Response]) -> httpx.MockTransport:
@@ -300,9 +298,7 @@ async def test_fetch_uses_cache_on_etag_match(tmp_path: Path):
     target = cfg.cache_dir / "item-1" / "Q1.csv"
     target.parent.mkdir(parents=True)
     target.write_bytes(b"cached-content")
-    target.with_suffix(target.suffix + ".meta.json").write_text(
-        json.dumps({"etag": "v1"})
-    )
+    target.with_suffix(target.suffix + ".meta.json").write_text(json.dumps({"etag": "v1"}))
 
     calls: list[str] = []
 
@@ -362,9 +358,7 @@ async def test_token_is_reused_across_calls(tmp_path: Path):
             token_calls += 1
             return _token_response()
         if url.startswith(delta_url):
-            return httpx.Response(
-                200, json={"value": [], "@odata.deltaLink": "d"}
-            )
+            return httpx.Response(200, json={"value": [], "@odata.deltaLink": "d"})
         return httpx.Response(404)
 
     transport = httpx.MockTransport(handler)
@@ -380,9 +374,7 @@ async def test_token_is_reused_across_calls(tmp_path: Path):
 async def test_raises_for_status_on_token_failure(tmp_path: Path):
     transport = _make_handler(
         {
-            "https://login.microsoftonline.com/": httpx.Response(
-                401, json={"error": "unauthorized"}
-            ),
+            "https://login.microsoftonline.com/": httpx.Response(401, json={"error": "unauthorized"}),
         }
     )
     async with httpx.AsyncClient(transport=transport) as client:

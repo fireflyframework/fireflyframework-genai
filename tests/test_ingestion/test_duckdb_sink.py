@@ -75,8 +75,7 @@ def sink() -> DuckDBSink:
 def test_begin_creates_tables(sink: DuckDBSink, sales_schema: TargetSchema):
     sink.begin(sales_schema)
     rows = sink.connection.execute(
-        "SELECT table_name FROM information_schema.tables WHERE table_schema='main' "
-        "ORDER BY table_name"
+        "SELECT table_name FROM information_schema.tables WHERE table_schema='main' ORDER BY table_name"
     ).fetchall()
     assert [r[0] for r in rows] == ["customers", "sales"]
 
@@ -109,9 +108,7 @@ def test_write_inserts_valid_rows(sink: DuckDBSink, sales_schema: TargetSchema):
     )
     counts = sink.finalize()
     assert counts == {"customers": 2, "sales": 1}
-    rows = sink.connection.execute(
-        "SELECT id, name, tier FROM customers ORDER BY id"
-    ).fetchall()
+    rows = sink.connection.execute("SELECT id, name, tier FROM customers ORDER BY id").fetchall()
     assert rows == [(1, "Alpha", "gold"), (2, "Beta", "silver")]
 
 
@@ -122,9 +119,7 @@ def test_write_skips_row_with_unknown_table(sink: DuckDBSink, sales_schema: Targ
     assert any(e.kind == "UnknownTable" for e in sink.validation_errors)
 
 
-def test_write_skips_row_with_missing_required_column(
-    sink: DuckDBSink, sales_schema: TargetSchema
-):
+def test_write_skips_row_with_missing_required_column(sink: DuckDBSink, sales_schema: TargetSchema):
     sink.begin(sales_schema)
     sink.write(
         [TypedRecord(table="sales", row={"id": 1, "day": date(2026, 1, 1)})]  # missing customer_id
@@ -135,9 +130,7 @@ def test_write_skips_row_with_missing_required_column(
     assert "customer_id" in err.message
 
 
-def test_write_skips_row_with_unknown_column(
-    sink: DuckDBSink, sales_schema: TargetSchema
-):
+def test_write_skips_row_with_unknown_column(sink: DuckDBSink, sales_schema: TargetSchema):
     sink.begin(sales_schema)
     sink.write(
         [
@@ -148,22 +141,14 @@ def test_write_skips_row_with_unknown_column(
         ]
     )
     assert sink.finalize()["customers"] == 0
-    assert any(
-        e.kind == "RowValidationError" and "unknown columns" in e.message
-        for e in sink.validation_errors
-    )
+    assert any(e.kind == "RowValidationError" and "unknown columns" in e.message for e in sink.validation_errors)
 
 
 def test_write_skips_row_outside_enum(sink: DuckDBSink, sales_schema: TargetSchema):
     sink.begin(sales_schema)
-    sink.write(
-        [TypedRecord(table="customers", row={"id": 1, "name": "A", "tier": "platinum"})]
-    )
+    sink.write([TypedRecord(table="customers", row={"id": 1, "name": "A", "tier": "platinum"})])
     assert sink.finalize()["customers"] == 0
-    assert any(
-        e.kind == "RowValidationError" and "enum" in e.message
-        for e in sink.validation_errors
-    )
+    assert any(e.kind == "RowValidationError" and "enum" in e.message for e in sink.validation_errors)
 
 
 def test_coerces_string_date_to_date(sink: DuckDBSink, sales_schema: TargetSchema):
@@ -208,9 +193,7 @@ def test_coerces_string_boolean(sink: DuckDBSink, sales_schema: TargetSchema):
     assert rows[0][0] is True
 
 
-def test_rejects_bool_for_integer_column(
-    sink: DuckDBSink, sales_schema: TargetSchema
-):
+def test_rejects_bool_for_integer_column(sink: DuckDBSink, sales_schema: TargetSchema):
     sink.begin(sales_schema)
     sink.write([TypedRecord(table="customers", row={"id": True, "name": "A", "tier": "gold"})])
     assert sink.finalize()["customers"] == 0

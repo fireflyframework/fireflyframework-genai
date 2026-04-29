@@ -33,9 +33,7 @@ def _build_parser() -> argparse.ArgumentParser:
         prog="firefly-ingest",
         description="Run an ingestion pipeline against a structured target schema.",
     )
-    parser.add_argument(
-        "-v", "--verbose", action="store_true", help="enable DEBUG logging"
-    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="enable DEBUG logging")
     sub = parser.add_subparsers(dest="command", required=True)
 
     run = sub.add_parser("run", help="execute an ingestion run")
@@ -80,11 +78,7 @@ async def _status_command(config_path: Path) -> int:
     delta = config.state.delta_file
     scripts = config.mapper.scripts_dir
     n_files = sum(1 for _ in cache.rglob("*")) if cache.exists() else 0
-    n_scripts = (
-        sum(1 for p in scripts.glob("*.py") if not p.name.startswith("_"))
-        if scripts.exists()
-        else 0
-    )
+    n_scripts = sum(1 for p in scripts.glob("*.py") if not p.name.startswith("_")) if scripts.exists() else 0
     has_delta = delta.exists()
     print(f"cache_dir: {cache} ({n_files} entries)")
     print(f"scripts_dir: {scripts} ({n_scripts} mapping scripts)")

@@ -60,11 +60,7 @@ class AzureKeyVaultSecretsProvider:
         try:
             secret = client.get_secret(key)
         except Exception as exc:
-            raise SecretNotFoundError(
-                f"key vault {self._vault_url!r} does not contain secret {key!r}"
-            ) from exc
+            raise SecretNotFoundError(f"key vault {self._vault_url!r} does not contain secret {key!r}") from exc
         if secret.value is None:
-            raise SecretNotFoundError(
-                f"key vault secret {key!r} has no value"
-            )
+            raise SecretNotFoundError(f"key vault secret {key!r} has no value")
         return secret.value
