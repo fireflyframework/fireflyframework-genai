@@ -36,6 +36,7 @@ import sys
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from types import ModuleType
+from typing import cast
 
 from fireflyframework_agentic.ingestion.domain import (
     RawFile,
@@ -139,4 +140,4 @@ class ScriptMapper:
         fn = module.map
         if not callable(fn):
             raise MappingScriptError(f"script {path} map is not callable")
-        return fn
+        return cast("MapFn", fn)

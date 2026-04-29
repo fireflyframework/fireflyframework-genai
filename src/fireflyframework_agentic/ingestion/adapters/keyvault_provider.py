@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING
 from fireflyframework_agentic.ingestion.exceptions import SecretNotFoundError
 
 if TYPE_CHECKING:
-    from azure.keyvault.secrets import SecretClient
+    from azure.keyvault.secrets import SecretClient  # type: ignore[import-not-found]
 
 
 class AzureKeyVaultSecretsProvider:
@@ -41,8 +41,8 @@ class AzureKeyVaultSecretsProvider:
         if self._client is not None:
             return self._client
         try:
-            from azure.identity import DefaultAzureCredential
-            from azure.keyvault.secrets import SecretClient
+            from azure.identity import DefaultAzureCredential  # type: ignore[import-not-found]
+            from azure.keyvault.secrets import SecretClient  # type: ignore[import-not-found]
         except ImportError as exc:
             raise ImportError(
                 "AzureKeyVaultSecretsProvider requires the "
